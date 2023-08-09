@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/Happy-Why/toktik-api/api"
+	"github.com/Happy-Why/toktik-api/internal/global"
+	"github.com/Happy-Why/toktik-api/pkg/router"
+	"github.com/Happy-Why/toktik-api/pkg/setting"
 	srv "github.com/Happy-Why/toktik-common/serveHTTP"
-	_ "github.com/Happy-Why/toktik-user/internal/api/user"
-	"github.com/Happy-Why/toktik-user/internal/global"
-	"github.com/Happy-Why/toktik-user/pkg/router"
-	"github.com/Happy-Why/toktik-user/pkg/setting"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,9 +21,9 @@ func main() {
 	router.InitRouter(route)
 
 	// RPC 注册
-	kr := router.RegisterRPC()
+	//kr := router.RegisterRPC()
 	//服务端配置
-	stop := func() { kr.Stop() }
+	//stop := func() { kr.Stop() }
 	fmt.Println("------------------------------------------------")
-	srv.Run(route, "user", "127.0.0.1:8081", stop)
+	srv.Run(route, "user", "127.0.0.1:8082", nil)
 }

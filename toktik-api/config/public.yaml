@@ -1,0 +1,14 @@
+Server:
+  Name: "user"
+  Addr: "0.0.0.0:8080"
+
+Logger:
+  Level: "debug"
+  LogSavePath: "storage/applogs/"
+  LogFileExt:    ".log"
+  MaxSize: 10
+  MaxBackups: 7
+  MaxAge: 30
+  Compress: false
+  LowLevelFile: "info"
+  HighLevelFile: "error"
