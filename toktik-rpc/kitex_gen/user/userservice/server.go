@@ -2,7 +2,7 @@
 package userservice
 
 import (
-	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
+	"github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	server "github.com/cloudwego/kitex/server"
 )
 

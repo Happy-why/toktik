@@ -12,7 +12,7 @@ type Response struct {
 
 // State 状态码
 type State struct {
-	Code int         `json:"status_code"`    // 状态码，0-成功，其他值-失败
+	Code int64       `json:"status_code"`    // 状态码，0-成功，其他值-失败
 	Msg  string      `json:"status_msg"`     // 返回状态描述
 	Data interface{} `json:"data,omitempty"` // 失败时返回空
 }
@@ -27,7 +27,7 @@ func NewResponse(ctx *gin.Context) *Response {
 }
 
 // Reply 响应单个数据
-func (r *Response) Reply(err errcode.Err, datas ...interface{}) {
+func (r *Response) Reply(err errcode.Err, datas ...any) { //err errcode.Err
 	var data interface{}
 	if len(datas) > 0 {
 		data = datas[0]
@@ -36,12 +36,14 @@ func (r *Response) Reply(err errcode.Err, datas ...interface{}) {
 		err = errcode.StatusOK
 	} else {
 		data = nil
+		r.c.JSON(http.StatusOK, State{
+			Code: err.ECode(),
+			Msg:  err.Error(),
+		})
+		return
 	}
-	r.c.JSON(http.StatusOK, State{
-		Code: err.ECode(),
-		Msg:  err.Error(),
-		Data: data,
-	})
+
+	r.c.JSON(http.StatusOK, data)
 }
 
 // ReplyList 响应列表数据

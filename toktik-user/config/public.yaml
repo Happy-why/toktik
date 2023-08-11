@@ -1,6 +1,13 @@
 Server:
   Name: "user"
-  Addr: "0.0.0.0:8080"
+  RunMode: "DEBUG"
+  Addr: "0.0.0.0:8081"
+  DefaultContextTimeout: 10s
+
+RPC:
+  Name: "rpc-user"
+  Addr: "0.0.0.0:8881"
+
 
 Logger:
   Level: "debug"

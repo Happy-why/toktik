@@ -5,7 +5,7 @@ package userservice
 import (
 	"context"
 	"fmt"
-	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
+	"github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 	streaming "github.com/cloudwego/kitex/pkg/streaming"

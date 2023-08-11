@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/Happy-Why/toktik-user/pkg/router"
+	"github.com/Happy-Why/toktik-api/pkg/router"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -16,7 +16,8 @@ func init() {
 }
 
 func (*RouterUser) Route(r *gin.Engine) {
+	InitRpcUserClient()
+	//初始化grpc的客户端连接
 	h := NewHandlerUser()
-	r.POST("/project/login/getCaptcha", h.getCaptcha)
-
+	r.POST("/douyin/user/register", h.Register)
 }

@@ -4,12 +4,15 @@ import "time"
 
 type Public struct {
 	Logger Logger
+	Server Server
+	Rpc    Rpc
 }
 
 type Private struct {
 	Token Token
 	Mysql Mysql
 	Redis Redis
+	Etcd  Etcd
 }
 
 type Server struct {
@@ -17,6 +20,15 @@ type Server struct {
 	RunMode               string
 	Addr                  string
 	DefaultContextTimeout time.Duration
+}
+
+type Rpc struct {
+	Name string
+	Addr string
+}
+
+type Etcd struct {
+	Addr []string
 }
 
 type Logger struct {

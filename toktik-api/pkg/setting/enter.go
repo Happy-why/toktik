@@ -1,11 +1,13 @@
 package setting
 
-type group struct {
-	config config
+var Settings []InitSettings
+
+type InitSettings interface {
+	InitSetting()
 }
 
-var Group = new(group)
-
-func InitAll() {
-	Group.config.Init()
+func InitAllSetting() {
+	for _, setting := range Settings {
+		setting.InitSetting()
+	}
 }

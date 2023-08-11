@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	srv "github.com/Happy-Why/toktik-common/serveHTTP"
-	_ "github.com/Happy-Why/toktik-user/internal/api/user"
 	"github.com/Happy-Why/toktik-user/internal/global"
 	"github.com/Happy-Why/toktik-user/pkg/router"
 	"github.com/Happy-Why/toktik-user/pkg/setting"
@@ -12,7 +11,7 @@ import (
 
 func main() {
 	// 初始化
-	setting.InitAll()
+	setting.InitAllSetting()
 	fmt.Printf("config:%#v\n", global.PbSettings)
 	fmt.Printf("config:%#v\n", global.PvSettings)
 	// 初始化 gin
@@ -25,5 +24,5 @@ func main() {
 	//服务端配置
 	stop := func() { kr.Stop() }
 	fmt.Println("------------------------------------------------")
-	srv.Run(route, "user", "127.0.0.1:8081", stop)
+	srv.Run(route, global.PbSettings.Server.Name, global.PbSettings.Server.Addr, stop)
 }

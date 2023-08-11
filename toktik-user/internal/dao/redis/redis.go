@@ -26,7 +26,7 @@ func InitRedis() *RdbCache {
 	err := rdb.Ping(context.Background()).Err()
 	if err != nil {
 		// Redis连接失败，进行相应处理
-		zap.S().Errorf("redis init failed, err:%v", err)
+		zap.L().Error("redis init error:", zap.Error(err))
 		fmt.Println("redis初始化失败！！！！！")
 		panic(err)
 	}

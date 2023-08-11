@@ -1,6 +1,16 @@
 Server:
-  Name: "user"
+  Name: "api"
   Addr: "0.0.0.0:8080"
+
+RPC:
+  Name: "rpc-api"
+  Addr: "0.0.0.0:8880"
+  ServerAddrs:
+    rpc-user: 192.168.30.134:8881
+    rpc-video: 192.168.30.134:8882
+    rpc-interaction: 192.168.30.134:8883
+    rpc-chat: 192.168.30.134:8884
+
 
 Logger:
   Level: "debug"

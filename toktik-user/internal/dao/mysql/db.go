@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/Happy-Why/toktik-user/internal/dao"
 	"github.com/Happy-Why/toktik-user/internal/global"
-	"github.com/Happy-Why/toktik-user/internal/model/auto"
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -35,13 +35,12 @@ func InitMysql() {
 		},
 	})
 	if err != nil {
+		zap.L().Error("init mysql db error:", zap.Error(err))
 		panic("连接数据库失败, error=" + err.Error())
 	}
 	dao.Group.Mdb = DB
-	err = DB.AutoMigrate(&auto.Comment{}, &auto.Favorite{}, &auto.User{}, &auto.Relation{}, &auto.Video{})
-	if err != nil {
-		fmt.Println("db err:", err)
-	}
+	//_= DB.AutoMigrate(&auto.Comment{}, &auto.Favorite{}, &auto.User{}, &auto.Relation{}, &auto.Video{})
+
 }
 
 func GetDB() *gorm.DB {

@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+func init() {
+	c := config{}
+	Settings = append(Settings, c)
+}
+
 var (
 	configPaths       string // 配置文件路径
 	privateConfigName string // private配置文件名
@@ -26,8 +31,8 @@ func setupFlag() {
 	flag.Parse()
 }
 
-// Init 读取配置文件
-func (config) Init() {
+// InitSetting 读取配置文件
+func (config) InitSetting() {
 	setupFlag()
 	// 在调用其他组件的Init时，这个init会首先执行并且把配置文件绑定到全局的结构体上
 	PbSetting, err := setting.NewSetting(publicConfigName, configType, strings.Split(configPaths, ",")...) // 引入配置文件路径
@@ -38,11 +43,11 @@ func (config) Init() {
 		panic("初始化配置文件有误:" + err.Error())
 	}
 
-	//PvSetting, err := setting.NewSetting(privateConfigName, configType, strings.Split(configPaths, ",")...) // 引入配置文件路径
-	//if err != nil {
-	//	panic("初始化配置文件有误:" + err.Error())
-	//}
-	//if err = PvSetting.BindAll(&global.PvSettings); err != nil {
-	//	panic("初始化配置文件有误:" + err.Error())
-	//}
+	PvSetting, err := setting.NewSetting(privateConfigName, configType, strings.Split(configPaths, ",")...) // 引入配置文件路径
+	if err != nil {
+		panic("初始化配置文件有误:" + err.Error())
+	}
+	if err = PvSetting.BindAll(&global.PvSettings); err != nil {
+		panic("初始化配置文件有误:" + err.Error())
+	}
 }

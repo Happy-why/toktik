@@ -1,14 +1,15 @@
 package router
 
 import (
-	"context"
+	rpcmiddleware "github.com/Happy-Why/toktik-common/rpc-middleware"
 	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user/userservice"
+	"github.com/Happy-Why/toktik-user/internal/global"
 	"github.com/Happy-Why/toktik-user/internal/service"
-	"github.com/cloudwego/kitex/pkg/endpoint"
-	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	"github.com/gin-gonic/gin"
+	etcd "github.com/kitex-contrib/registry-etcd"
+	"go.uber.org/zap"
 	"net"
 )
 
@@ -32,57 +33,30 @@ func InitRouter(r *gin.Engine) {
 }
 
 func RegisterRPC() server.Server {
-	//r, err := etcd.NewEtcdRegistry([]string{"654"})
-	//if err != nil {
-	//	panic(err)
-	//}
-	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8881")
+	r, err := etcd.NewEtcdRegistry(global.PvSettings.Etcd.Addr)
 	if err != nil {
-		panic(err)
+		zap.L().Error("etcd.NewEtcdRegistry err:", zap.Error(err))
+		return nil
 	}
-
+	addr, err := net.ResolveTCPAddr("tcp", global.PbSettings.Rpc.Addr) //:8881
+	if err != nil {
+		zap.L().Error("net.ResolveTCPAddr err:", zap.Error(err))
+		return nil
+	}
 	svr := user.NewServer(
-		new(service.UserServiceImpl),
+		service.NewUserService(),
 		server.WithServiceAddr(addr),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "user"}),
-		server.WithMiddleware(CommonMiddleware), // middleware
-		server.WithMiddleware(ServerMiddleware),
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: global.PbSettings.Rpc.Name}),
+		server.WithMiddleware(rpcmiddleware.CommonMiddleware), // middleware
+		server.WithMiddleware(rpcmiddleware.ServerMiddleware),
+		server.WithRegistry(r),
 	)
 	go func() {
-		err = svr.Run()
+		err := svr.Run()
 		if err != nil {
+			zap.L().Error("RPC svr.Run() err:", zap.Error(err))
 			panic(err)
 		}
 	}()
 	return svr
-}
-
-// CommonMiddleware common middleware print some rpc info、real request and real response
-func CommonMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
-	return func(ctx context.Context, req, resp interface{}) (err error) {
-		ri := rpcinfo.GetRPCInfo(ctx)
-		// get real request
-		klog.Infof("real request: %+v\n", req)
-		// get remote service information
-		klog.Infof("remote service name: %s, remote method: %s\n", ri.To().ServiceName(), ri.To().Method())
-		if err = next(ctx, req, resp); err != nil {
-			return err
-		}
-		// get real response
-		klog.Infof("real response: %+v\n", resp)
-		return nil
-	}
-}
-
-// ServerMiddleware server middleware print client address
-func ServerMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
-	return func(ctx context.Context, req, resp interface{}) (err error) {
-		ri := rpcinfo.GetRPCInfo(ctx)
-		// get client information
-		klog.Infof("client address: %v\n", ri.From().Address())
-		if err = next(ctx, req, resp); err != nil {
-			return err
-		}
-		return nil
-	}
 }
