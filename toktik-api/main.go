@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	_ "github.com/Happy-Why/toktik-api/internal/api"
+	_ "github.com/Happy-Why/toktik-api/internal/api/user"
 	"github.com/Happy-Why/toktik-api/internal/global"
+	"github.com/Happy-Why/toktik-api/pkg/middleware"
 	"github.com/Happy-Why/toktik-api/pkg/router"
 	"github.com/Happy-Why/toktik-api/pkg/setting"
 	srv "github.com/Happy-Why/toktik-common/serveHTTP"
@@ -17,6 +18,7 @@ func main() {
 	fmt.Printf("config:%#v\n", global.PvSettings)
 	// 初始化 gin
 	route := gin.Default()
+	route.Use(middleware.Auth(), middleware.Cors())
 	// 路由注册
 	router.InitRouter(route)
 

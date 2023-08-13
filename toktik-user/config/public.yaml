@@ -4,10 +4,13 @@ Server:
   Addr: "0.0.0.0:8081"
   DefaultContextTimeout: 10s
 
+Rules:
+  DefaultUserAvatar: "https://q1.qlogo.cn/g?b=qq&nk=1780006511&s=640"
+  DefaultUserSignature: "这里什么有没有捏"
+
 RPC:
   Name: "rpc-user"
   Addr: "0.0.0.0:8881"
-
 
 Logger:
   Level: "debug"

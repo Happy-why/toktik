@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/Happy-Why/toktik-api/internal/api"
 	"github.com/Happy-Why/toktik-api/internal/global"
 	"github.com/Happy-Why/toktik-api/internal/model"
 	rpcmiddleware "github.com/Happy-Why/toktik-common/rpc-middleware"
@@ -9,8 +10,6 @@ import (
 	etcd "github.com/kitex-contrib/registry-etcd"
 	"log"
 )
-
-var userClient userservice.Client
 
 func InitRpcUserClient() {
 	r, err := etcd.NewEtcdResolver(global.PvSettings.Etcd.Addr)
@@ -27,5 +26,5 @@ func InitRpcUserClient() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	userClient = c
+	api.UserClient = c
 }

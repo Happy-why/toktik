@@ -8,10 +8,26 @@ import (
 type RegisterHandler struct {
 }
 
-func (RegisterHandler) RegisterResponse(err errcode.Err, msg string) *user.RegisterResponse {
-	u := &user.RegisterResponse{
-		StatusCode: err.ECode(),
-		StatusMsg:  err.Error() + ":" + msg,
-	}
-	return u
+func (RegisterHandler) RegisterResponse(err errcode.Err, msg string, resp *user.RegisterResponse) *user.RegisterResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type LoginHandler struct {
+}
+
+func (LoginHandler) LoginResponse(err errcode.Err, msg string, resp *user.LoginResponse) *user.LoginResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type UserIndexHandler struct {
+}
+
+func (UserIndexHandler) UserIndexResponse(err errcode.Err, msg string, resp *user.UserIndexResponse) *user.UserIndexResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
 }

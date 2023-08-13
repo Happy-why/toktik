@@ -1,3 +1,9 @@
 Etcd:
   Addr:
     - "192.168.30.134:2379"
+
+
+Token:
+  Key: "plKiujmnHBgsYHxJcMhgsJkLsOpaqZec"
+  UserTokenExp: 168h # 小时
+  AuthorizationKey: why

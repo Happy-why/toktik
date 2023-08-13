@@ -22,7 +22,10 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "UserService"
 	handlerType := (*user.UserService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"Register": kitex.NewMethodInfo(registerHandler, newRegisterArgs, newRegisterResult, false),
+		"Register":    kitex.NewMethodInfo(registerHandler, newRegisterArgs, newRegisterResult, false),
+		"Login":       kitex.NewMethodInfo(loginHandler, newLoginArgs, newLoginResult, false),
+		"TokenVerify": kitex.NewMethodInfo(tokenVerifyHandler, newTokenVerifyArgs, newTokenVerifyResult, false),
+		"UserIndex":   kitex.NewMethodInfo(userIndexHandler, newUserIndexArgs, newUserIndexResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "user",
@@ -191,6 +194,465 @@ func (p *RegisterResult) GetResult() interface{} {
 	return p.Success
 }
 
+func loginHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.LoginRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).Login(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *LoginArgs:
+		success, err := handler.(user.UserService).Login(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*LoginResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newLoginArgs() interface{} {
+	return &LoginArgs{}
+}
+
+func newLoginResult() interface{} {
+	return &LoginResult{}
+}
+
+type LoginArgs struct {
+	Req *user.LoginRequest
+}
+
+func (p *LoginArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.LoginRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *LoginArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *LoginArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *LoginArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in LoginArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *LoginArgs) Unmarshal(in []byte) error {
+	msg := new(user.LoginRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var LoginArgs_Req_DEFAULT *user.LoginRequest
+
+func (p *LoginArgs) GetReq() *user.LoginRequest {
+	if !p.IsSetReq() {
+		return LoginArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *LoginArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *LoginArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type LoginResult struct {
+	Success *user.LoginResponse
+}
+
+var LoginResult_Success_DEFAULT *user.LoginResponse
+
+func (p *LoginResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.LoginResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *LoginResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *LoginResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *LoginResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in LoginResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *LoginResult) Unmarshal(in []byte) error {
+	msg := new(user.LoginResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *LoginResult) GetSuccess() *user.LoginResponse {
+	if !p.IsSetSuccess() {
+		return LoginResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *LoginResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.LoginResponse)
+}
+
+func (p *LoginResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *LoginResult) GetResult() interface{} {
+	return p.Success
+}
+
+func tokenVerifyHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.TokenVerifyRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).TokenVerify(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *TokenVerifyArgs:
+		success, err := handler.(user.UserService).TokenVerify(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*TokenVerifyResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newTokenVerifyArgs() interface{} {
+	return &TokenVerifyArgs{}
+}
+
+func newTokenVerifyResult() interface{} {
+	return &TokenVerifyResult{}
+}
+
+type TokenVerifyArgs struct {
+	Req *user.TokenVerifyRequest
+}
+
+func (p *TokenVerifyArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.TokenVerifyRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *TokenVerifyArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *TokenVerifyArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *TokenVerifyArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in TokenVerifyArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *TokenVerifyArgs) Unmarshal(in []byte) error {
+	msg := new(user.TokenVerifyRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var TokenVerifyArgs_Req_DEFAULT *user.TokenVerifyRequest
+
+func (p *TokenVerifyArgs) GetReq() *user.TokenVerifyRequest {
+	if !p.IsSetReq() {
+		return TokenVerifyArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *TokenVerifyArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *TokenVerifyArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type TokenVerifyResult struct {
+	Success *user.TokenVerifyResponse
+}
+
+var TokenVerifyResult_Success_DEFAULT *user.TokenVerifyResponse
+
+func (p *TokenVerifyResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.TokenVerifyResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *TokenVerifyResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *TokenVerifyResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *TokenVerifyResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in TokenVerifyResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *TokenVerifyResult) Unmarshal(in []byte) error {
+	msg := new(user.TokenVerifyResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *TokenVerifyResult) GetSuccess() *user.TokenVerifyResponse {
+	if !p.IsSetSuccess() {
+		return TokenVerifyResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *TokenVerifyResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.TokenVerifyResponse)
+}
+
+func (p *TokenVerifyResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *TokenVerifyResult) GetResult() interface{} {
+	return p.Success
+}
+
+func userIndexHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.UserIndexRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).UserIndex(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *UserIndexArgs:
+		success, err := handler.(user.UserService).UserIndex(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*UserIndexResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newUserIndexArgs() interface{} {
+	return &UserIndexArgs{}
+}
+
+func newUserIndexResult() interface{} {
+	return &UserIndexResult{}
+}
+
+type UserIndexArgs struct {
+	Req *user.UserIndexRequest
+}
+
+func (p *UserIndexArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.UserIndexRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *UserIndexArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *UserIndexArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *UserIndexArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in UserIndexArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *UserIndexArgs) Unmarshal(in []byte) error {
+	msg := new(user.UserIndexRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var UserIndexArgs_Req_DEFAULT *user.UserIndexRequest
+
+func (p *UserIndexArgs) GetReq() *user.UserIndexRequest {
+	if !p.IsSetReq() {
+		return UserIndexArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *UserIndexArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *UserIndexArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type UserIndexResult struct {
+	Success *user.UserIndexResponse
+}
+
+var UserIndexResult_Success_DEFAULT *user.UserIndexResponse
+
+func (p *UserIndexResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.UserIndexResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *UserIndexResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *UserIndexResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *UserIndexResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in UserIndexResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *UserIndexResult) Unmarshal(in []byte) error {
+	msg := new(user.UserIndexResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *UserIndexResult) GetSuccess() *user.UserIndexResponse {
+	if !p.IsSetSuccess() {
+		return UserIndexResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *UserIndexResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.UserIndexResponse)
+}
+
+func (p *UserIndexResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *UserIndexResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -206,6 +668,36 @@ func (p *kClient) Register(ctx context.Context, Req *user.RegisterRequest) (r *u
 	_args.Req = Req
 	var _result RegisterResult
 	if err = p.c.Call(ctx, "Register", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) Login(ctx context.Context, Req *user.LoginRequest) (r *user.LoginResponse, err error) {
+	var _args LoginArgs
+	_args.Req = Req
+	var _result LoginResult
+	if err = p.c.Call(ctx, "Login", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) TokenVerify(ctx context.Context, Req *user.TokenVerifyRequest) (r *user.TokenVerifyResponse, err error) {
+	var _args TokenVerifyArgs
+	_args.Req = Req
+	var _result TokenVerifyResult
+	if err = p.c.Call(ctx, "TokenVerify", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UserIndex(ctx context.Context, Req *user.UserIndexRequest) (r *user.UserIndexResponse, err error) {
+	var _args UserIndexArgs
+	_args.Req = Req
+	var _result UserIndexResult
+	if err = p.c.Call(ctx, "UserIndex", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

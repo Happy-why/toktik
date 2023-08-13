@@ -5,6 +5,7 @@ package userservice
 import (
 	"context"
 	"github.com/Happy-Why/toktik-rpc/kitex_gen/user"
+
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
 )
@@ -12,6 +13,9 @@ import (
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
 	Register(ctx context.Context, Req *user.RegisterRequest, callOptions ...callopt.Option) (r *user.RegisterResponse, err error)
+	Login(ctx context.Context, Req *user.LoginRequest, callOptions ...callopt.Option) (r *user.LoginResponse, err error)
+	TokenVerify(ctx context.Context, Req *user.TokenVerifyRequest, callOptions ...callopt.Option) (r *user.TokenVerifyResponse, err error)
+	UserIndex(ctx context.Context, Req *user.UserIndexRequest, callOptions ...callopt.Option) (r *user.UserIndexResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -46,4 +50,19 @@ type kUserServiceClient struct {
 func (p *kUserServiceClient) Register(ctx context.Context, Req *user.RegisterRequest, callOptions ...callopt.Option) (r *user.RegisterResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Register(ctx, Req)
+}
+
+func (p *kUserServiceClient) Login(ctx context.Context, Req *user.LoginRequest, callOptions ...callopt.Option) (r *user.LoginResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.Login(ctx, Req)
+}
+
+func (p *kUserServiceClient) TokenVerify(ctx context.Context, Req *user.TokenVerifyRequest, callOptions ...callopt.Option) (r *user.TokenVerifyResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.TokenVerify(ctx, Req)
+}
+
+func (p *kUserServiceClient) UserIndex(ctx context.Context, Req *user.UserIndexRequest, callOptions ...callopt.Option) (r *user.UserIndexResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UserIndex(ctx, Req)
 }

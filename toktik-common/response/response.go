@@ -42,7 +42,6 @@ func (r *Response) Reply(err errcode.Err, datas ...any) { //err errcode.Err
 		})
 		return
 	}
-
 	r.c.JSON(http.StatusOK, data)
 }
 

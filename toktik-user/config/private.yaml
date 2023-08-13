@@ -9,7 +9,7 @@ Redis:
   Host: "192.168.30.134"
   Port: "6379"
   Password: ""
-  DB: 1
+  DB: 2
 
 Etcd:
   Addr:

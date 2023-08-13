@@ -47,6 +47,7 @@ func (m *myErr) Error() string {
 func (m *myErr) WithDetails(details ...string) Err {
 	var newErr = &myErr{}
 	_ = copier.Copy(newErr, m)
+	m.Msg = m.Msg + "," + details[0]
 	newErr.Details = append(newErr.Details, details...)
 	return newErr
 }

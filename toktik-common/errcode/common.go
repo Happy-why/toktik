@@ -9,4 +9,6 @@ var (
 	ErrTimeOut         = NewErr(0005, "请求超时")
 	ErrDB              = NewErr(0006, "db错误")
 	ErrRedis           = NewErr(0007, "redis错误")
+	ErrAuth            = NewErr(0010, "身份鉴权失败")
+	ErrAuthExp         = NewErr(0011, "身份过期")
 )

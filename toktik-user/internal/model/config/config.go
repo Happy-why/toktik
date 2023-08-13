@@ -6,6 +6,7 @@ type Public struct {
 	Logger Logger
 	Server Server
 	Rpc    Rpc
+	Rules  Rules
 }
 
 type Private struct {
@@ -20,6 +21,11 @@ type Server struct {
 	RunMode               string
 	Addr                  string
 	DefaultContextTimeout time.Duration
+}
+
+type Rules struct {
+	DefaultUserAvatar    string
+	DefaultUserSignature string
 }
 
 type Rpc struct {

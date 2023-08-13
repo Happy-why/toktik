@@ -7,11 +7,15 @@ import (
 )
 
 type HandlerResp interface {
-	RegisterResponse(err errcode.Err, msg string) *user.RegisterResponse
+	RegisterResponse(err errcode.Err, msg string, resp *user.RegisterResponse) *user.RegisterResponse
+	LoginResponse(err errcode.Err, msg string, resp *user.LoginResponse) *user.LoginResponse
+	UserIndexResponse(err errcode.Err, msg string, resp *user.UserIndexResponse) *user.UserIndexResponse
 }
 
 type HandlerResps struct {
 	model.RegisterHandler
+	model.LoginHandler
+	model.UserIndexHandler
 }
 
 func NewHandlerResps() *HandlerResps {
