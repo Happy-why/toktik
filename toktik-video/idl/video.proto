@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package video;
+
+option go_package = "video";
+
+message VideoFeedRequest {
+  optional int64 latest_time = 1; // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
+  optional string token = 2; // 可选参数，登录用户设置
+}
+
+message VideoFeedResponse {
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+   string status_msg = 2; // 返回状态描述
+  repeated Video video_list = 3; // 视频列表
+  optional int64 next_time = 4; // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
+}
+message Video {
+   int64 id = 1; // 视频唯一标识
+   User author = 2; // 视频作者信息
+   string play_url = 3; // 视频播放地址
+   string cover_url = 4; // 视频封面地址
+   int64 favorite_count = 5; // 视频的点赞总数
+   int64 comment_count = 6; // 视频的评论总数
+   bool is_favorite = 7; // true-已点赞，false-未点赞
+   string title = 8; // 视频标题
+}
+
+message User {
+   int64 id = 1; // 用户id
+   string name = 2; // 用户名称
+  optional int64 follow_count = 3; // 关注总数
+  optional int64 follower_count = 4; // 粉丝总数
+   bool is_follow = 5; // true-已关注，false-未关注
+  optional string avatar = 6; //用户头像
+  optional string background_image = 7; //用户个人页顶部大图
+  optional string signature = 8; //个人简介
+  optional int64 total_favorited = 9; //获赞数量
+  optional int64 work_count = 10; //作品数量
+  optional int64 favorite_count = 11; //点赞数量
+}
+
+message VideoPublishRequest {
+   string token = 1; // 用户鉴权token
+   bytes data = 2; // 视频数据
+   string title = 3; // 视频标题
+}
+
+message VideoPublishResponse {
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+   string status_msg = 2; // 返回状态描述
+}
+
+message PublishListRequest {
+   int64 user_id = 1; // 用户id
+   string token = 2; // 用户鉴权token
+}
+
+message PublishListResponse {
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+   string status_msg = 2; // 返回状态描述
+  repeated Video video_list = 3; // 用户发布的视频列表
+}
+
+message FavoriteListRequest {
+   int64 user_id = 1; // 用户id
+   string token = 2; // 用户鉴权token
+}
+
+message FavoriteListResponse {
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+   string status_msg = 2; // 返回状态描述
+  repeated Video video_list = 3; // 用户点赞视频列表
+}
+
+message FavoriteActionRequest {
+   string token = 1; // 用户鉴权token
+   int64 video_id = 2; // 视频id
+   int32 action_type = 3; // 1-点赞，2-取消点赞
+}
+
+message FavoriteActionResponse {
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+   string status_msg = 2; // 返回状态描述
+}
+
+message CommentActionRequest {
+   string token = 1; // 用户鉴权token
+   int64 video_id = 2; // 视频id
+   int32 action_type = 3; // 1-发布评论，2-删除评论
+  optional string comment_text = 4; // 用户填写的评论内容，在action_type=1的时候使用
+  optional int64 comment_id = 5; // 要删除的评论id，在action_type=2的时候使用
+}
+
+message CommentActionResponse {
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+   string status_msg = 2; // 返回状态描述
+  optional Comment comment = 3; // 评论成功返回评论内容，不需要重新拉取整个列表
+}
+
+message Comment {
+   int64 id = 1; // 视频评论id
+   User user =2; // 评论用户信息
+   string content = 3; // 评论内容
+   string create_date = 4; // 评论发布日期，格式 mm-dd
+}
+
+message CommentListRequest {
+   string token = 1; // 用户鉴权token
+   int64 video_id = 2; // 视频id
+}
+
+message CommentListResponse {
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+   string status_msg = 2; // 返回状态描述
+  repeated Comment comment_list = 3; // 评论列表
+}
+
+service VideoService{
+  rpc VideoFeed (VideoFeedRequest) returns(VideoFeedResponse);
+  rpc VideoPublish (VideoPublishRequest) returns(VideoPublishResponse);
+  rpc PublishList(PublishListRequest)returns(PublishListResponse);
+  rpc FavoriteList(FavoriteListRequest)returns(FavoriteListResponse);
+  rpc FavoriteAction(FavoriteActionRequest)returns(FavoriteActionResponse);
+  rpc CommentAction(CommentActionRequest)returns(CommentActionResponse);
+  rpc CommentList(CommentListRequest)returns(CommentListResponse);
+}
+
+
+

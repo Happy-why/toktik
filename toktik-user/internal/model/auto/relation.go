@@ -4,9 +4,9 @@ import "gorm.io/gorm"
 
 type Relation struct {
 	gorm.Model
-	UserId   uint32 `json:"user_id" gorm:"not null"`   // 用户ID
-	TargetId uint32 `json:"target_id" gorm:"not null"` // 目标ID
-	IsFriend int    `json:"is_friend" gorm:"nut null"`
+	UserId   uint `json:"user_id" gorm:"not null"`   // 用户ID
+	TargetId uint `json:"target_id" gorm:"not null"` // 目标ID
+	//IsFriend int  `json:"is_friend" gorm:"not null"` // 如果需要保证 relation_id 唯一，可以使用该字段
 }
 
 func (*Relation) TableName() string {

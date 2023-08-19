@@ -53,10 +53,6 @@ type GormConn struct {
 	tx *gorm.DB
 }
 
-func (g *GormConn) Begin() {
-	g.tx = GetDB().Begin()
-}
-
 func NewGormConn() *GormConn {
 	return &GormConn{db: GetDB()}
 }

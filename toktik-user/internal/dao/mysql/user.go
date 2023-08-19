@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"context"
-	"fmt"
 	"github.com/Happy-Why/toktik-user/internal/model/auto"
 )
 
@@ -41,9 +40,7 @@ func (u *UserDao) GetUserInfoByUserID(c context.Context, userID int64) (*auto.Us
 
 func (u *UserDao) IsFollowUser(c context.Context, myUserID, targetUserID int64) (bool, error) {
 	var count int64
-	session := u.conn.Session(c)
-	sql := fmt.Sprintf("SELECT COUNT(*) FROM relation WHERE (user_id = ? AND target_id = ?) OR (user_id = ? AND target_id = ? AND is_friend = ?);")
-	raw := session.Raw(sql, myUserID, targetUserID, targetUserID, myUserID, 1)
-	err := raw.Scan(&count).Error
+	err := u.conn.Session(c).Model(&auto.Relation{}).
+		Where("user_id = ? AND target_id = ?", myUserID, targetUserID).Count(&count).Error
 	return count > 0, err
 }

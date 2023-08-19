@@ -7,7 +7,7 @@ import (
 // Video 视频表 /*
 type Video struct {
 	gorm.Model
-	UserId        uint32 `json:"user_id" gorm:"not null;index"`
+	UserId        uint   `json:"user_id" gorm:"not null;index"`
 	Title         string `json:"title" gorm:"not null"`    // 视频标题
 	PlayURL       string `json:"play_url" gorm:"not null"` // 视频播放地址
 	CoverURL      string `json:"cover_url"`                // 视频封面地址

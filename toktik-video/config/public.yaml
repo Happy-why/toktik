@@ -1,0 +1,24 @@
+Server:
+  Name: "video"
+  RunMode: "DEBUG"
+  Addr: "0.0.0.0:8083"
+  DefaultContextTimeout: 10s
+
+Rules:
+  DefaultUserAvatar: "https://q1.qlogo.cn/g?b=qq&nk=1780006511&s=640"
+  DefaultUserSignature: "这里什么有没有捏"
+
+RPC:
+  Name: "rpc-interaction"
+  Addr: "0.0.0.0:8883"
+
+Logger:
+  Level: "debug"
+  LogSavePath: "storage/applogs/"
+  LogFileExt:    ".log"
+  MaxSize: 10
+  MaxBackups: 7
+  MaxAge: 30
+  Compress: false
+  LowLevelFile: "info"
+  HighLevelFile: "error"

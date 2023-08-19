@@ -2,6 +2,7 @@ package errcode
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/jinzhu/copier"
@@ -47,7 +48,8 @@ func (m *myErr) Error() string {
 func (m *myErr) WithDetails(details ...string) Err {
 	var newErr = &myErr{}
 	_ = copier.Copy(newErr, m)
-	m.Msg = m.Msg + "," + details[0]
-	newErr.Details = append(newErr.Details, details...)
+	msgs := strings.Split(m.Msg, ",")
+	m.Msg = msgs[0] + "," + details[0]
+	//newErr.Details = append(newErr.Details, details...)
 	return newErr
 }
