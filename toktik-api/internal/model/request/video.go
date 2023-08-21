@@ -11,11 +11,12 @@ import (
 type VideoFeedRequest struct {
 	LatestTime int64  `json:"latest_time" form:"latest_time"`
 	Token      string `json:"token" form:"token"`
+	UserId     int64  `json:"user_id" form:"user_id"`
 }
 
 func (v *VideoFeedRequest) VerifyFeed() {
 	if v.LatestTime == 0 {
-		v.LatestTime = time.Now().UnixMilli()
+		v.LatestTime = time.Now().Unix()
 	}
 }
 

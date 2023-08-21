@@ -1,7 +1,6 @@
 package video
 
 import (
-	"fmt"
 	"github.com/Happy-Why/toktik-api/internal/api"
 	"github.com/Happy-Why/toktik-api/internal/model/request"
 	"github.com/Happy-Why/toktik-api/internal/model/response"
@@ -28,9 +27,13 @@ func (v *HandlerVideo) VideoFeed(c *gin.Context) {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
+	// 若登录，获取用户id
+	content, ok := token.GetTokenContent(c)
+	if ok {
+		req.UserId = content.ID
+	}
 	// 2.校验参数，这里是校验latest_time
 	req.VerifyFeed()
-	fmt.Println(req)
 	// 3.调用rpc服务获取响应
 	params := &video.VideoFeedRequest{}
 	_ = copier.Copy(params, req)

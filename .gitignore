@@ -21,3 +21,5 @@
 go.work
 
 *.mp4
+
+private.yaml

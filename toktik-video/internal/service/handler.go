@@ -38,8 +38,69 @@ func NewVideoService() *VideoServiceImpl {
 }
 
 func (vs *VideoServiceImpl) VideoFeed(ctx context.Context, req *video.VideoFeedRequest) (resp *video.VideoFeedResponse, err error) {
+	resp = new(video.VideoFeedResponse)
+	// 1.处理业务逻辑
+	// 判断是否登录
+	isLogin := req.UserId != 0
+	// 2.业务处理
+	// ① 按投稿时间查询最多30个video，按投稿时间降序
+	videoInfos, err := vs.videoRepo.GetVideosByTime(ctx, *req.LatestTime*1e9)
+	if err != nil {
+		zap.L().Error("vs.videoRepo.GetVideosByTime err:", zap.Error(err))
+		return vs.respRepo.VideoFeedResponse(errcode.ErrDB, err.Error(), &video.VideoFeedResponse{}), nil
+	}
+	// 获取next_time
+	time := videoInfos[len(videoInfos)-1].CreatedAt.Unix()
+	resp.NextTime = &time
+	for _, v := range videoInfos {
+		// ② 根据userId查询出 userInfo
+		userInfo, err := vs.videoRepo.GetUserInfoByID(ctx, int64(v.UserId))
+		if err != nil {
+			zap.L().Error("vs.videoRepo.GetUserInfoByID err:", zap.Error(err))
+			return vs.respRepo.VideoFeedResponse(errcode.ErrDB, err.Error(), &video.VideoFeedResponse{}), nil
+		}
+		isFollow := false
+		isFavorite := false
+		// ③ 若登录判断是否关注对方 //TODO 查询缓存
+		if isLogin {
+			isFollow, err = vs.videoRepo.IsFollowTargetUser(ctx, req.UserId, int64(v.UserId))
+			if err != nil {
+				zap.L().Error("vs.videoRepo.IsFollowTargetUser err:", zap.Error(err))
+				return vs.respRepo.VideoFeedResponse(errcode.ErrDB, err.Error(), &video.VideoFeedResponse{}), nil
+			}
+			// ④ 判断该视频是否点赞
+			isFavorite, _ = vs.videoRepo.IsFavoriteVideo(ctx, req.UserId, int64(v.ID))
+			if err != nil {
+				zap.L().Error("vs.videoRepo.IsFavoriteVideo err:", zap.Error(err))
+				return vs.respRepo.VideoFeedResponse(errcode.ErrDB, err.Error(), &video.VideoFeedResponse{}), nil
+			}
+		}
 
-	return nil, nil
+		resp.VideoList = append(resp.VideoList, &video.Video{
+			Id: int64(v.ID),
+			Author: &video.User{
+				Id:              int64(userInfo.ID),
+				Name:            userInfo.Username,
+				FollowCount:     &userInfo.FollowCount,
+				FollowerCount:   &userInfo.FollowerCount,
+				IsFollow:        isFollow,
+				Avatar:          &userInfo.Avatar,
+				BackgroundImage: &userInfo.BackgroundImage,
+				Signature:       &userInfo.Signature,
+				TotalFavorited:  &userInfo.TotalFavorited,
+				WorkCount:       &userInfo.WorkCount,
+				FavoriteCount:   &userInfo.TotalFavorited,
+			},
+			PlayUrl:       v.PlayURL,
+			CoverUrl:      v.CoverURL,
+			FavoriteCount: v.FavoriteCount,
+			CommentCount:  v.CommentCount,
+			IsFavorite:    isFavorite,
+			Title:         v.Title,
+		})
+	}
+
+	return vs.respRepo.VideoFeedResponse(errcode.StatusOK, model.MsgNil, resp), nil
 }
 
 func (vs *VideoServiceImpl) VideoPublish(ctx context.Context, req *video.VideoPublishRequest) (resp *video.VideoPublishResponse, err error) {
@@ -91,6 +152,7 @@ func (vs *VideoServiceImpl) VideoPublish(ctx context.Context, req *video.VideoPu
 }
 
 func (vs *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishListRequest) (resp *video.PublishListResponse, err error) {
+
 	return nil, nil
 }
 
