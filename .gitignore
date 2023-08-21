@@ -22,8 +22,8 @@ go.work
 
 *.mp4
 
-toktik-video/config/private.yaml
-toktik-api/config/private.yaml
-toktik-user/config/private.yaml
-toktik-interaction/config/private.yaml
-toktik-chat/config/private.yaml
+/toktik-video/config/private.yaml
+/toktik-api/config/private.yaml
+/toktik-user/config/private.yaml
+/toktik-interaction/config/private.yaml
+/toktik-chat/config/private.yaml
