@@ -41,8 +41,8 @@ message User {
 }
 
 message VideoPublishRequest {
-   string token = 1; // 用户鉴权token
-   bytes data = 2; // 视频数据
+  int64 user_id = 1;
+  bytes data = 2; // 视频数据
    string title = 3; // 视频标题
 }
 
@@ -53,7 +53,6 @@ message VideoPublishResponse {
 
 message PublishListRequest {
    int64 user_id = 1; // 用户id
-   string token = 2; // 用户鉴权token
 }
 
 message PublishListResponse {
@@ -64,7 +63,6 @@ message PublishListResponse {
 
 message FavoriteListRequest {
    int64 user_id = 1; // 用户id
-   string token = 2; // 用户鉴权token
 }
 
 message FavoriteListResponse {
@@ -74,8 +72,8 @@ message FavoriteListResponse {
 }
 
 message FavoriteActionRequest {
-   string token = 1; // 用户鉴权token
-   int64 video_id = 2; // 视频id
+  int64 user_id = 1;
+  int64 video_id = 2; // 视频id
    int32 action_type = 3; // 1-点赞，2-取消点赞
 }
 
@@ -85,7 +83,7 @@ message FavoriteActionResponse {
 }
 
 message CommentActionRequest {
-   string token = 1; // 用户鉴权token
+  int64 user_id = 1;
    int64 video_id = 2; // 视频id
    int32 action_type = 3; // 1-发布评论，2-删除评论
   optional string comment_text = 4; // 用户填写的评论内容，在action_type=1的时候使用
@@ -106,7 +104,7 @@ message Comment {
 }
 
 message CommentListRequest {
-   string token = 1; // 用户鉴权token
+  int64 user_id = 1;
    int64 video_id = 2; // 视频id
 }
 

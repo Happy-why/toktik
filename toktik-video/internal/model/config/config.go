@@ -10,9 +10,10 @@ type Public struct {
 }
 
 type Private struct {
-	Mysql Mysql
-	Redis Redis
-	Etcd  Etcd
+	Mysql     Mysql
+	Redis     Redis
+	Etcd      Etcd
+	AliyunOSS AliyunOSS
 }
 
 type Server struct {
@@ -61,4 +62,11 @@ type Redis struct {
 	Port     string
 	Password string
 	DB       int
+}
+
+type AliyunOSS struct {
+	Endpoint        string `yaml:"Endpoint"`
+	AccessKeyId     string `yaml:"AccessKeyID"`
+	AccessKeySecret string `yaml:"AccessKeySecret"`
+	BucketName      string `yaml:"BucketName"`
 }

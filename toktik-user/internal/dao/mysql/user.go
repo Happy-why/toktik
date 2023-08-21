@@ -22,8 +22,7 @@ func (u *UserDao) GetUserByUsername(c context.Context, username string) (bool, e
 }
 
 func (u *UserDao) UserRegister(c context.Context, userInfo *auto.User) error {
-	err := u.conn.Session(c).Create(userInfo).Error
-	return err
+	return u.conn.Session(c).Create(userInfo).Error
 }
 
 func (u *UserDao) GetUserInfoByUsername(c context.Context, username string) (*auto.User, error) {

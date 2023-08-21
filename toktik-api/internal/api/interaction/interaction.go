@@ -34,7 +34,7 @@ func (p *HandlerInteraction) FollowSB(c *gin.Context) {
 	}
 	req.MyUserId = content.ID
 
-	// 2.调用user rpc服务 获取响应
+	// 2.调用 rpc服务 获取响应
 	params := &inter.FollowActionRequest{}
 	_ = copier.Copy(params, req)
 	result, err := api.InteractionClient.FollowSB(c, params)
@@ -57,7 +57,7 @@ func (p *HandlerInteraction) FollowList(c *gin.Context) {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	// 2.调用user rpc服务 获取响应
+	// 2.调用 rpc服务 获取响应
 	params := &inter.FollowListRequest{}
 	_ = copier.Copy(params, req)
 	result, err := api.InteractionClient.FollowList(c, params)
@@ -80,7 +80,7 @@ func (p *HandlerInteraction) FansList(c *gin.Context) {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	// 2.调用user rpc服务 获取响应
+	// 2.调用 rpc服务 获取响应
 	params := &inter.FansListRequest{}
 	_ = copier.Copy(params, req)
 	result, err := api.InteractionClient.FansList(c, params)
@@ -103,7 +103,7 @@ func (p *HandlerInteraction) FriendList(c *gin.Context) {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	// 2.调用user rpc服务 获取响应
+	// 2.调用 rpc服务 获取响应
 	params := &inter.FriendListRequest{}
 	_ = copier.Copy(params, req)
 	result, err := api.InteractionClient.FriendList(c, params)

@@ -374,7 +374,7 @@ ReadFieldError:
 }
 
 func (x *VideoPublishRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -430,11 +430,6 @@ func (x *PublishListRequest) FastRead(buf []byte, _type int8, number int32) (off
 		if err != nil {
 			goto ReadFieldError
 		}
-	case 2:
-		offset, err = x.fastReadField2(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -450,11 +445,6 @@ ReadFieldError:
 
 func (x *PublishListRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
-	return offset, err
-}
-
-func (x *PublishListRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
@@ -515,11 +505,6 @@ func (x *FavoriteListRequest) FastRead(buf []byte, _type int8, number int32) (of
 		if err != nil {
 			goto ReadFieldError
 		}
-	case 2:
-		offset, err = x.fastReadField2(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -535,11 +520,6 @@ ReadFieldError:
 
 func (x *FavoriteListRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
-	return offset, err
-}
-
-func (x *FavoriteListRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
@@ -624,7 +604,7 @@ ReadFieldError:
 }
 
 func (x *FavoriteActionRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -714,7 +694,7 @@ ReadFieldError:
 }
 
 func (x *CommentActionRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -876,7 +856,7 @@ ReadFieldError:
 }
 
 func (x *CommentListRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -1201,10 +1181,10 @@ func (x *VideoPublishRequest) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *VideoPublishRequest) fastWriteField1(buf []byte) (offset int) {
-	if x.Token == "" {
+	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.GetToken())
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
@@ -1254,7 +1234,6 @@ func (x *PublishListRequest) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
-	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -1263,14 +1242,6 @@ func (x *PublishListRequest) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
-	return offset
-}
-
-func (x *PublishListRequest) fastWriteField2(buf []byte) (offset int) {
-	if x.Token == "" {
-		return offset
-	}
-	offset += fastpb.WriteString(buf[offset:], 2, x.GetToken())
 	return offset
 }
 
@@ -1315,7 +1286,6 @@ func (x *FavoriteListRequest) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
-	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -1324,14 +1294,6 @@ func (x *FavoriteListRequest) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
-	return offset
-}
-
-func (x *FavoriteListRequest) fastWriteField2(buf []byte) (offset int) {
-	if x.Token == "" {
-		return offset
-	}
-	offset += fastpb.WriteString(buf[offset:], 2, x.GetToken())
 	return offset
 }
 
@@ -1382,10 +1344,10 @@ func (x *FavoriteActionRequest) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *FavoriteActionRequest) fastWriteField1(buf []byte) (offset int) {
-	if x.Token == "" {
+	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.GetToken())
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
@@ -1443,10 +1405,10 @@ func (x *CommentActionRequest) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *CommentActionRequest) fastWriteField1(buf []byte) (offset int) {
-	if x.Token == "" {
+	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.GetToken())
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
@@ -1569,10 +1531,10 @@ func (x *CommentListRequest) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *CommentListRequest) fastWriteField1(buf []byte) (offset int) {
-	if x.Token == "" {
+	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.GetToken())
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
 	return offset
 }
 
@@ -1886,10 +1848,10 @@ func (x *VideoPublishRequest) Size() (n int) {
 }
 
 func (x *VideoPublishRequest) sizeField1() (n int) {
-	if x.Token == "" {
+	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(1, x.GetToken())
+	n += fastpb.SizeInt64(1, x.GetUserId())
 	return n
 }
 
@@ -1939,7 +1901,6 @@ func (x *PublishListRequest) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
-	n += x.sizeField2()
 	return n
 }
 
@@ -1948,14 +1909,6 @@ func (x *PublishListRequest) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeInt64(1, x.GetUserId())
-	return n
-}
-
-func (x *PublishListRequest) sizeField2() (n int) {
-	if x.Token == "" {
-		return n
-	}
-	n += fastpb.SizeString(2, x.GetToken())
 	return n
 }
 
@@ -2000,7 +1953,6 @@ func (x *FavoriteListRequest) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
-	n += x.sizeField2()
 	return n
 }
 
@@ -2009,14 +1961,6 @@ func (x *FavoriteListRequest) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeInt64(1, x.GetUserId())
-	return n
-}
-
-func (x *FavoriteListRequest) sizeField2() (n int) {
-	if x.Token == "" {
-		return n
-	}
-	n += fastpb.SizeString(2, x.GetToken())
 	return n
 }
 
@@ -2067,10 +2011,10 @@ func (x *FavoriteActionRequest) Size() (n int) {
 }
 
 func (x *FavoriteActionRequest) sizeField1() (n int) {
-	if x.Token == "" {
+	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(1, x.GetToken())
+	n += fastpb.SizeInt64(1, x.GetUserId())
 	return n
 }
 
@@ -2128,10 +2072,10 @@ func (x *CommentActionRequest) Size() (n int) {
 }
 
 func (x *CommentActionRequest) sizeField1() (n int) {
-	if x.Token == "" {
+	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(1, x.GetToken())
+	n += fastpb.SizeInt64(1, x.GetUserId())
 	return n
 }
 
@@ -2254,10 +2198,10 @@ func (x *CommentListRequest) Size() (n int) {
 }
 
 func (x *CommentListRequest) sizeField1() (n int) {
-	if x.Token == "" {
+	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(1, x.GetToken())
+	n += fastpb.SizeInt64(1, x.GetUserId())
 	return n
 }
 
@@ -2343,7 +2287,7 @@ var fieldIDToName_User = map[int32]string{
 }
 
 var fieldIDToName_VideoPublishRequest = map[int32]string{
-	1: "Token",
+	1: "UserId",
 	2: "Data",
 	3: "Title",
 }
@@ -2355,7 +2299,6 @@ var fieldIDToName_VideoPublishResponse = map[int32]string{
 
 var fieldIDToName_PublishListRequest = map[int32]string{
 	1: "UserId",
-	2: "Token",
 }
 
 var fieldIDToName_PublishListResponse = map[int32]string{
@@ -2366,7 +2309,6 @@ var fieldIDToName_PublishListResponse = map[int32]string{
 
 var fieldIDToName_FavoriteListRequest = map[int32]string{
 	1: "UserId",
-	2: "Token",
 }
 
 var fieldIDToName_FavoriteListResponse = map[int32]string{
@@ -2376,7 +2318,7 @@ var fieldIDToName_FavoriteListResponse = map[int32]string{
 }
 
 var fieldIDToName_FavoriteActionRequest = map[int32]string{
-	1: "Token",
+	1: "UserId",
 	2: "VideoId",
 	3: "ActionType",
 }
@@ -2387,7 +2329,7 @@ var fieldIDToName_FavoriteActionResponse = map[int32]string{
 }
 
 var fieldIDToName_CommentActionRequest = map[int32]string{
-	1: "Token",
+	1: "UserId",
 	2: "VideoId",
 	3: "ActionType",
 	4: "CommentText",
@@ -2408,7 +2350,7 @@ var fieldIDToName_Comment = map[int32]string{
 }
 
 var fieldIDToName_CommentListRequest = map[int32]string{
-	1: "Token",
+	1: "UserId",
 	2: "VideoId",
 }
 

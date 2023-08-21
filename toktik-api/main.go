@@ -4,6 +4,7 @@ import (
 	"fmt"
 	_ "github.com/Happy-Why/toktik-api/internal/api/interaction"
 	_ "github.com/Happy-Why/toktik-api/internal/api/user"
+	_ "github.com/Happy-Why/toktik-api/internal/api/video"
 	"github.com/Happy-Why/toktik-api/internal/global"
 	"github.com/Happy-Why/toktik-api/pkg/middleware"
 	"github.com/Happy-Why/toktik-api/pkg/router"

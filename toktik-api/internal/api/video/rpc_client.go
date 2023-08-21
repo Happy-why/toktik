@@ -17,9 +17,9 @@ func InitRpcInteractionClient() {
 		panic(err)
 	}
 	c, err := videoservice.NewClient(
-		model.RpcInteraction,
+		model.RpcVideo,
 		client.WithHostPorts(global.PbSettings.Rpc.ServerAddrs[model.RpcVideo]),
-		client.WithMiddleware(rpcmiddleware.CommonMiddleware),
+		//client.WithMiddleware(rpcmiddleware.CommonMiddleware),
 		client.WithInstanceMW(rpcmiddleware.ClientMiddleware),
 		client.WithResolver(r),
 	)

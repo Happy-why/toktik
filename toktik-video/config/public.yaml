@@ -9,7 +9,7 @@ Rules:
   DefaultUserSignature: "这里什么有没有捏"
 
 RPC:
-  Name: "rpc-interaction"
+  Name: "rpc-video"
   Addr: "0.0.0.0:8883"
 
 Logger:

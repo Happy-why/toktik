@@ -20,10 +20,10 @@ func (*RouterVideo) Route(r *gin.Engine) {
 	InitRpcInteractionClient()
 	//初始化grpc的客户端连接
 	h := NewHandlerVideo()
-	r.GET("/douyin/feed/")
+	r.GET("/douyin/feed/", h.VideoFeed)
 	g := r.Group("/douyin", middleware.MustUser())
 	{
-		g.POST("/publish/action/", h.VideoFeed)
+		g.POST("/publish/action/", h.VideoPublish)
 		g.GET("/publish/list/")
 		g.POST("/favorite/action/")
 		g.GET("/favorite/list/")

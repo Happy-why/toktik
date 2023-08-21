@@ -18,7 +18,7 @@ func RegisterRPC() server.Server {
 		zap.L().Error("etcd.NewEtcdRegistry err:", zap.Error(err))
 		return nil
 	}
-	addr, err := net.ResolveTCPAddr("tcp", global.PbSettings.Rpc.Addr) //:8882
+	addr, err := net.ResolveTCPAddr("tcp", global.PbSettings.Rpc.Addr) //:8883
 	if err != nil {
 		zap.L().Error("net.ResolveTCPAddr err:", zap.Error(err))
 		return nil
