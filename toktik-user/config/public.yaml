@@ -7,6 +7,7 @@ Server:
 Rules:
   DefaultUserAvatar: "https://q1.qlogo.cn/g?b=qq&nk=1780006511&s=640"
   DefaultUserSignature: "这里什么有没有捏"
+  DefaultUserBackGroundImage: "https://why-bucket.oss-cn-beijing.aliyuncs.com/back.jpg"
 
 RPC:
   Name: "rpc-user"

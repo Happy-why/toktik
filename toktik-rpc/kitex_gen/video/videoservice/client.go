@@ -4,8 +4,7 @@ package videoservice
 
 import (
 	"context"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/video"
-
+	video "github.com/Happy-Why/toktik-rpc/kitex_gen/video"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
 )

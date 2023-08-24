@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Happy-Why/toktik-interaction/internal/dao"
 	"github.com/Happy-Why/toktik-interaction/internal/global"
+	"github.com/Happy-Why/toktik-interaction/internal/model/auto"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -39,7 +40,7 @@ func InitMysql() {
 		panic("连接数据库失败, error=" + err.Error())
 	}
 	dao.Group.Mdb = DB
-
+	_ = DB.AutoMigrate(&auto.Relation{})
 }
 
 func GetDB() *gorm.DB {

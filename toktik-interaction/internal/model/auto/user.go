@@ -1,6 +1,10 @@
 package auto
 
-import "gorm.io/gorm"
+import (
+	"encoding/json"
+	"gorm.io/gorm"
+	"strconv"
+)
 
 type User struct {
 	gorm.Model
@@ -14,8 +18,21 @@ type User struct {
 	Signature       string `json:"signature"`                      // 个人简介
 	TotalFavorited  int64  `json:"total_favorited"`                // 获赞数量
 	WorkCount       int64  `json:"work_count"`                     // 作品数
+	FavoriteCount   int64  `json:"favorite_count"`                 // 点赞总数
 }
 
 func (*User) TableName() string {
 	return "user"
+}
+
+func NewUserKey(videoId uint) string {
+	videoStr := strconv.Itoa(int(videoId))
+	return "user_info::" + videoStr
+}
+
+func NewMapUserInfo(userInfo *User) map[string]interface{} {
+	userStr, _ := json.Marshal(userInfo)
+	userMap := make(map[string]interface{})
+	_ = json.Unmarshal(userStr, &userMap)
+	return userMap
 }

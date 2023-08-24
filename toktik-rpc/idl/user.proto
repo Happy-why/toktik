@@ -65,9 +65,41 @@ message TokenVerifyResponse{
 
 }
 
+message AddFollowCountRequest{
+  int64 user_id = 1;
+  int64 target_id = 2;
+}
+
+message AddFollowCountResponse{
+  int64 status_code = 1 ; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
+}
+
+message SubFollowCountRequest{
+  int64 user_id = 1;
+  int64 target_id = 2;
+}
+
+message SubFollowCountResponse{
+  int64 status_code = 1 ; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
+}
+
+message GetUserListRequest{
+  repeated int64 target_id = 1;
+}
+
+message GetUserListResponse{
+  int64 status_code = 1 ; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
+  repeated User user_list = 3;
+}
 service UserService{
   rpc Register(RegisterRequest) returns (RegisterResponse) {}
   rpc Login(LoginRequest) returns (LoginResponse) {}
   rpc TokenVerify(TokenVerifyRequest) returns(TokenVerifyResponse) {}
   rpc UserIndex(UserIndexRequest) returns(UserIndexResponse){}
+  rpc AddFollowCount(AddFollowCountRequest)returns(AddFollowCountResponse){}
+  rpc SubFollowCount(SubFollowCountRequest)returns(SubFollowCountResponse){}
+  rpc GetUserList(GetUserListRequest)returns(GetUserListResponse){}
 }

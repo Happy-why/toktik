@@ -4,8 +4,7 @@ package interactionservice
 
 import (
 	"context"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
-
+	interaction "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
 )
@@ -16,6 +15,7 @@ type Client interface {
 	FollowList(ctx context.Context, Req *interaction.FollowListRequest, callOptions ...callopt.Option) (r *interaction.FollowListResponse, err error)
 	FansList(ctx context.Context, Req *interaction.FansListRequest, callOptions ...callopt.Option) (r *interaction.FansListResponse, err error)
 	FriendList(ctx context.Context, Req *interaction.FriendListRequest, callOptions ...callopt.Option) (r *interaction.FriendListResponse, err error)
+	IsFollowTarget(ctx context.Context, Req *interaction.IsFollowTargetRequest, callOptions ...callopt.Option) (r *interaction.IsFollowTargetResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -65,4 +65,9 @@ func (p *kInteractionServiceClient) FansList(ctx context.Context, Req *interacti
 func (p *kInteractionServiceClient) FriendList(ctx context.Context, Req *interaction.FriendListRequest, callOptions ...callopt.Option) (r *interaction.FriendListResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.FriendList(ctx, Req)
+}
+
+func (p *kInteractionServiceClient) IsFollowTarget(ctx context.Context, Req *interaction.IsFollowTargetRequest, callOptions ...callopt.Option) (r *interaction.IsFollowTargetResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.IsFollowTarget(ctx, Req)
 }

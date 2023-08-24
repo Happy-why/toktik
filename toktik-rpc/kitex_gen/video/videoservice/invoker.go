@@ -3,7 +3,7 @@
 package videoservice
 
 import (
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/video"
+	video "github.com/Happy-Why/toktik-rpc/kitex_gen/video"
 	server "github.com/cloudwego/kitex/server"
 )
 

@@ -8,7 +8,7 @@ import (
 	"github.com/Happy-Why/toktik-rpc/kitex_gen/video/videoservice"
 	"github.com/cloudwego/kitex/client"
 	etcd "github.com/kitex-contrib/registry-etcd"
-	"log"
+	"go.uber.org/zap"
 )
 
 func InitRpcInteractionClient() {
@@ -24,7 +24,8 @@ func InitRpcInteractionClient() {
 		client.WithResolver(r),
 	)
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Error("apiServer InitRpcVideoClient err:", zap.Error(err))
+		panic(err)
 	}
 	api.VideoClient = c
 }

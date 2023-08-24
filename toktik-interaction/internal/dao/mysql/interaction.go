@@ -47,7 +47,9 @@ func (i *InteractionDao) AddFollowerCount(c context.Context, conn DbConn, userID
 
 func (i *InteractionDao) CancelFollowUser(c context.Context, conn DbConn, relationInfo *auto.Relation) error {
 	i.conn = conn.(*GormConn)
-	return i.conn.Tx(c).Model(&auto.Relation{}).Unscoped().Delete(relationInfo).Error
+	return i.conn.Tx(c).Model(&auto.Relation{}).
+		Where("user_id = ? AND target_id = ?", relationInfo.UserId, relationInfo.TargetId).
+		Unscoped().Delete(relationInfo).Error
 }
 
 func (i *InteractionDao) SubFollowCount(c context.Context, conn DbConn, userID uint) error {
@@ -64,35 +66,36 @@ func (i *InteractionDao) SubFollowerCount(c context.Context, conn DbConn, userID
 		Update("follower_count", gorm.Expr("follower_count - ?", 1)).Error
 }
 
-func (i *InteractionDao) GetFollowList(c context.Context, userID uint) ([]*auto.User, error) {
-	followUsers := make([]*auto.User, 0)
+func (i *InteractionDao) GetFollowIDs(c context.Context, userID uint) ([]int64, error) {
+	var userIDs []int64
 	session := i.conn.Session(c)
-	sql := fmt.Sprintf("SELECT u.* FROM relation r JOIN user u ON r.target_id = u.id WHERE r.user_id = ?;")
+	sql := fmt.Sprintf("SELECT target_id FROM relation  WHERE user_id = ?;")
 	raw := session.Raw(sql, userID)
-	err := raw.Scan(&followUsers).Error
-	return followUsers, err
+	err := raw.Scan(&userIDs).Error
+	return userIDs, err
 }
 
-func (i *InteractionDao) GetFansList(c context.Context, userID uint) ([]*auto.User, error) {
-	fansUsers := make([]*auto.User, 0)
+func (i *InteractionDao) GetFansIDs(c context.Context, userID uint) ([]int64, error) {
+	var userIDs []int64
 	session := i.conn.Session(c)
-	sql := fmt.Sprintf("SELECT u.* FROM relation r JOIN user u ON r.user_id = u.id WHERE r.target_id = ?;")
+	sql := fmt.Sprintf("SELECT user_id FROM relation  WHERE target_id = ?;")
 	raw := session.Raw(sql, userID)
-	err := raw.Scan(&fansUsers).Error
-	return fansUsers, err
+	err := raw.Scan(&userIDs).Error
+	return userIDs, err
 }
 
-func (i *InteractionDao) GetFriendList(c context.Context, userID uint) ([]*auto.User, error) {
-	friendUsers := make([]*auto.User, 0)
+func (i *InteractionDao) GetFriendIDs(c context.Context, userID uint) ([]int64, error) {
+	var userIDs []int64
 	session := i.conn.Session(c)
-	sql := fmt.Sprintf(
-		"SELECT u.* " +
-			"FROM relation r2 " +
-			"JOIN user u ON r2.user_id = u.id " +
-			"WHERE r2.target_id = ? " +
-			"AND r2.user_id IN " +
-			"( SELECT r1.target_id FROM relation r1 WHERE user_id = ?);")
+	sql := fmt.Sprintf("SELECT user_id FROM relation  WHERE user_id IN  (SELECT target_id FROM relation  WHERE user_id = ?)AND target_id = ?;")
 	raw := session.Raw(sql, userID, userID)
-	err := raw.Scan(&friendUsers).Error
-	return friendUsers, err
+	err := raw.Scan(&userIDs).Error
+	return userIDs, err
+}
+
+func (i *InteractionDao) IsFollowUser(c context.Context, myUserID, targetUserID int64) (bool, error) {
+	var count int64
+	err := i.conn.Session(c).Model(&auto.Relation{}).
+		Where("user_id = ? AND target_id = ?", myUserID, targetUserID).Count(&count).Error
+	return count > 0, err
 }

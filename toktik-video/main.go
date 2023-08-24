@@ -4,7 +4,7 @@ import (
 	"fmt"
 	srv "github.com/Happy-Why/toktik-common/serveHTTP"
 	"github.com/Happy-Why/toktik-video/internal/global"
-	"github.com/Happy-Why/toktik-video/pkg/router"
+	"github.com/Happy-Why/toktik-video/pkg/rpc"
 	"github.com/Happy-Why/toktik-video/pkg/setting"
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +18,7 @@ func main() {
 	route := gin.Default()
 
 	// RPC 注册
-	kr := router.RegisterRPC()
+	kr := rpc.RegisterRPC()
 	//服务端配置
 	stop := func() { kr.Stop() }
 	fmt.Println("------------------------------------------------")

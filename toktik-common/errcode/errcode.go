@@ -19,6 +19,10 @@ type Err interface {
 var globalMap map[int64]Err
 var once sync.Once
 
+func CreateErr(code int64, msg string) Err {
+	return &myErr{Code: code, Msg: msg}
+}
+
 func NewErr(code int64, msg string) Err {
 	once.Do(func() {
 		globalMap = make(map[int64]Err)

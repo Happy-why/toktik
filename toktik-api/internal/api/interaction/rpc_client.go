@@ -8,7 +8,7 @@ import (
 	"github.com/Happy-Why/toktik-rpc/kitex_gen/interaction/interactionservice"
 	"github.com/cloudwego/kitex/client"
 	etcd "github.com/kitex-contrib/registry-etcd"
-	"log"
+	"go.uber.org/zap"
 )
 
 func InitRpcInteractionClient() {
@@ -18,13 +18,14 @@ func InitRpcInteractionClient() {
 	}
 	c, err := interactionservice.NewClient(
 		model.RpcInteraction,
-		client.WithHostPorts(global.PbSettings.Rpc.ServerAddrs[model.RpcInteraction]),
+		//client.WithHostPorts(global.PbSettings.Rpc.ServerAddrs[model.RpcInteraction]),
 		client.WithMiddleware(rpcmiddleware.CommonMiddleware),
 		client.WithInstanceMW(rpcmiddleware.ClientMiddleware),
 		client.WithResolver(r),
 	)
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Error("apiServer InitRpcInteractionClient err:", zap.Error(err))
+		panic(err)
 	}
 	api.InteractionClient = c
 }

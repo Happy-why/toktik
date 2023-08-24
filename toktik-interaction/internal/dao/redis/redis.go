@@ -3,22 +3,27 @@ package redis
 import (
 	"context"
 	"fmt"
+	"github.com/Happy-Why/toktik-interaction/internal/dao"
 	"github.com/Happy-Why/toktik-interaction/internal/global"
-	"github.com/go-redis/redis/v8"
+	redis2 "github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 	"time"
 )
 
 type RdbCache struct {
-	rdb *redis.Client
+	rdb *redis2.Client
 }
 
-func NewRdbCache(rdb *redis.Client) *RdbCache {
+func GetRdbCache() *RdbCache {
+	return &RdbCache{rdb: dao.Group.Rdb}
+}
+
+func NewRdbCache(rdb *redis2.Client) *RdbCache {
 	return &RdbCache{rdb: rdb}
 }
 
-func InitRedis() *RdbCache {
-	rdb := redis.NewClient(&redis.Options{
+func InitRedis() *redis2.Client {
+	rdb := redis2.NewClient(&redis2.Options{
 		Addr:     global.PvSettings.Redis.Host + ":" + global.PvSettings.Redis.Port,
 		Password: global.PvSettings.Redis.Password, // 密码
 		DB:       global.PvSettings.Redis.DB,       // 数据库
@@ -30,7 +35,7 @@ func InitRedis() *RdbCache {
 		fmt.Println("redis初始化失败！！！！！")
 		panic(err)
 	}
-	return NewRdbCache(rdb)
+	return rdb
 }
 
 func (rc *RdbCache) Put(c context.Context, key, value string, expire time.Duration) error {

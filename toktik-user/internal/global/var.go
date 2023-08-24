@@ -13,4 +13,5 @@ var (
 	Logger     *logger.Log    // 日志
 	Maker      token.Maker
 	SnowFlake  *utils.SnowFlake
+	//RdbClient  *redis.RdbCache
 )

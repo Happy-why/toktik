@@ -24,8 +24,9 @@ type Server struct {
 }
 
 type Rules struct {
-	DefaultUserAvatar    string
-	DefaultUserSignature string
+	DefaultUserAvatar          string
+	DefaultUserSignature       string
+	DefaultUserBackGroundImage string
 }
 
 type Rpc struct {

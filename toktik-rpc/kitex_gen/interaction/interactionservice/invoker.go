@@ -3,7 +3,7 @@
 package interactionservice
 
 import (
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
+	interaction "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
 	server "github.com/cloudwego/kitex/server"
 )
 

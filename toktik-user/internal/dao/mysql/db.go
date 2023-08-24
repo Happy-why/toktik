@@ -40,7 +40,7 @@ func InitMysql() {
 		panic("连接数据库失败, error=" + err.Error())
 	}
 	dao.Group.Mdb = DB
-	_ = DB.AutoMigrate(&auto.Comment{}, &auto.Favorite{}, &auto.User{}, &auto.Relation{}, &auto.Video{})
+	_ = DB.AutoMigrate(&auto.User{})
 
 }
 
@@ -61,6 +61,10 @@ func NewTran() *GormConn {
 }
 func (g *GormConn) Session(ctx context.Context) *gorm.DB {
 	return g.db.Session(&gorm.Session{Context: ctx})
+}
+
+func (g *GormConn) Begin() {
+	g.tx = GetDB().Begin()
 }
 
 func (g *GormConn) Rollback() {

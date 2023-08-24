@@ -31,3 +31,30 @@ func (UserIndexHandler) UserIndexResponse(err errcode.Err, msg string, resp *use
 	resp.StatusMsg = err.Error() + ":" + msg
 	return resp
 }
+
+type AddFollowCountHandler struct {
+}
+
+func (AddFollowCountHandler) AddFollowCountResponse(err errcode.Err, msg string, resp *user.AddFollowCountResponse) *user.AddFollowCountResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type SubFollowCountHandler struct {
+}
+
+func (SubFollowCountHandler) SubFollowCountResponse(err errcode.Err, msg string, resp *user.SubFollowCountResponse) *user.SubFollowCountResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type GutUserListHandler struct {
+}
+
+func (GutUserListHandler) GetUserListResponse(err errcode.Err, msg string, resp *user.GetUserListResponse) *user.GetUserListResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}

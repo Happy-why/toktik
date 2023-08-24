@@ -16,5 +16,6 @@ type Dao struct {
 
 func (Dao) InitSetting() {
 	mysql.InitMysql()
+	//global.RdbClient = redis.InitRedis()
 	dao.Group.Rdb = redis.InitRedis()
 }

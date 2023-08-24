@@ -4,8 +4,7 @@ package userservice
 
 import (
 	"context"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/user"
-
+	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
 )
@@ -16,6 +15,9 @@ type Client interface {
 	Login(ctx context.Context, Req *user.LoginRequest, callOptions ...callopt.Option) (r *user.LoginResponse, err error)
 	TokenVerify(ctx context.Context, Req *user.TokenVerifyRequest, callOptions ...callopt.Option) (r *user.TokenVerifyResponse, err error)
 	UserIndex(ctx context.Context, Req *user.UserIndexRequest, callOptions ...callopt.Option) (r *user.UserIndexResponse, err error)
+	AddFollowCount(ctx context.Context, Req *user.AddFollowCountRequest, callOptions ...callopt.Option) (r *user.AddFollowCountResponse, err error)
+	SubFollowCount(ctx context.Context, Req *user.SubFollowCountRequest, callOptions ...callopt.Option) (r *user.SubFollowCountResponse, err error)
+	GetUserList(ctx context.Context, Req *user.GetUserListRequest, callOptions ...callopt.Option) (r *user.GetUserListResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -65,4 +67,19 @@ func (p *kUserServiceClient) TokenVerify(ctx context.Context, Req *user.TokenVer
 func (p *kUserServiceClient) UserIndex(ctx context.Context, Req *user.UserIndexRequest, callOptions ...callopt.Option) (r *user.UserIndexResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.UserIndex(ctx, Req)
+}
+
+func (p *kUserServiceClient) AddFollowCount(ctx context.Context, Req *user.AddFollowCountRequest, callOptions ...callopt.Option) (r *user.AddFollowCountResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.AddFollowCount(ctx, Req)
+}
+
+func (p *kUserServiceClient) SubFollowCount(ctx context.Context, Req *user.SubFollowCountRequest, callOptions ...callopt.Option) (r *user.SubFollowCountResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.SubFollowCount(ctx, Req)
+}
+
+func (p *kUserServiceClient) GetUserList(ctx context.Context, Req *user.GetUserListRequest, callOptions ...callopt.Option) (r *user.GetUserListResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetUserList(ctx, Req)
 }

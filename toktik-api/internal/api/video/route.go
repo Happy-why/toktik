@@ -24,10 +24,10 @@ func (*RouterVideo) Route(r *gin.Engine) {
 	g := r.Group("/douyin", middleware.MustUser())
 	{
 		g.POST("/publish/action/", h.VideoPublish)
-		g.GET("/publish/list/")
-		g.POST("/favorite/action/")
-		g.GET("/favorite/list/")
-		g.POST("/comment/action/")
-		g.GET("/comment/list/")
+		g.GET("/publish/list/", h.PublishList)
+		g.POST("/favorite/action/", h.FavoriteAction)
+		g.GET("/favorite/list/", h.FavoriteList)
+		g.POST("/comment/action/", h.CommentAction)
+		g.GET("/comment/list/", h.CommentList)
 	}
 }

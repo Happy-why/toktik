@@ -14,7 +14,8 @@ type InteractionRepo interface {
 	CancelFollowUser(c context.Context, conn mysql.DbConn, relationInfo *auto.Relation) error
 	SubFollowCount(c context.Context, conn mysql.DbConn, userID uint) error
 	SubFollowerCount(c context.Context, conn mysql.DbConn, userID uint) error
-	GetFollowList(c context.Context, userID uint) ([]*auto.User, error)
-	GetFansList(c context.Context, userID uint) ([]*auto.User, error)
-	GetFriendList(c context.Context, userID uint) ([]*auto.User, error)
+	GetFollowIDs(c context.Context, userID uint) ([]int64, error)
+	GetFansIDs(c context.Context, userID uint) ([]int64, error)
+	GetFriendIDs(c context.Context, userID uint) ([]int64, error)
+	IsFollowUser(c context.Context, myUserID, targetUserID int64) (bool, error)
 }

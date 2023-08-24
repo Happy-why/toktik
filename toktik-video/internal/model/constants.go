@@ -15,3 +15,15 @@ const (
 	VIDEO = "video"
 	COVER = "cover"
 )
+
+const (
+	FAVORITE = iota + 1
+	CANCELFAVORITE
+)
+
+const (
+	RpcUser        = "rpc-user"
+	RpcVideo       = "rpc-video"
+	RpcInteraction = "rpc-interaction"
+	RpcChat        = "rpc-chat"
+)

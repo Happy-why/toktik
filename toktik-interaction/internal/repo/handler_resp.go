@@ -11,6 +11,7 @@ type HandlerResp interface {
 	FollowListResponse(err errcode.Err, msg string, resp *inter.FollowListResponse) *inter.FollowListResponse
 	FansListResponse(err errcode.Err, msg string, resp *inter.FansListResponse) *inter.FansListResponse
 	FriendListResponse(err errcode.Err, msg string, resp *inter.FriendListResponse) *inter.FriendListResponse
+	IsFollowTargetResponse(err errcode.Err, msg string, resp *inter.IsFollowTargetResponse) *inter.IsFollowTargetResponse
 }
 
 type HandlerResps struct {
@@ -18,6 +19,7 @@ type HandlerResps struct {
 	model.FollowListHandler
 	model.FansListHandler
 	model.FriendListHandler
+	model.IsFollowTargetHandler
 }
 
 func NewHandlerResps() *HandlerResps {

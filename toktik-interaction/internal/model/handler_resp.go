@@ -40,3 +40,12 @@ func (FriendListHandler) FriendListResponse(err errcode.Err, msg string, resp *i
 	resp.StatusMsg = err.Error() + ":" + msg
 	return resp
 }
+
+type IsFollowTargetHandler struct {
+}
+
+func (IsFollowTargetHandler) IsFollowTargetResponse(err errcode.Err, msg string, resp *inter.IsFollowTargetResponse) *inter.IsFollowTargetResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}

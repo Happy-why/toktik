@@ -1,7 +1,9 @@
 package auto
 
 import (
+	"encoding/json"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 // Video 视频表 /*
@@ -18,4 +20,16 @@ type Video struct {
 
 func (*Video) TableName() string {
 	return "video"
+}
+
+func NewVideoKey(videoId uint) string {
+	videoStr := strconv.Itoa(int(videoId))
+	return "video_info::" + videoStr
+}
+
+func NewMapVideoInfo(videoInfo *Video) map[string]interface{} {
+	videoStr, _ := json.Marshal(videoInfo)
+	videoMap := make(map[string]interface{})
+	_ = json.Unmarshal(videoStr, &videoMap)
+	return videoMap
 }

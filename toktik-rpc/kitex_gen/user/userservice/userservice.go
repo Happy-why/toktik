@@ -5,7 +5,7 @@ package userservice
 import (
 	"context"
 	"fmt"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/user"
+	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 	streaming "github.com/cloudwego/kitex/pkg/streaming"
@@ -22,10 +22,13 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "UserService"
 	handlerType := (*user.UserService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"Register":    kitex.NewMethodInfo(registerHandler, newRegisterArgs, newRegisterResult, false),
-		"Login":       kitex.NewMethodInfo(loginHandler, newLoginArgs, newLoginResult, false),
-		"TokenVerify": kitex.NewMethodInfo(tokenVerifyHandler, newTokenVerifyArgs, newTokenVerifyResult, false),
-		"UserIndex":   kitex.NewMethodInfo(userIndexHandler, newUserIndexArgs, newUserIndexResult, false),
+		"Register":       kitex.NewMethodInfo(registerHandler, newRegisterArgs, newRegisterResult, false),
+		"Login":          kitex.NewMethodInfo(loginHandler, newLoginArgs, newLoginResult, false),
+		"TokenVerify":    kitex.NewMethodInfo(tokenVerifyHandler, newTokenVerifyArgs, newTokenVerifyResult, false),
+		"UserIndex":      kitex.NewMethodInfo(userIndexHandler, newUserIndexArgs, newUserIndexResult, false),
+		"AddFollowCount": kitex.NewMethodInfo(addFollowCountHandler, newAddFollowCountArgs, newAddFollowCountResult, false),
+		"SubFollowCount": kitex.NewMethodInfo(subFollowCountHandler, newSubFollowCountArgs, newSubFollowCountResult, false),
+		"GetUserList":    kitex.NewMethodInfo(getUserListHandler, newGetUserListArgs, newGetUserListResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "user",
@@ -653,6 +656,465 @@ func (p *UserIndexResult) GetResult() interface{} {
 	return p.Success
 }
 
+func addFollowCountHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.AddFollowCountRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).AddFollowCount(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *AddFollowCountArgs:
+		success, err := handler.(user.UserService).AddFollowCount(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*AddFollowCountResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newAddFollowCountArgs() interface{} {
+	return &AddFollowCountArgs{}
+}
+
+func newAddFollowCountResult() interface{} {
+	return &AddFollowCountResult{}
+}
+
+type AddFollowCountArgs struct {
+	Req *user.AddFollowCountRequest
+}
+
+func (p *AddFollowCountArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.AddFollowCountRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *AddFollowCountArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *AddFollowCountArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *AddFollowCountArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in AddFollowCountArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *AddFollowCountArgs) Unmarshal(in []byte) error {
+	msg := new(user.AddFollowCountRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var AddFollowCountArgs_Req_DEFAULT *user.AddFollowCountRequest
+
+func (p *AddFollowCountArgs) GetReq() *user.AddFollowCountRequest {
+	if !p.IsSetReq() {
+		return AddFollowCountArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *AddFollowCountArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *AddFollowCountArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type AddFollowCountResult struct {
+	Success *user.AddFollowCountResponse
+}
+
+var AddFollowCountResult_Success_DEFAULT *user.AddFollowCountResponse
+
+func (p *AddFollowCountResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.AddFollowCountResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *AddFollowCountResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *AddFollowCountResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *AddFollowCountResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in AddFollowCountResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *AddFollowCountResult) Unmarshal(in []byte) error {
+	msg := new(user.AddFollowCountResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *AddFollowCountResult) GetSuccess() *user.AddFollowCountResponse {
+	if !p.IsSetSuccess() {
+		return AddFollowCountResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *AddFollowCountResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.AddFollowCountResponse)
+}
+
+func (p *AddFollowCountResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *AddFollowCountResult) GetResult() interface{} {
+	return p.Success
+}
+
+func subFollowCountHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.SubFollowCountRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).SubFollowCount(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *SubFollowCountArgs:
+		success, err := handler.(user.UserService).SubFollowCount(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*SubFollowCountResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newSubFollowCountArgs() interface{} {
+	return &SubFollowCountArgs{}
+}
+
+func newSubFollowCountResult() interface{} {
+	return &SubFollowCountResult{}
+}
+
+type SubFollowCountArgs struct {
+	Req *user.SubFollowCountRequest
+}
+
+func (p *SubFollowCountArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.SubFollowCountRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *SubFollowCountArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *SubFollowCountArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *SubFollowCountArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in SubFollowCountArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *SubFollowCountArgs) Unmarshal(in []byte) error {
+	msg := new(user.SubFollowCountRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var SubFollowCountArgs_Req_DEFAULT *user.SubFollowCountRequest
+
+func (p *SubFollowCountArgs) GetReq() *user.SubFollowCountRequest {
+	if !p.IsSetReq() {
+		return SubFollowCountArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *SubFollowCountArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *SubFollowCountArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type SubFollowCountResult struct {
+	Success *user.SubFollowCountResponse
+}
+
+var SubFollowCountResult_Success_DEFAULT *user.SubFollowCountResponse
+
+func (p *SubFollowCountResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.SubFollowCountResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *SubFollowCountResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *SubFollowCountResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *SubFollowCountResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in SubFollowCountResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *SubFollowCountResult) Unmarshal(in []byte) error {
+	msg := new(user.SubFollowCountResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *SubFollowCountResult) GetSuccess() *user.SubFollowCountResponse {
+	if !p.IsSetSuccess() {
+		return SubFollowCountResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *SubFollowCountResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.SubFollowCountResponse)
+}
+
+func (p *SubFollowCountResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *SubFollowCountResult) GetResult() interface{} {
+	return p.Success
+}
+
+func getUserListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.GetUserListRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).GetUserList(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *GetUserListArgs:
+		success, err := handler.(user.UserService).GetUserList(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*GetUserListResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newGetUserListArgs() interface{} {
+	return &GetUserListArgs{}
+}
+
+func newGetUserListResult() interface{} {
+	return &GetUserListResult{}
+}
+
+type GetUserListArgs struct {
+	Req *user.GetUserListRequest
+}
+
+func (p *GetUserListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.GetUserListRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *GetUserListArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *GetUserListArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *GetUserListArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in GetUserListArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *GetUserListArgs) Unmarshal(in []byte) error {
+	msg := new(user.GetUserListRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var GetUserListArgs_Req_DEFAULT *user.GetUserListRequest
+
+func (p *GetUserListArgs) GetReq() *user.GetUserListRequest {
+	if !p.IsSetReq() {
+		return GetUserListArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *GetUserListArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *GetUserListArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type GetUserListResult struct {
+	Success *user.GetUserListResponse
+}
+
+var GetUserListResult_Success_DEFAULT *user.GetUserListResponse
+
+func (p *GetUserListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.GetUserListResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *GetUserListResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *GetUserListResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *GetUserListResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in GetUserListResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *GetUserListResult) Unmarshal(in []byte) error {
+	msg := new(user.GetUserListResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *GetUserListResult) GetSuccess() *user.GetUserListResponse {
+	if !p.IsSetSuccess() {
+		return GetUserListResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *GetUserListResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.GetUserListResponse)
+}
+
+func (p *GetUserListResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *GetUserListResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -698,6 +1160,36 @@ func (p *kClient) UserIndex(ctx context.Context, Req *user.UserIndexRequest) (r 
 	_args.Req = Req
 	var _result UserIndexResult
 	if err = p.c.Call(ctx, "UserIndex", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) AddFollowCount(ctx context.Context, Req *user.AddFollowCountRequest) (r *user.AddFollowCountResponse, err error) {
+	var _args AddFollowCountArgs
+	_args.Req = Req
+	var _result AddFollowCountResult
+	if err = p.c.Call(ctx, "AddFollowCount", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) SubFollowCount(ctx context.Context, Req *user.SubFollowCountRequest) (r *user.SubFollowCountResponse, err error) {
+	var _args SubFollowCountArgs
+	_args.Req = Req
+	var _result SubFollowCountResult
+	if err = p.c.Call(ctx, "SubFollowCount", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetUserList(ctx context.Context, Req *user.GetUserListRequest) (r *user.GetUserListResponse, err error) {
+	var _args GetUserListArgs
+	_args.Req = Req
+	var _result GetUserListResult
+	if err = p.c.Call(ctx, "GetUserList", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
