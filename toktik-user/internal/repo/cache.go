@@ -2,8 +2,8 @@ package repo
 
 import (
 	"context"
-	"github.com/Happy-Why/toktik-user/internal/model/auto"
 	"time"
+	"toktik-user/internal/model/auto"
 )
 
 type Cache interface {
@@ -18,4 +18,9 @@ type RClientRepo interface {
 	AddFollowerCount(c context.Context, key string) error
 	SubFollowCount(c context.Context, key string) error
 	SubFollowerCount(c context.Context, key string) error
+	AddWorkCount(c context.Context, key string) error
+	AddFavoriteCount(c context.Context, key string) error
+	AddTotalFavoriteCount(c context.Context, key string) error
+	SubFavoriteCount(c context.Context, key string) error
+	SubTotalFavoriteCount(c context.Context, key string) error
 }

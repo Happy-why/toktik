@@ -1,9 +1,9 @@
 package setting
 
 import (
-	"github.com/Happy-Why/toktik-common/logger"
-	"github.com/Happy-Why/toktik-video/internal/global"
 	"go.uber.org/zap"
+	"toktik-common/logger"
+	"toktik-video/internal/global"
 )
 
 func init() {
@@ -17,14 +17,14 @@ type log struct {
 // InitSetting 日志初始化
 func (log) InitSetting() {
 	global.Logger = logger.NewLogger(&logger.InitStruct{
-		LogSavePath:   global.PbSettings.Logger.LogSavePath,
-		LogFileExt:    global.PbSettings.Logger.LogFileExt,
-		MaxSize:       global.PbSettings.Logger.MaxSize,
-		MaxBackups:    global.PbSettings.Logger.MaxBackups,
-		MaxAge:        global.PbSettings.Logger.MaxAge,
-		Compress:      global.PbSettings.Logger.Compress,
-		LowLevelFile:  global.PbSettings.Logger.LowLevelFile,
-		HighLevelFile: global.PbSettings.Logger.HighLevelFile,
-	}, global.PbSettings.Logger.Level)
+		LogSavePath:   global.Settings.Logger.LogSavePath,
+		LogFileExt:    global.Settings.Logger.LogFileExt,
+		MaxSize:       global.Settings.Logger.MaxSize,
+		MaxBackups:    global.Settings.Logger.MaxBackups,
+		MaxAge:        global.Settings.Logger.MaxAge,
+		Compress:      global.Settings.Logger.Compress,
+		LowLevelFile:  global.Settings.Logger.LowLevelFile,
+		HighLevelFile: global.Settings.Logger.HighLevelFile,
+	}, global.Settings.Logger.Level)
 	zap.ReplaceGlobals(global.Logger.Logger)
 }

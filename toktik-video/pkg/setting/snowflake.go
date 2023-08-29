@@ -1,8 +1,8 @@
 package setting
 
 import (
-	"github.com/Happy-Why/toktik-common/utils"
-	"github.com/Happy-Why/toktik-video/internal/global"
+	"toktik-common/utils"
+	"toktik-video/internal/global"
 )
 
 func init() {

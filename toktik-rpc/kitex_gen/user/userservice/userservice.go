@@ -5,11 +5,11 @@ package userservice
 import (
 	"context"
 	"fmt"
-	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 	streaming "github.com/cloudwego/kitex/pkg/streaming"
 	proto "google.golang.org/protobuf/proto"
+	user "toktik-rpc/kitex_gen/user"
 )
 
 func serviceInfo() *kitex.ServiceInfo {
@@ -22,13 +22,15 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "UserService"
 	handlerType := (*user.UserService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"Register":       kitex.NewMethodInfo(registerHandler, newRegisterArgs, newRegisterResult, false),
-		"Login":          kitex.NewMethodInfo(loginHandler, newLoginArgs, newLoginResult, false),
-		"TokenVerify":    kitex.NewMethodInfo(tokenVerifyHandler, newTokenVerifyArgs, newTokenVerifyResult, false),
-		"UserIndex":      kitex.NewMethodInfo(userIndexHandler, newUserIndexArgs, newUserIndexResult, false),
-		"AddFollowCount": kitex.NewMethodInfo(addFollowCountHandler, newAddFollowCountArgs, newAddFollowCountResult, false),
-		"SubFollowCount": kitex.NewMethodInfo(subFollowCountHandler, newSubFollowCountArgs, newSubFollowCountResult, false),
-		"GetUserList":    kitex.NewMethodInfo(getUserListHandler, newGetUserListArgs, newGetUserListResult, false),
+		"Register":                kitex.NewMethodInfo(registerHandler, newRegisterArgs, newRegisterResult, false),
+		"Login":                   kitex.NewMethodInfo(loginHandler, newLoginArgs, newLoginResult, false),
+		"TokenVerify":             kitex.NewMethodInfo(tokenVerifyHandler, newTokenVerifyArgs, newTokenVerifyResult, false),
+		"UserIndex":               kitex.NewMethodInfo(userIndexHandler, newUserIndexArgs, newUserIndexResult, false),
+		"AddFollowCount":          kitex.NewMethodInfo(addFollowCountHandler, newAddFollowCountArgs, newAddFollowCountResult, false),
+		"SubFollowCount":          kitex.NewMethodInfo(subFollowCountHandler, newSubFollowCountArgs, newSubFollowCountResult, false),
+		"GetUserList":             kitex.NewMethodInfo(getUserListHandler, newGetUserListArgs, newGetUserListResult, false),
+		"AddUserWorkCount":        kitex.NewMethodInfo(addUserWorkCountHandler, newAddUserWorkCountArgs, newAddUserWorkCountResult, false),
+		"UpdateUserFavoriteCount": kitex.NewMethodInfo(updateUserFavoriteCountHandler, newUpdateUserFavoriteCountArgs, newUpdateUserFavoriteCountResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "user",
@@ -1115,6 +1117,312 @@ func (p *GetUserListResult) GetResult() interface{} {
 	return p.Success
 }
 
+func addUserWorkCountHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.AddUserWorkCountRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).AddUserWorkCount(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *AddUserWorkCountArgs:
+		success, err := handler.(user.UserService).AddUserWorkCount(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*AddUserWorkCountResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newAddUserWorkCountArgs() interface{} {
+	return &AddUserWorkCountArgs{}
+}
+
+func newAddUserWorkCountResult() interface{} {
+	return &AddUserWorkCountResult{}
+}
+
+type AddUserWorkCountArgs struct {
+	Req *user.AddUserWorkCountRequest
+}
+
+func (p *AddUserWorkCountArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.AddUserWorkCountRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *AddUserWorkCountArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *AddUserWorkCountArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *AddUserWorkCountArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in AddUserWorkCountArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *AddUserWorkCountArgs) Unmarshal(in []byte) error {
+	msg := new(user.AddUserWorkCountRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var AddUserWorkCountArgs_Req_DEFAULT *user.AddUserWorkCountRequest
+
+func (p *AddUserWorkCountArgs) GetReq() *user.AddUserWorkCountRequest {
+	if !p.IsSetReq() {
+		return AddUserWorkCountArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *AddUserWorkCountArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *AddUserWorkCountArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type AddUserWorkCountResult struct {
+	Success *user.AddUserWorkCountResponse
+}
+
+var AddUserWorkCountResult_Success_DEFAULT *user.AddUserWorkCountResponse
+
+func (p *AddUserWorkCountResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.AddUserWorkCountResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *AddUserWorkCountResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *AddUserWorkCountResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *AddUserWorkCountResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in AddUserWorkCountResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *AddUserWorkCountResult) Unmarshal(in []byte) error {
+	msg := new(user.AddUserWorkCountResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *AddUserWorkCountResult) GetSuccess() *user.AddUserWorkCountResponse {
+	if !p.IsSetSuccess() {
+		return AddUserWorkCountResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *AddUserWorkCountResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.AddUserWorkCountResponse)
+}
+
+func (p *AddUserWorkCountResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *AddUserWorkCountResult) GetResult() interface{} {
+	return p.Success
+}
+
+func updateUserFavoriteCountHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(user.UpdateUserFavoriteCountRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(user.UserService).UpdateUserFavoriteCount(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *UpdateUserFavoriteCountArgs:
+		success, err := handler.(user.UserService).UpdateUserFavoriteCount(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*UpdateUserFavoriteCountResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newUpdateUserFavoriteCountArgs() interface{} {
+	return &UpdateUserFavoriteCountArgs{}
+}
+
+func newUpdateUserFavoriteCountResult() interface{} {
+	return &UpdateUserFavoriteCountResult{}
+}
+
+type UpdateUserFavoriteCountArgs struct {
+	Req *user.UpdateUserFavoriteCountRequest
+}
+
+func (p *UpdateUserFavoriteCountArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(user.UpdateUserFavoriteCountRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *UpdateUserFavoriteCountArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *UpdateUserFavoriteCountArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *UpdateUserFavoriteCountArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in UpdateUserFavoriteCountArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *UpdateUserFavoriteCountArgs) Unmarshal(in []byte) error {
+	msg := new(user.UpdateUserFavoriteCountRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var UpdateUserFavoriteCountArgs_Req_DEFAULT *user.UpdateUserFavoriteCountRequest
+
+func (p *UpdateUserFavoriteCountArgs) GetReq() *user.UpdateUserFavoriteCountRequest {
+	if !p.IsSetReq() {
+		return UpdateUserFavoriteCountArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *UpdateUserFavoriteCountArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *UpdateUserFavoriteCountArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type UpdateUserFavoriteCountResult struct {
+	Success *user.UpdateUserFavoriteCountResponse
+}
+
+var UpdateUserFavoriteCountResult_Success_DEFAULT *user.UpdateUserFavoriteCountResponse
+
+func (p *UpdateUserFavoriteCountResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(user.UpdateUserFavoriteCountResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *UpdateUserFavoriteCountResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *UpdateUserFavoriteCountResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *UpdateUserFavoriteCountResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in UpdateUserFavoriteCountResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *UpdateUserFavoriteCountResult) Unmarshal(in []byte) error {
+	msg := new(user.UpdateUserFavoriteCountResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *UpdateUserFavoriteCountResult) GetSuccess() *user.UpdateUserFavoriteCountResponse {
+	if !p.IsSetSuccess() {
+		return UpdateUserFavoriteCountResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *UpdateUserFavoriteCountResult) SetSuccess(x interface{}) {
+	p.Success = x.(*user.UpdateUserFavoriteCountResponse)
+}
+
+func (p *UpdateUserFavoriteCountResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *UpdateUserFavoriteCountResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -1190,6 +1498,26 @@ func (p *kClient) GetUserList(ctx context.Context, Req *user.GetUserListRequest)
 	_args.Req = Req
 	var _result GetUserListResult
 	if err = p.c.Call(ctx, "GetUserList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) AddUserWorkCount(ctx context.Context, Req *user.AddUserWorkCountRequest) (r *user.AddUserWorkCountResponse, err error) {
+	var _args AddUserWorkCountArgs
+	_args.Req = Req
+	var _result AddUserWorkCountResult
+	if err = p.c.Call(ctx, "AddUserWorkCount", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UpdateUserFavoriteCount(ctx context.Context, Req *user.UpdateUserFavoriteCountRequest) (r *user.UpdateUserFavoriteCountResponse, err error) {
+	var _args UpdateUserFavoriteCountArgs
+	_args.Req = Req
+	var _result UpdateUserFavoriteCountResult
+	if err = p.c.Call(ctx, "UpdateUserFavoriteCount", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

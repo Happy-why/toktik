@@ -2,17 +2,24 @@ package config
 
 import "time"
 
-type Public struct {
+type Config struct {
 	Logger Logger
 	Server Server
 	Rpc    Rpc
 	Rules  Rules
+	Mysql  Mysql
+	Redis  Redis
+	Etcd   Etcd
+	Nacos  Nacos
 }
 
-type Private struct {
-	Mysql Mysql
-	Redis Redis
-	Etcd  Etcd
+type Nacos struct {
+	Namespace   string `json:"namespace"`
+	Group       string `json:"group"`
+	Addr        string `json:"addr"`
+	Port        int    `json:"port"`
+	Scheme      string `json:"scheme"`
+	ContextPath string `json:"context_path"`
 }
 
 type Server struct {

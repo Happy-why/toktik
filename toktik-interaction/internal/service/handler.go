@@ -3,18 +3,18 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/Happy-Why/toktik-common/errcode"
-	"github.com/Happy-Why/toktik-interaction/internal/dao/mysql"
-	"github.com/Happy-Why/toktik-interaction/internal/dao/redis"
-	"github.com/Happy-Why/toktik-interaction/internal/model"
-	"github.com/Happy-Why/toktik-interaction/internal/model/auto"
-	"github.com/Happy-Why/toktik-interaction/internal/repo"
-	"github.com/Happy-Why/toktik-interaction/pkg/myerr"
-	"github.com/Happy-Why/toktik-interaction/pkg/rpc/client"
-	inter "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"toktik-common/errcode"
+	"toktik-interaction/internal/dao/mysql"
+	"toktik-interaction/internal/dao/redis"
+	"toktik-interaction/internal/model"
+	"toktik-interaction/internal/model/auto"
+	"toktik-interaction/internal/repo"
+	"toktik-interaction/pkg/myerr"
+	"toktik-interaction/pkg/rpc/client"
+	inter "toktik-rpc/kitex_gen/interaction"
+	"toktik-rpc/kitex_gen/user"
 )
 
 // InteractionServiceImpl implements the last service interface defined in the IDL.
@@ -45,9 +45,9 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 		return is.respRepo.FollowSBResponse(errcode.ErrDB, err.Error(), &inter.FollowActionResponse{}), nil
 	}
 	relationInfo := &auto.Relation{
-		Model:    gorm.Model{},
-		UserId:   uint(req.MyUserId),
-		TargetId: uint(req.ToUserId),
+		BaseModel: auto.BaseModel{},
+		UserId:    uint(req.MyUserId),
+		TargetId:  uint(req.ToUserId),
 	}
 	// 进行业务
 	switch req.ActionType {
@@ -61,14 +61,6 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 				zap.L().Error("is.interactionRepo.FollowUserAction err:", zap.Error(err))
 				return err
 			}
-			//if err = is.interactionRepo.AddFollowCount(ctx, conn, uint(req.MyUserId)); err != nil {
-			//	zap.L().Error("is.interactionRepo.AddFollowCount err:", zap.Error(err))
-			//	return err
-			//}
-			//if err = is.interactionRepo.AddFollowerCount(ctx, conn, uint(req.ToUserId)); err != nil {
-			//	zap.L().Error("is.interactionRepo.AddFollowerCount err:", zap.Error(err))
-			//	return err
-			//}
 			return nil
 		}); err != nil {
 			return is.respRepo.FollowSBResponse(errcode.ErrDB, err.Error(), &inter.FollowActionResponse{}), nil
@@ -134,12 +126,12 @@ func (is *InteractionServiceImpl) FollowList(ctx context.Context, req *inter.Fol
 	if len(userIDs) == 0 {
 		return is.respRepo.FollowListResponse(errcode.StatusOK, model.MsgNil, &inter.FollowListResponse{}), nil
 	}
-	userListResp, err := client.UserClient.GetUserList(ctx, &user.GetUserListRequest{TargetId: userIDs})
+	userListResp, err := client.UserClient.GetUserList(ctx, &user.GetUserListRequest{UserId: req.UserId, TargetId: userIDs})
 	if userListResp == nil {
 		zap.L().Error("client.UserClient.GetUserList 返回空指针")
 		return is.respRepo.FollowListResponse(errcode.ErrServer, model.MsgNil, &inter.FollowListResponse{}), nil
 	}
-	if err != nil {
+	if userListResp.StatusCode != model.RpcSuccess {
 		zap.L().Error("client.UserClient.GetUserList err:", zap.Error(err))
 		return is.respRepo.FollowListResponse(errcode.CreateErr(userListResp.StatusCode, model.MsgNil), userListResp.StatusMsg, &inter.FollowListResponse{}), nil
 	}
@@ -159,12 +151,12 @@ func (is *InteractionServiceImpl) FansList(ctx context.Context, req *inter.FansL
 	if len(userIDs) == 0 {
 		return is.respRepo.FansListResponse(errcode.StatusOK, model.MsgNil, &inter.FansListResponse{}), nil
 	}
-	userListResp, err := client.UserClient.GetUserList(ctx, &user.GetUserListRequest{TargetId: userIDs})
+	userListResp, err := client.UserClient.GetUserList(ctx, &user.GetUserListRequest{UserId: req.UserId, TargetId: userIDs})
 	if userListResp == nil {
 		zap.L().Error("client.UserClient.GetUserList 返回空指针")
 		return is.respRepo.FansListResponse(errcode.ErrServer, model.MsgNil, &inter.FansListResponse{}), nil
 	}
-	if err != nil {
+	if userListResp.StatusCode != model.RpcSuccess {
 		zap.L().Error("client.UserClient.GetUserList err:", zap.Error(err))
 		return is.respRepo.FansListResponse(errcode.CreateErr(userListResp.StatusCode, model.MsgNil), userListResp.StatusMsg, &inter.FansListResponse{}), nil
 	}
@@ -186,12 +178,12 @@ func (is *InteractionServiceImpl) FriendList(ctx context.Context, req *inter.Fri
 	if len(userIDs) == 0 {
 		return is.respRepo.FriendListResponse(errcode.StatusOK, model.MsgNil, &inter.FriendListResponse{}), nil
 	}
-	userListResp, err := client.UserClient.GetUserList(ctx, &user.GetUserListRequest{TargetId: userIDs})
+	userListResp, err := client.UserClient.GetUserList(ctx, &user.GetUserListRequest{UserId: req.UserId, TargetId: userIDs})
 	if userListResp == nil {
 		zap.L().Error("client.UserClient.GetUserList 返回空指针")
 		return is.respRepo.FriendListResponse(errcode.ErrServer, model.MsgNil, &inter.FriendListResponse{}), nil
 	}
-	if err != nil {
+	if userListResp.StatusCode != model.RpcSuccess {
 		zap.L().Error("client.UserClient.GetUserList err:", zap.Error(err))
 		return is.respRepo.FriendListResponse(errcode.CreateErr(userListResp.StatusCode, model.MsgNil), userListResp.StatusMsg, &inter.FriendListResponse{}), nil
 	}
@@ -215,5 +207,37 @@ func (is *InteractionServiceImpl) IsFollowTarget(ctx context.Context, req *inter
 	resp = &inter.IsFollowTargetResponse{
 		Exist: exist,
 	}
-	return is.respRepo.IsFollowTargetResponse(errcode.StatusOK, model.MsgNil, &inter.IsFollowTargetResponse{}), nil
+	return is.respRepo.IsFollowTargetResponse(errcode.StatusOK, model.MsgNil, resp), nil
+}
+
+func (is *InteractionServiceImpl) IsFollowManyTargets(ctx context.Context, req *inter.IsFollowManyTargetsRequest) (resp *inter.IsFollowManyTargetsResponse, err error) {
+	resp = new(inter.IsFollowManyTargetsResponse)
+	for _, v := range req.TargetIds {
+		exist, err := is.interactionRepo.IsFollowUser(ctx, req.UserId, v)
+		if err != nil {
+			zap.L().Error("is.interactionRepo.IsFollowUser err:", zap.Error(err))
+			return is.respRepo.IsFollowManyTargetsResponse(errcode.ErrDB, err.Error(), &inter.IsFollowManyTargetsResponse{}), nil
+		}
+		resp.ManyExist = append(resp.ManyExist, exist)
+	}
+	return is.respRepo.IsFollowManyTargetsResponse(errcode.StatusOK, model.MsgNil, resp), nil
+}
+
+func (is *InteractionServiceImpl) IsFriend(ctx context.Context, req *inter.IsFriendRequest) (resp *inter.IsFriendResponse, err error) {
+	resp = new(inter.IsFriendResponse)
+	// 判断自己是否关注他
+	exist1, err := is.interactionRepo.IsFollowUser(ctx, req.UserId, req.TargetId)
+	if err != nil {
+		zap.L().Error("is.interactionRepo.IsFollowUser err:", zap.Error(err))
+		return is.respRepo.IsFriendResponse(errcode.ErrDB, err.Error(), &inter.IsFriendResponse{}), nil
+	}
+	exist2, err := is.interactionRepo.IsFollowUser(ctx, req.TargetId, req.UserId)
+	if err != nil {
+		zap.L().Error("is.interactionRepo.IsFollowUser err:", zap.Error(err))
+		return is.respRepo.IsFriendResponse(errcode.ErrDB, err.Error(), &inter.IsFriendResponse{}), nil
+	}
+	if exist1 && exist2 {
+		resp.IsFriend = true
+	}
+	return is.respRepo.IsFriendResponse(errcode.StatusOK, model.MsgNil, resp), nil
 }

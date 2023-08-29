@@ -1,8 +1,8 @@
 package request
 
 import (
-	"github.com/Happy-Why/toktik-api/pkg/myerr"
-	"github.com/Happy-Why/toktik-common/errcode"
+	"toktik-api/pkg/myerr"
+	"toktik-common/errcode"
 )
 
 type RegisterRequest struct {

@@ -3,11 +3,11 @@ package redis
 import (
 	"context"
 	"fmt"
-	"github.com/Happy-Why/toktik-interaction/internal/dao"
-	"github.com/Happy-Why/toktik-interaction/internal/global"
 	redis2 "github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 	"time"
+	"toktik-interaction/internal/dao"
+	"toktik-interaction/internal/global"
 )
 
 type RdbCache struct {
@@ -24,9 +24,9 @@ func NewRdbCache(rdb *redis2.Client) *RdbCache {
 
 func InitRedis() *redis2.Client {
 	rdb := redis2.NewClient(&redis2.Options{
-		Addr:     global.PvSettings.Redis.Host + ":" + global.PvSettings.Redis.Port,
-		Password: global.PvSettings.Redis.Password, // 密码
-		DB:       global.PvSettings.Redis.DB,       // 数据库
+		Addr:     global.Settings.Redis.Host + ":" + global.Settings.Redis.Port,
+		Password: global.Settings.Redis.Password, // 密码
+		DB:       global.Settings.Redis.DB,       // 数据库
 	})
 	err := rdb.Ping(context.Background()).Err()
 	if err != nil {
@@ -47,4 +47,58 @@ func (rc *RdbCache) Get(c context.Context, key string) (string, error) {
 	fmt.Println(key)
 	result, err := rc.rdb.Get(c, key).Result()
 	return result, err
+}
+
+func (rc *RdbCache) HSet(c context.Context, key string, value interface{}) error {
+	return rc.rdb.HSet(c, key, value).Err()
+}
+
+func (rc *RdbCache) HGet(c context.Context, key string, filed string) error {
+	return rc.rdb.HGet(c, key, filed).Err()
+}
+
+func (rc *RdbCache) HGetAll(c context.Context, key string) (map[string]string, error) {
+	return rc.rdb.HGetAll(c, key).Result()
+}
+
+func (rc *RdbCache) IncrHMCount(c context.Context, key, field string, incr int64) (int64, error) {
+	return rc.rdb.HIncrBy(c, key, field, incr).Result()
+}
+
+func (rc *RdbCache) SAdd(c context.Context, key string, value interface{}) (int64, error) {
+	// 返回存入数据的数量
+	return rc.rdb.SAdd(c, key, value).Result()
+}
+
+func (rc *RdbCache) SGetAll(c context.Context, key string) ([]string, error) {
+	return rc.rdb.SMembers(c, key).Result()
+}
+
+func (rc *RdbCache) SDel(c context.Context, key string, value interface{}) (int64, error) {
+	return rc.rdb.SRem(c, key, value).Result()
+}
+
+func (rc *RdbCache) SIsExist(c context.Context, key string, value interface{}) (bool, error) {
+	return rc.rdb.SIsMember(c, key, value).Result()
+}
+
+func (rc *RdbCache) ZSet(c context.Context, key string, score []float64, member []interface{}) (int64, error) {
+	// 返回存入数据的数量
+	z := make([]*redis2.Z, len(score))
+	for i := 0; i < len(score); i++ {
+		z = append(z, &redis2.Z{Score: score[i], Member: member[i]})
+	}
+	return rc.rdb.ZAdd(c, key, z...).Result()
+}
+
+func (rc *RdbCache) ZGetRange(c context.Context, key string, min, max string, offset, count int64) ([]string, error) {
+	return rc.rdb.ZRevRangeByScore(c, key, &redis2.ZRangeBy{Min: min, Max: max, Offset: offset, Count: count}).Result()
+}
+
+func (rc *RdbCache) LPush(c context.Context, key string, values ...interface{}) (int64, error) {
+	return rc.rdb.LPush(c, key, values).Result()
+}
+
+func (rc *RdbCache) LPopCount(c context.Context, key string, count int) ([]string, error) {
+	return rc.rdb.LPopCount(c, key, count).Result()
 }

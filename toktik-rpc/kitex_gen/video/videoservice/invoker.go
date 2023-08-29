@@ -3,8 +3,8 @@
 package videoservice
 
 import (
-	video "github.com/Happy-Why/toktik-rpc/kitex_gen/video"
 	server "github.com/cloudwego/kitex/server"
+	video "toktik-rpc/kitex_gen/video"
 )
 
 // NewInvoker creates a server.Invoker with the given handler and options.

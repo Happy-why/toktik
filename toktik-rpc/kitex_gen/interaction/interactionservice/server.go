@@ -2,8 +2,8 @@
 package interactionservice
 
 import (
-	interaction "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
 	server "github.com/cloudwego/kitex/server"
+	interaction "toktik-rpc/kitex_gen/interaction"
 )
 
 // NewServer creates a server.Server with the given handler and options.

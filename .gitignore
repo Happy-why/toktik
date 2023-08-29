@@ -19,8 +19,11 @@
 
 # Go workspace file
 go.work
+go.work.sum
 
 *.mp4
+
+.idea
 
 ./toktik-video/config/private.yaml
 ./toktik-api/config/private.yaml

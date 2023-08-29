@@ -1,10 +1,10 @@
 package user
 
 import (
-	"github.com/Happy-Why/toktik-api/pkg/middleware"
-	"github.com/Happy-Why/toktik-api/pkg/router"
 	"github.com/gin-gonic/gin"
 	"log"
+	"toktik-api/pkg/middleware"
+	"toktik-api/pkg/router"
 )
 
 type RouterUser struct {

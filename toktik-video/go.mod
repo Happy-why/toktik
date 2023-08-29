@@ -1,3 +1,3 @@
-module github.com/Happy-Why/toktik-video
+module toktik-video
 
 go 1.19

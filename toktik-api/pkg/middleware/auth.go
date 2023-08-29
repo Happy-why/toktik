@@ -1,14 +1,14 @@
 package middleware
 
 import (
-	"github.com/Happy-Why/toktik-api/internal/api"
-	"github.com/Happy-Why/toktik-api/internal/global"
-	"github.com/Happy-Why/toktik-common/errcode"
-	"github.com/Happy-Why/toktik-common/response"
-	"github.com/Happy-Why/toktik-common/token"
-	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"toktik-api/internal/api"
+	"toktik-api/internal/global"
+	"toktik-common/errcode"
+	"toktik-common/response"
+	"toktik-common/token"
+	user "toktik-rpc/kitex_gen/user"
 )
 
 const (

@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
-	"github.com/Happy-Why/toktik-user/internal/model/auto"
+	"toktik-user/internal/model/auto"
 )
 
 type UserRClient struct {
@@ -49,5 +49,30 @@ func (u *UserRClient) SubFollowCount(c context.Context, key string) error {
 
 func (u *UserRClient) SubFollowerCount(c context.Context, key string) error {
 	_, err := u.rClient.IncrHMCount(c, key, auto.FollowerCount, -1)
+	return err
+}
+
+func (u *UserRClient) AddWorkCount(c context.Context, key string) error {
+	_, err := u.rClient.IncrHMCount(c, key, auto.WorkCount, 1)
+	return err
+}
+
+func (u *UserRClient) AddFavoriteCount(c context.Context, key string) error {
+	_, err := u.rClient.IncrHMCount(c, key, auto.FavoriteCount, 1)
+	return err
+}
+
+func (u *UserRClient) AddTotalFavoriteCount(c context.Context, key string) error {
+	_, err := u.rClient.IncrHMCount(c, key, auto.TotalFavorited, 1)
+	return err
+}
+
+func (u *UserRClient) SubFavoriteCount(c context.Context, key string) error {
+	_, err := u.rClient.IncrHMCount(c, key, auto.FavoriteCount, -1)
+	return err
+}
+
+func (u *UserRClient) SubTotalFavoriteCount(c context.Context, key string) error {
+	_, err := u.rClient.IncrHMCount(c, key, auto.TotalFavorited, -1)
 	return err
 }

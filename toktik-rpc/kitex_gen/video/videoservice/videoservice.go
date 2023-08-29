@@ -5,11 +5,11 @@ package videoservice
 import (
 	"context"
 	"fmt"
-	video "github.com/Happy-Why/toktik-rpc/kitex_gen/video"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 	streaming "github.com/cloudwego/kitex/pkg/streaming"
 	proto "google.golang.org/protobuf/proto"
+	video "toktik-rpc/kitex_gen/video"
 )
 
 func serviceInfo() *kitex.ServiceInfo {

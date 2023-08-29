@@ -5,11 +5,11 @@ package interactionservice
 import (
 	"context"
 	"fmt"
-	interaction "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 	streaming "github.com/cloudwego/kitex/pkg/streaming"
 	proto "google.golang.org/protobuf/proto"
+	interaction "toktik-rpc/kitex_gen/interaction"
 )
 
 func serviceInfo() *kitex.ServiceInfo {
@@ -22,11 +22,13 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "InteractionService"
 	handlerType := (*interaction.InteractionService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"FollowSB":       kitex.NewMethodInfo(followSBHandler, newFollowSBArgs, newFollowSBResult, false),
-		"FollowList":     kitex.NewMethodInfo(followListHandler, newFollowListArgs, newFollowListResult, false),
-		"FansList":       kitex.NewMethodInfo(fansListHandler, newFansListArgs, newFansListResult, false),
-		"FriendList":     kitex.NewMethodInfo(friendListHandler, newFriendListArgs, newFriendListResult, false),
-		"IsFollowTarget": kitex.NewMethodInfo(isFollowTargetHandler, newIsFollowTargetArgs, newIsFollowTargetResult, false),
+		"FollowSB":            kitex.NewMethodInfo(followSBHandler, newFollowSBArgs, newFollowSBResult, false),
+		"FollowList":          kitex.NewMethodInfo(followListHandler, newFollowListArgs, newFollowListResult, false),
+		"FansList":            kitex.NewMethodInfo(fansListHandler, newFansListArgs, newFansListResult, false),
+		"FriendList":          kitex.NewMethodInfo(friendListHandler, newFriendListArgs, newFriendListResult, false),
+		"IsFollowTarget":      kitex.NewMethodInfo(isFollowTargetHandler, newIsFollowTargetArgs, newIsFollowTargetResult, false),
+		"IsFollowManyTargets": kitex.NewMethodInfo(isFollowManyTargetsHandler, newIsFollowManyTargetsArgs, newIsFollowManyTargetsResult, false),
+		"IsFriend":            kitex.NewMethodInfo(isFriendHandler, newIsFriendArgs, newIsFriendResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "interaction",
@@ -807,6 +809,312 @@ func (p *IsFollowTargetResult) GetResult() interface{} {
 	return p.Success
 }
 
+func isFollowManyTargetsHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(interaction.IsFollowManyTargetsRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(interaction.InteractionService).IsFollowManyTargets(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *IsFollowManyTargetsArgs:
+		success, err := handler.(interaction.InteractionService).IsFollowManyTargets(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*IsFollowManyTargetsResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newIsFollowManyTargetsArgs() interface{} {
+	return &IsFollowManyTargetsArgs{}
+}
+
+func newIsFollowManyTargetsResult() interface{} {
+	return &IsFollowManyTargetsResult{}
+}
+
+type IsFollowManyTargetsArgs struct {
+	Req *interaction.IsFollowManyTargetsRequest
+}
+
+func (p *IsFollowManyTargetsArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(interaction.IsFollowManyTargetsRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *IsFollowManyTargetsArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *IsFollowManyTargetsArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *IsFollowManyTargetsArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in IsFollowManyTargetsArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *IsFollowManyTargetsArgs) Unmarshal(in []byte) error {
+	msg := new(interaction.IsFollowManyTargetsRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var IsFollowManyTargetsArgs_Req_DEFAULT *interaction.IsFollowManyTargetsRequest
+
+func (p *IsFollowManyTargetsArgs) GetReq() *interaction.IsFollowManyTargetsRequest {
+	if !p.IsSetReq() {
+		return IsFollowManyTargetsArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *IsFollowManyTargetsArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *IsFollowManyTargetsArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type IsFollowManyTargetsResult struct {
+	Success *interaction.IsFollowManyTargetsResponse
+}
+
+var IsFollowManyTargetsResult_Success_DEFAULT *interaction.IsFollowManyTargetsResponse
+
+func (p *IsFollowManyTargetsResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(interaction.IsFollowManyTargetsResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *IsFollowManyTargetsResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *IsFollowManyTargetsResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *IsFollowManyTargetsResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in IsFollowManyTargetsResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *IsFollowManyTargetsResult) Unmarshal(in []byte) error {
+	msg := new(interaction.IsFollowManyTargetsResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *IsFollowManyTargetsResult) GetSuccess() *interaction.IsFollowManyTargetsResponse {
+	if !p.IsSetSuccess() {
+		return IsFollowManyTargetsResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *IsFollowManyTargetsResult) SetSuccess(x interface{}) {
+	p.Success = x.(*interaction.IsFollowManyTargetsResponse)
+}
+
+func (p *IsFollowManyTargetsResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *IsFollowManyTargetsResult) GetResult() interface{} {
+	return p.Success
+}
+
+func isFriendHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(interaction.IsFriendRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(interaction.InteractionService).IsFriend(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *IsFriendArgs:
+		success, err := handler.(interaction.InteractionService).IsFriend(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*IsFriendResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newIsFriendArgs() interface{} {
+	return &IsFriendArgs{}
+}
+
+func newIsFriendResult() interface{} {
+	return &IsFriendResult{}
+}
+
+type IsFriendArgs struct {
+	Req *interaction.IsFriendRequest
+}
+
+func (p *IsFriendArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(interaction.IsFriendRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *IsFriendArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *IsFriendArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *IsFriendArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in IsFriendArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *IsFriendArgs) Unmarshal(in []byte) error {
+	msg := new(interaction.IsFriendRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var IsFriendArgs_Req_DEFAULT *interaction.IsFriendRequest
+
+func (p *IsFriendArgs) GetReq() *interaction.IsFriendRequest {
+	if !p.IsSetReq() {
+		return IsFriendArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *IsFriendArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *IsFriendArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type IsFriendResult struct {
+	Success *interaction.IsFriendResponse
+}
+
+var IsFriendResult_Success_DEFAULT *interaction.IsFriendResponse
+
+func (p *IsFriendResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(interaction.IsFriendResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *IsFriendResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *IsFriendResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *IsFriendResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in IsFriendResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *IsFriendResult) Unmarshal(in []byte) error {
+	msg := new(interaction.IsFriendResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *IsFriendResult) GetSuccess() *interaction.IsFriendResponse {
+	if !p.IsSetSuccess() {
+		return IsFriendResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *IsFriendResult) SetSuccess(x interface{}) {
+	p.Success = x.(*interaction.IsFriendResponse)
+}
+
+func (p *IsFriendResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *IsFriendResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -862,6 +1170,26 @@ func (p *kClient) IsFollowTarget(ctx context.Context, Req *interaction.IsFollowT
 	_args.Req = Req
 	var _result IsFollowTargetResult
 	if err = p.c.Call(ctx, "IsFollowTarget", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) IsFollowManyTargets(ctx context.Context, Req *interaction.IsFollowManyTargetsRequest) (r *interaction.IsFollowManyTargetsResponse, err error) {
+	var _args IsFollowManyTargetsArgs
+	_args.Req = Req
+	var _result IsFollowManyTargetsResult
+	if err = p.c.Call(ctx, "IsFollowManyTargets", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) IsFriend(ctx context.Context, Req *interaction.IsFriendRequest) (r *interaction.IsFriendResponse, err error) {
+	var _args IsFriendArgs
+	_args.Req = Req
+	var _result IsFriendResult
+	if err = p.c.Call(ctx, "IsFriend", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

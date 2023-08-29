@@ -615,6 +615,11 @@ func (x *GetUserListRequest) FastRead(buf []byte, _type int8, number int32) (off
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -629,6 +634,11 @@ ReadFieldError:
 }
 
 func (x *GetUserListRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *GetUserListRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	offset, err = fastpb.ReadList(buf, _type,
 		func(buf []byte, _type int8) (n int, err error) {
 			var v int64
@@ -690,6 +700,146 @@ func (x *GetUserListResponse) fastReadField3(buf []byte, _type int8) (offset int
 	}
 	x.UserList = append(x.UserList, &v)
 	return offset, nil
+}
+
+func (x *AddUserWorkCountRequest) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_AddUserWorkCountRequest[number], err)
+}
+
+func (x *AddUserWorkCountRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *AddUserWorkCountResponse) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_AddUserWorkCountResponse[number], err)
+}
+
+func (x *AddUserWorkCountResponse) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.StatusCode, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *AddUserWorkCountResponse) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.StatusMsg, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *UpdateUserFavoriteCountRequest) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_UpdateUserFavoriteCountRequest[number], err)
+}
+
+func (x *UpdateUserFavoriteCountRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *UpdateUserFavoriteCountRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.AuthorId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *UpdateUserFavoriteCountRequest) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.ActionType, offset, err = fastpb.ReadInt32(buf, _type)
+	return offset, err
+}
+
+func (x *UpdateUserFavoriteCountResponse) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_UpdateUserFavoriteCountResponse[number], err)
+}
+
+func (x *UpdateUserFavoriteCountResponse) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.StatusCode, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *UpdateUserFavoriteCountResponse) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.StatusMsg, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
 }
 
 func (x *RegisterRequest) FastWrite(buf []byte) (offset int) {
@@ -1139,14 +1289,23 @@ func (x *GetUserListRequest) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
 func (x *GetUserListRequest) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *GetUserListRequest) fastWriteField2(buf []byte) (offset int) {
 	if len(x.TargetId) == 0 {
 		return offset
 	}
-	offset += fastpb.WriteListPacked(buf[offset:], 1, len(x.GetTargetId()),
+	offset += fastpb.WriteListPacked(buf[offset:], 2, len(x.GetTargetId()),
 		func(buf []byte, numTagOrKey, numIdxOrVal int32) int {
 			offset := 0
 			offset += fastpb.WriteInt64(buf[offset:], numTagOrKey, x.GetTargetId()[numIdxOrVal])
@@ -1188,6 +1347,106 @@ func (x *GetUserListResponse) fastWriteField3(buf []byte) (offset int) {
 	for i := range x.GetUserList() {
 		offset += fastpb.WriteMessage(buf[offset:], 3, x.GetUserList()[i])
 	}
+	return offset
+}
+
+func (x *AddUserWorkCountRequest) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	return offset
+}
+
+func (x *AddUserWorkCountRequest) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *AddUserWorkCountResponse) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *AddUserWorkCountResponse) fastWriteField1(buf []byte) (offset int) {
+	if x.StatusCode == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetStatusCode())
+	return offset
+}
+
+func (x *AddUserWorkCountResponse) fastWriteField2(buf []byte) (offset int) {
+	if x.StatusMsg == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetStatusMsg())
+	return offset
+}
+
+func (x *UpdateUserFavoriteCountRequest) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
+	return offset
+}
+
+func (x *UpdateUserFavoriteCountRequest) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *UpdateUserFavoriteCountRequest) fastWriteField2(buf []byte) (offset int) {
+	if x.AuthorId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 2, x.GetAuthorId())
+	return offset
+}
+
+func (x *UpdateUserFavoriteCountRequest) fastWriteField3(buf []byte) (offset int) {
+	if x.ActionType == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt32(buf[offset:], 3, x.GetActionType())
+	return offset
+}
+
+func (x *UpdateUserFavoriteCountResponse) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *UpdateUserFavoriteCountResponse) fastWriteField1(buf []byte) (offset int) {
+	if x.StatusCode == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetStatusCode())
+	return offset
+}
+
+func (x *UpdateUserFavoriteCountResponse) fastWriteField2(buf []byte) (offset int) {
+	if x.StatusMsg == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetStatusMsg())
 	return offset
 }
 
@@ -1638,14 +1897,23 @@ func (x *GetUserListRequest) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
 func (x *GetUserListRequest) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetUserId())
+	return n
+}
+
+func (x *GetUserListRequest) sizeField2() (n int) {
 	if len(x.TargetId) == 0 {
 		return n
 	}
-	n += fastpb.SizeListPacked(1, len(x.GetTargetId()),
+	n += fastpb.SizeListPacked(2, len(x.GetTargetId()),
 		func(numTagOrKey, numIdxOrVal int32) int {
 			n := 0
 			n += fastpb.SizeInt64(numTagOrKey, x.GetTargetId()[numIdxOrVal])
@@ -1687,6 +1955,106 @@ func (x *GetUserListResponse) sizeField3() (n int) {
 	for i := range x.GetUserList() {
 		n += fastpb.SizeMessage(3, x.GetUserList()[i])
 	}
+	return n
+}
+
+func (x *AddUserWorkCountRequest) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	return n
+}
+
+func (x *AddUserWorkCountRequest) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetUserId())
+	return n
+}
+
+func (x *AddUserWorkCountResponse) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *AddUserWorkCountResponse) sizeField1() (n int) {
+	if x.StatusCode == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetStatusCode())
+	return n
+}
+
+func (x *AddUserWorkCountResponse) sizeField2() (n int) {
+	if x.StatusMsg == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetStatusMsg())
+	return n
+}
+
+func (x *UpdateUserFavoriteCountRequest) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	n += x.sizeField3()
+	return n
+}
+
+func (x *UpdateUserFavoriteCountRequest) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetUserId())
+	return n
+}
+
+func (x *UpdateUserFavoriteCountRequest) sizeField2() (n int) {
+	if x.AuthorId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(2, x.GetAuthorId())
+	return n
+}
+
+func (x *UpdateUserFavoriteCountRequest) sizeField3() (n int) {
+	if x.ActionType == 0 {
+		return n
+	}
+	n += fastpb.SizeInt32(3, x.GetActionType())
+	return n
+}
+
+func (x *UpdateUserFavoriteCountResponse) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *UpdateUserFavoriteCountResponse) sizeField1() (n int) {
+	if x.StatusCode == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetStatusCode())
+	return n
+}
+
+func (x *UpdateUserFavoriteCountResponse) sizeField2() (n int) {
+	if x.StatusMsg == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetStatusMsg())
 	return n
 }
 
@@ -1768,11 +2136,32 @@ var fieldIDToName_SubFollowCountResponse = map[int32]string{
 }
 
 var fieldIDToName_GetUserListRequest = map[int32]string{
-	1: "TargetId",
+	1: "UserId",
+	2: "TargetId",
 }
 
 var fieldIDToName_GetUserListResponse = map[int32]string{
 	1: "StatusCode",
 	2: "StatusMsg",
 	3: "UserList",
+}
+
+var fieldIDToName_AddUserWorkCountRequest = map[int32]string{
+	1: "UserId",
+}
+
+var fieldIDToName_AddUserWorkCountResponse = map[int32]string{
+	1: "StatusCode",
+	2: "StatusMsg",
+}
+
+var fieldIDToName_UpdateUserFavoriteCountRequest = map[int32]string{
+	1: "UserId",
+	2: "AuthorId",
+	3: "ActionType",
+}
+
+var fieldIDToName_UpdateUserFavoriteCountResponse = map[int32]string{
+	1: "StatusCode",
+	2: "StatusMsg",
 }

@@ -4,9 +4,9 @@ package interactionservice
 
 import (
 	"context"
-	interaction "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
+	interaction "toktik-rpc/kitex_gen/interaction"
 )
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
@@ -16,6 +16,8 @@ type Client interface {
 	FansList(ctx context.Context, Req *interaction.FansListRequest, callOptions ...callopt.Option) (r *interaction.FansListResponse, err error)
 	FriendList(ctx context.Context, Req *interaction.FriendListRequest, callOptions ...callopt.Option) (r *interaction.FriendListResponse, err error)
 	IsFollowTarget(ctx context.Context, Req *interaction.IsFollowTargetRequest, callOptions ...callopt.Option) (r *interaction.IsFollowTargetResponse, err error)
+	IsFollowManyTargets(ctx context.Context, Req *interaction.IsFollowManyTargetsRequest, callOptions ...callopt.Option) (r *interaction.IsFollowManyTargetsResponse, err error)
+	IsFriend(ctx context.Context, Req *interaction.IsFriendRequest, callOptions ...callopt.Option) (r *interaction.IsFriendResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -70,4 +72,14 @@ func (p *kInteractionServiceClient) FriendList(ctx context.Context, Req *interac
 func (p *kInteractionServiceClient) IsFollowTarget(ctx context.Context, Req *interaction.IsFollowTargetRequest, callOptions ...callopt.Option) (r *interaction.IsFollowTargetResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.IsFollowTarget(ctx, Req)
+}
+
+func (p *kInteractionServiceClient) IsFollowManyTargets(ctx context.Context, Req *interaction.IsFollowManyTargetsRequest, callOptions ...callopt.Option) (r *interaction.IsFollowManyTargetsResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.IsFollowManyTargets(ctx, Req)
+}
+
+func (p *kInteractionServiceClient) IsFriend(ctx context.Context, Req *interaction.IsFriendRequest, callOptions ...callopt.Option) (r *interaction.IsFriendResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.IsFriend(ctx, Req)
 }

@@ -4,9 +4,9 @@ package videoservice
 
 import (
 	"context"
-	video "github.com/Happy-Why/toktik-rpc/kitex_gen/video"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
+	video "toktik-rpc/kitex_gen/video"
 )
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.

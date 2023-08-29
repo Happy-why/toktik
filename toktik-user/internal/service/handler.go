@@ -2,23 +2,25 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/Happy-Why/toktik-common/errcode"
-	"github.com/Happy-Why/toktik-common/utils"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/user"
-	"github.com/Happy-Why/toktik-user/internal/dao/mysql"
-	"github.com/Happy-Why/toktik-user/internal/dao/redis"
-	"github.com/Happy-Why/toktik-user/internal/global"
-	"github.com/Happy-Why/toktik-user/internal/model"
-	"github.com/Happy-Why/toktik-user/internal/model/auto"
-	"github.com/Happy-Why/toktik-user/internal/repo"
-	"github.com/Happy-Why/toktik-user/pkg/myerr"
-	"github.com/Happy-Why/toktik-user/pkg/rpc/client"
+	redis2 "github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"strconv"
 	"time"
+	"toktik-common/errcode"
+	"toktik-common/utils"
+	"toktik-rpc/kitex_gen/interaction"
+	"toktik-rpc/kitex_gen/user"
+	"toktik-user/internal/dao/mysql"
+	"toktik-user/internal/dao/redis"
+	"toktik-user/internal/global"
+	"toktik-user/internal/model"
+	"toktik-user/internal/model/auto"
+	"toktik-user/internal/repo"
+	"toktik-user/pkg/myerr"
+	"toktik-user/pkg/rpc/client"
 )
 
 // UserServiceImpl implements the last service interface defined in the IDL.
@@ -62,12 +64,12 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReques
 		BaseModel:       auto.BaseModel{ID: uint(userID)},
 		Username:        req.Username,
 		Password:        hashPassword,
-		Avatar:          global.PbSettings.Rules.DefaultUserAvatar,
+		Avatar:          global.Settings.Rules.DefaultUserAvatar,
 		IsFollow:        false,
 		FollowCount:     0,
 		FollowerCount:   0,
-		BackgroundImage: global.PbSettings.Rules.DefaultUserBackGroundImage,
-		Signature:       global.PbSettings.Rules.DefaultUserSignature,
+		BackgroundImage: global.Settings.Rules.DefaultUserBackGroundImage,
+		Signature:       global.Settings.Rules.DefaultUserSignature,
 		TotalFavorited:  0,
 		WorkCount:       0,
 		FavoriteCount:   0,
@@ -92,7 +94,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReques
 	// 将 token 中的 content 加入缓存，以便身份校验时的判断身份
 	sss := make(chan struct{}, 0)
 	go func() {
-		if err := s.cache.Put(ctx, model.TypeUserToken+strconv.Itoa(int(userInfo.ID)), content, global.PvSettings.Token.UserTokenExp); err != nil {
+		if err := s.cache.Put(ctx, model.TypeUserToken+strconv.Itoa(int(userInfo.ID)), content, global.Settings.Token.UserTokenExp); err != nil {
 			zap.L().Error("s.cache.Put err:", zap.Error(err))
 			return
 		}
@@ -132,7 +134,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginRequest) (re
 	//将 token 中的 content 加入缓存，以便身份校验时的判断身份
 	sss := make(chan struct{}, 0)
 	go func() {
-		if err := s.cache.Put(c, model.TypeUserToken+strconv.Itoa(int(userInfo.ID)), content, global.PvSettings.Token.UserTokenExp); err != nil {
+		if err := s.cache.Put(c, model.TypeUserToken+strconv.Itoa(int(userInfo.ID)), content, global.Settings.Token.UserTokenExp); err != nil {
 			zap.L().Error("s.cache.Put err:", zap.Error(err))
 			return
 		}
@@ -149,11 +151,12 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginRequest) (re
 }
 
 func (s *UserServiceImpl) TokenVerify(ctx context.Context, req *user.TokenVerifyRequest) (resp *user.TokenVerifyResponse, err error) {
-	c, cancel := context.WithTimeout(ctx, 200*time.Second)
-	defer cancel()
 	// 从缓存中查询 token 中的 content，校验身份
-	content, err := s.cache.Get(c, model.TypeUserToken+strconv.Itoa(int(req.UserId)))
+	content, err := s.cache.Get(ctx, model.TypeUserToken+strconv.Itoa(int(req.UserId)))
 	fmt.Println("content:", content)
+	if err == redis2.Nil {
+		return nil, errors.New("查无此人")
+	}
 	if err != nil {
 		zap.L().Error("TokenVerify cache get user error", zap.Error(err))
 		return nil, err
@@ -275,7 +278,7 @@ func (s *UserServiceImpl) AddFollowCount(ctx context.Context, req *user.AddFollo
 func (s *UserServiceImpl) SubFollowCount(ctx context.Context, req *user.SubFollowCountRequest) (resp *user.SubFollowCountResponse, err error) {
 	// 1.校验业务逻辑
 	// 2.处理业务
-	// 执行事务，对当前userId_follow_count+1，对targetId_follower_count+1
+	// 执行事务，对当前userId_follow_count-1，对targetId_follower_count-1
 	if err = s.transaction.Action(func(conn mysql.DbConn) error {
 		if err = s.userRepo.SubFollowCount(ctx, conn, uint(req.UserId)); err != nil {
 			zap.L().Error("s.userRepo.SubFollowCount err:", zap.Error(err))
@@ -314,13 +317,25 @@ func (s *UserServiceImpl) GetUserList(ctx context.Context, req *user.GetUserList
 		zap.L().Error("s.userRepo.GetUserList err:", zap.Error(err))
 		return s.respRepo.GetUserListResponse(errcode.ErrDB, err.Error(), &user.GetUserListResponse{}), nil
 	}
-	for _, v := range userInfos {
+	isFollowResp, _ := client.InteractionClient.IsFollowManyTargets(ctx, &interaction.IsFollowManyTargetsRequest{
+		UserId:    req.UserId,
+		TargetIds: req.TargetId,
+	})
+	if isFollowResp == nil {
+		zap.L().Error("client.InteractionClient.IsFollowManyTargets 返回空指针")
+		return s.respRepo.GetUserListResponse(errcode.ErrServer, model.MsgNil, &user.GetUserListResponse{}), nil
+	}
+	if isFollowResp.StatusCode != model.RpcSuccess {
+		zap.L().Error("client.InteractionClient.IsFollowManyTargets err:", zap.Error(err))
+		return s.respRepo.GetUserListResponse(errcode.CreateErr(isFollowResp.StatusCode, model.MsgNil), isFollowResp.StatusMsg, &user.GetUserListResponse{}), nil
+	}
+	for i, v := range userInfos {
 		resp.UserList = append(resp.UserList, &user.User{
 			Id:              int64(v.ID),
 			Name:            v.Username,
 			FollowCount:     &v.FollowCount,
 			FollowerCount:   &v.FollowerCount,
-			IsFollow:        v.IsFollow,
+			IsFollow:        isFollowResp.ManyExist[i],
 			Avatar:          &v.Avatar,
 			BackgroundImage: &v.BackgroundImage,
 			Signature:       &v.Signature,
@@ -330,4 +345,52 @@ func (s *UserServiceImpl) GetUserList(ctx context.Context, req *user.GetUserList
 		})
 	}
 	return s.respRepo.GetUserListResponse(errcode.StatusOK, model.MsgNil, resp), nil
+}
+
+func (s *UserServiceImpl) AddUserWorkCount(ctx context.Context, req *user.AddUserWorkCountRequest) (resp *user.AddUserWorkCountResponse, err error) {
+	// 1.校验业务逻辑
+	// 2.处理业务
+	// 将redis中信息 更改
+	userKey := auto.CreateUserKey(uint(req.UserId))
+	err = s.rClient.AddWorkCount(ctx, userKey)
+	if err != nil {
+		zap.L().Error("s.rClient.AddFollowCount err:", zap.Error(err))
+		return s.respRepo.AddUserWorkCountResponse(errcode.ErrRedis, err.Error(), &user.AddUserWorkCountResponse{}), nil
+	}
+	//TODO 数据库更改交给定时任务
+	return s.respRepo.AddUserWorkCountResponse(errcode.StatusOK, model.MsgNil, &user.AddUserWorkCountResponse{}), nil
+}
+
+func (s *UserServiceImpl) UpdateUserFavoriteCount(ctx context.Context, req *user.UpdateUserFavoriteCountRequest) (resp *user.UpdateUserFavoriteCountResponse, err error) {
+	// 1.校验业务逻辑
+	// 2.处理业务
+	// 将redis中信息 更改
+	userKey := auto.CreateUserKey(uint(req.UserId))
+	authorKey := auto.CreateUserKey(uint(req.AuthorId))
+	switch req.ActionType {
+	case model.FAVORITE:
+		err = s.rClient.AddFavoriteCount(ctx, userKey)
+		if err != nil {
+			zap.L().Error("s.rClient.AddFavoriteCount err:", zap.Error(err))
+			return s.respRepo.UpdateUserFavoriteCountResponse(errcode.ErrRedis, err.Error(), &user.UpdateUserFavoriteCountResponse{}), nil
+		}
+		err = s.rClient.AddTotalFavoriteCount(ctx, authorKey)
+		if err != nil {
+			zap.L().Error("s.rClient.AddTotalFavoriteCount err:", zap.Error(err))
+			return s.respRepo.UpdateUserFavoriteCountResponse(errcode.ErrRedis, err.Error(), &user.UpdateUserFavoriteCountResponse{}), nil
+		}
+	case model.CANCELFAVORITE:
+		err = s.rClient.SubFavoriteCount(ctx, userKey)
+		if err != nil {
+			zap.L().Error("s.rClient.SubFavoriteCount err:", zap.Error(err))
+			return s.respRepo.UpdateUserFavoriteCountResponse(errcode.ErrRedis, err.Error(), &user.UpdateUserFavoriteCountResponse{}), nil
+		}
+		err = s.rClient.SubTotalFavoriteCount(ctx, authorKey)
+		if err != nil {
+			zap.L().Error("s.rClient.SubTotalFavoriteCount err:", zap.Error(err))
+			return s.respRepo.UpdateUserFavoriteCountResponse(errcode.ErrRedis, err.Error(), &user.UpdateUserFavoriteCountResponse{}), nil
+		}
+	}
+	return s.respRepo.UpdateUserFavoriteCountResponse(errcode.StatusOK, model.MsgNil, &user.UpdateUserFavoriteCountResponse{}), nil
+
 }

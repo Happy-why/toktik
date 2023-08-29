@@ -1,3 +1,3 @@
-module github.com/Happy-Why/toktik-rpc
+module toktik-rpc
 
 go 1.19

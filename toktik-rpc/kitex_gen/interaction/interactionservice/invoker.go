@@ -3,8 +3,8 @@
 package interactionservice
 
 import (
-	interaction "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
 	server "github.com/cloudwego/kitex/server"
+	interaction "toktik-rpc/kitex_gen/interaction"
 )
 
 // NewInvoker creates a server.Invoker with the given handler and options.

@@ -1,8 +1,8 @@
 package setting
 
 import (
-	"github.com/Happy-Why/toktik-common/utils"
-	"github.com/Happy-Why/toktik-user/internal/global"
+	"toktik-common/utils"
+	"toktik-user/internal/global"
 )
 
 func init() {

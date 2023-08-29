@@ -22,22 +22,3 @@ func InitRouter(r *gin.Engine) {
 		root.Route(r)
 	}
 }
-
-//func RegisterRPC() server.Server {
-//	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8881")
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	//svr := user.NewServer(
-//	//	new(service.UserServiceImpl),
-//	//	server.WithServiceAddr(addr),
-//	//)
-//	go func() {
-//		err = svr.Run()
-//		if err != nil {
-//			panic(err)
-//		}
-//	}()
-//	return svr
-//}

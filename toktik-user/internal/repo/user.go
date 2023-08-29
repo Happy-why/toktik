@@ -2,8 +2,8 @@ package repo
 
 import (
 	"context"
-	"github.com/Happy-Why/toktik-user/internal/dao/mysql"
-	"github.com/Happy-Why/toktik-user/internal/model/auto"
+	"toktik-user/internal/dao/mysql"
+	"toktik-user/internal/model/auto"
 )
 
 type UserRepo interface {

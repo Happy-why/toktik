@@ -1,0 +1,53 @@
+2023-08-13T01:44:31.663+0800	ERROR	service/handler.go:143	TokenVerify cache get user error	{"error": "context deadline exceeded"}
+2023-08-13T19:29:38.683+0800	ERROR	service/handler.go:155	s.userRepo.GetUserInfoByUserID err:	{"error": "sql: Scan error on column index 10, name \"total_favorited\": converting driver.Value type []uint8 (\"\") to a int64: invalid syntax"}
+2023-08-13T19:30:05.399+0800	ERROR	service/handler.go:155	s.userRepo.GetUserInfoByUserID err:	{"error": "sql: Scan error on column index 10, name \"total_favorited\": converting driver.Value type []uint8 (\"\") to a int64: invalid syntax"}
+2023-08-13T19:32:24.574+0800	ERROR	service/handler.go:82	s.cache.Put err:	{"error": "context canceled"}
+2023-08-13T19:32:28.649+0800	ERROR	service/handler.go:82	s.cache.Put err:	{"error": "context canceled"}
+2023-08-13T19:32:31.150+0800	ERROR	service/handler.go:82	s.cache.Put err:	{"error": "context canceled"}
+2023-08-13T19:32:33.844+0800	ERROR	service/handler.go:82	s.cache.Put err:	{"error": "context canceled"}
+2023-08-13T19:32:36.500+0800	ERROR	service/handler.go:82	s.cache.Put err:	{"error": "context canceled"}
+2023-08-13T19:33:04.388+0800	ERROR	service/handler.go:143	TokenVerify cache get user error	{"error": "redis: nil"}
+2023-08-13T19:58:29.142+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:46.259+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:47.573+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:48.564+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:49.419+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:50.219+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:51.241+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:52.051+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:52.916+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:53.690+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:54.520+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:55.317+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:56.185+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T19:58:57.110+0800	ERROR	service/handler.go:157	s.userRepo.GetUserInfoByUserID err:	{"error": "record not found"}
+2023-08-13T22:52:07.583+0800	ERROR	service/handler.go:103	s.userRepo.GetUserByUsername err:	{"error": "record not found"}
+2023-08-23T02:41:38.050+0800	ERROR	service/handler.go:169	s.rClient.HGetUserInfo err:	{"error": "json: cannot unmarshal string into Go struct field UserJSON.id of type uint"}
+2023-08-23T02:57:51.990+0800	ERROR	service/handler.go:169	s.rClient.HGetUserInfo err:	{"error": "json: cannot unmarshal string into Go struct field UserJSON.is_follow of type bool"}
+2023-08-23T02:58:10.534+0800	ERROR	service/handler.go:75	s.userRepo.UserRegister err:	{"error": "context deadline exceeded"}
+2023-08-23T04:13:14.960+0800	ERROR	service/handler.go:72	s.userRepo.UserRegister err:	{"error": "Error 1292 (22007): Incorrect datetime value: '0000-00-00' for column 'deleted_at' at row 1"}
+2023-08-23T04:18:36.042+0800	ERROR	service/handler.go:165	s.rClient.HGetUserInfo err:	{"error": "parsing time \"\\\"\\\"\" as \"\\\"2006-01-02T15:04:05Z07:00\\\"\": cannot parse \"\\\"\" as \"2006\""}
+2023-08-23T04:54:44.209+0800	ERROR	service/handler.go:165	s.rClient.HGetUserInfo err:	{"error": "json: cannot unmarshal string into Go struct field User.ID of type uint"}
+2023-08-23T04:58:14.444+0800	ERROR	service/handler.go:165	s.rClient.HGetUserInfo err:	{"error": "parsing time \"\\\"\\\"\" as \"\\\"2006-01-02T15:04:05Z07:00\\\"\": cannot parse \"\\\"\" as \"2006\""}
+2023-08-24T00:15:54.849+0800	ERROR	service/handler.go:188	s.userRepo.IsFollowUser err:	{"error": "Error 1146 (42S02): Table 'toktik-user.relation' doesn't exist"}
+2023-08-24T01:46:26.407+0800	ERROR	service/handler.go:193	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:52:46.159+0800	ERROR	service/handler.go:170	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:53:28.523+0800	ERROR	service/handler.go:170	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:53:43.324+0800	ERROR	service/handler.go:170	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-25T08:32:54.677+0800	ERROR	service/handler.go:170	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-25T08:34:14.057+0800	ERROR	service/handler.go:170	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-26T03:40:36.278+0800	ERROR	service/handler.go:158	TokenVerify cache get user error	{"error": "redis: nil"}
+2023-08-26T03:40:37.930+0800	ERROR	service/handler.go:158	TokenVerify cache get user error	{"error": "redis: nil"}
+2023-08-26T03:40:42.054+0800	ERROR	service/handler.go:158	TokenVerify cache get user error	{"error": "redis: nil"}
+2023-08-26T03:41:16.479+0800	ERROR	service/handler.go:158	TokenVerify cache get user error	{"error": "redis: nil"}
+2023-08-26T03:41:17.659+0800	ERROR	service/handler.go:158	TokenVerify cache get user error	{"error": "redis: nil"}
+2023-08-26T03:41:26.298+0800	ERROR	service/handler.go:158	TokenVerify cache get user error	{"error": "redis: nil"}
+2023-08-26T04:12:55.080+0800	ERROR	service/handler.go:170	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-26T05:27:10.868+0800	ERROR	service/handler.go:173	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-26T07:09:06.744+0800	ERROR	service/handler.go:325	client.InteractionClient.IsFollowManyTargets 返回空指针
+2023-08-28T21:41:14.901+0800	ERROR	service/handler.go:173	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-28T21:42:05.587+0800	ERROR	service/handler.go:325	client.InteractionClient.IsFollowManyTargets 返回空指针
+2023-08-28T21:43:12.872+0800	ERROR	service/handler.go:325	client.InteractionClient.IsFollowManyTargets 返回空指针
+2023-08-28T21:43:13.876+0800	ERROR	service/handler.go:325	client.InteractionClient.IsFollowManyTargets 返回空指针
+2023-08-28T21:43:38.343+0800	ERROR	service/handler.go:325	client.InteractionClient.IsFollowManyTargets 返回空指针
+2023-08-28T22:05:48.471+0800	ERROR	service/handler.go:325	client.InteractionClient.IsFollowManyTargets 返回空指针

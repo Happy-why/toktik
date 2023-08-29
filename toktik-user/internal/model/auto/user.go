@@ -33,9 +33,9 @@ const (
 	FavoriteCount  = "favorite_count"
 )
 
-func CreateUserKey(videoId uint) string {
-	videoStr := strconv.Itoa(int(videoId))
-	return "user_info::" + videoStr
+func CreateUserKey(userId uint) string {
+	userStr := strconv.Itoa(int(userId))
+	return "user_info::" + userStr
 }
 
 func CreateMapUserInfo(userInfo *User) map[string]interface{} {

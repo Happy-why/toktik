@@ -16,3 +16,8 @@ const (
 	RpcInteraction = "rpc-interaction"
 	RpcChat        = "rpc-chat"
 )
+
+const (
+	FAVORITE = iota + 1
+	CANCELFAVORITE
+)

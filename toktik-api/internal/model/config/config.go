@@ -2,15 +2,22 @@ package config
 
 import "time"
 
-type Public struct {
+type Config struct {
+	Nacos  Nacos
 	Server Server
 	Logger Logger
 	Rpc    Rpc
+	Token  Token
+	Etcd   Etcd
 }
 
-type Private struct {
-	Token Token
-	Etcd  Etcd
+type Nacos struct {
+	Namespace   string `json:"namespace"`
+	Group       string `json:"group"`
+	Addr        string `json:"addr"`
+	Port        int    `json:"port"`
+	Scheme      string `json:"scheme"`
+	ContextPath string `json:"context_path"`
 }
 
 type Server struct {

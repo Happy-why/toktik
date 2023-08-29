@@ -1,3 +1,3 @@
-module github.com/Happy-Why/toktik-chat
+module toktik-chat
 
 go 1.19

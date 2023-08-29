@@ -4,8 +4,8 @@ package interaction
 
 import (
 	fmt "fmt"
-	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	fastpb "github.com/cloudwego/fastpb"
+	user "toktik-rpc/kitex_gen/user"
 )
 
 var (
@@ -438,6 +438,184 @@ func (x *IsFollowTargetResponse) fastReadField3(buf []byte, _type int8) (offset 
 	return offset, err
 }
 
+func (x *IsFollowManyTargetsRequest) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_IsFollowManyTargetsRequest[number], err)
+}
+
+func (x *IsFollowManyTargetsRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *IsFollowManyTargetsRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	offset, err = fastpb.ReadList(buf, _type,
+		func(buf []byte, _type int8) (n int, err error) {
+			var v int64
+			v, offset, err = fastpb.ReadInt64(buf, _type)
+			if err != nil {
+				return offset, err
+			}
+			x.TargetIds = append(x.TargetIds, v)
+			return offset, err
+		})
+	return offset, err
+}
+
+func (x *IsFollowManyTargetsResponse) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_IsFollowManyTargetsResponse[number], err)
+}
+
+func (x *IsFollowManyTargetsResponse) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.StatusCode, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *IsFollowManyTargetsResponse) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.StatusMsg, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *IsFollowManyTargetsResponse) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	offset, err = fastpb.ReadList(buf, _type,
+		func(buf []byte, _type int8) (n int, err error) {
+			var v bool
+			v, offset, err = fastpb.ReadBool(buf, _type)
+			if err != nil {
+				return offset, err
+			}
+			x.ManyExist = append(x.ManyExist, v)
+			return offset, err
+		})
+	return offset, err
+}
+
+func (x *IsFriendRequest) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_IsFriendRequest[number], err)
+}
+
+func (x *IsFriendRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *IsFriendRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.TargetId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *IsFriendResponse) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_IsFriendResponse[number], err)
+}
+
+func (x *IsFriendResponse) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.StatusCode, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *IsFriendResponse) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.StatusMsg, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *IsFriendResponse) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.IsFriend, offset, err = fastpb.ReadBool(buf, _type)
+	return offset, err
+}
+
 func (x *FollowActionRequest) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -745,6 +923,134 @@ func (x *IsFollowTargetResponse) fastWriteField3(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteBool(buf[offset:], 3, x.GetExist())
+	return offset
+}
+
+func (x *IsFollowManyTargetsRequest) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *IsFollowManyTargetsRequest) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *IsFollowManyTargetsRequest) fastWriteField2(buf []byte) (offset int) {
+	if len(x.TargetIds) == 0 {
+		return offset
+	}
+	offset += fastpb.WriteListPacked(buf[offset:], 2, len(x.GetTargetIds()),
+		func(buf []byte, numTagOrKey, numIdxOrVal int32) int {
+			offset := 0
+			offset += fastpb.WriteInt64(buf[offset:], numTagOrKey, x.GetTargetIds()[numIdxOrVal])
+			return offset
+		})
+	return offset
+}
+
+func (x *IsFollowManyTargetsResponse) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
+	return offset
+}
+
+func (x *IsFollowManyTargetsResponse) fastWriteField1(buf []byte) (offset int) {
+	if x.StatusCode == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetStatusCode())
+	return offset
+}
+
+func (x *IsFollowManyTargetsResponse) fastWriteField2(buf []byte) (offset int) {
+	if x.StatusMsg == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetStatusMsg())
+	return offset
+}
+
+func (x *IsFollowManyTargetsResponse) fastWriteField3(buf []byte) (offset int) {
+	if len(x.ManyExist) == 0 {
+		return offset
+	}
+	offset += fastpb.WriteListPacked(buf[offset:], 3, len(x.GetManyExist()),
+		func(buf []byte, numTagOrKey, numIdxOrVal int32) int {
+			offset := 0
+			offset += fastpb.WriteBool(buf[offset:], numTagOrKey, x.GetManyExist()[numIdxOrVal])
+			return offset
+		})
+	return offset
+}
+
+func (x *IsFriendRequest) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *IsFriendRequest) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *IsFriendRequest) fastWriteField2(buf []byte) (offset int) {
+	if x.TargetId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 2, x.GetTargetId())
+	return offset
+}
+
+func (x *IsFriendResponse) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
+	return offset
+}
+
+func (x *IsFriendResponse) fastWriteField1(buf []byte) (offset int) {
+	if x.StatusCode == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetStatusCode())
+	return offset
+}
+
+func (x *IsFriendResponse) fastWriteField2(buf []byte) (offset int) {
+	if x.StatusMsg == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetStatusMsg())
+	return offset
+}
+
+func (x *IsFriendResponse) fastWriteField3(buf []byte) (offset int) {
+	if !x.IsFriend {
+		return offset
+	}
+	offset += fastpb.WriteBool(buf[offset:], 3, x.GetIsFriend())
 	return offset
 }
 
@@ -1058,6 +1364,134 @@ func (x *IsFollowTargetResponse) sizeField3() (n int) {
 	return n
 }
 
+func (x *IsFollowManyTargetsRequest) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *IsFollowManyTargetsRequest) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetUserId())
+	return n
+}
+
+func (x *IsFollowManyTargetsRequest) sizeField2() (n int) {
+	if len(x.TargetIds) == 0 {
+		return n
+	}
+	n += fastpb.SizeListPacked(2, len(x.GetTargetIds()),
+		func(numTagOrKey, numIdxOrVal int32) int {
+			n := 0
+			n += fastpb.SizeInt64(numTagOrKey, x.GetTargetIds()[numIdxOrVal])
+			return n
+		})
+	return n
+}
+
+func (x *IsFollowManyTargetsResponse) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	n += x.sizeField3()
+	return n
+}
+
+func (x *IsFollowManyTargetsResponse) sizeField1() (n int) {
+	if x.StatusCode == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetStatusCode())
+	return n
+}
+
+func (x *IsFollowManyTargetsResponse) sizeField2() (n int) {
+	if x.StatusMsg == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetStatusMsg())
+	return n
+}
+
+func (x *IsFollowManyTargetsResponse) sizeField3() (n int) {
+	if len(x.ManyExist) == 0 {
+		return n
+	}
+	n += fastpb.SizeListPacked(3, len(x.GetManyExist()),
+		func(numTagOrKey, numIdxOrVal int32) int {
+			n := 0
+			n += fastpb.SizeBool(numTagOrKey, x.GetManyExist()[numIdxOrVal])
+			return n
+		})
+	return n
+}
+
+func (x *IsFriendRequest) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *IsFriendRequest) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetUserId())
+	return n
+}
+
+func (x *IsFriendRequest) sizeField2() (n int) {
+	if x.TargetId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(2, x.GetTargetId())
+	return n
+}
+
+func (x *IsFriendResponse) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	n += x.sizeField3()
+	return n
+}
+
+func (x *IsFriendResponse) sizeField1() (n int) {
+	if x.StatusCode == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetStatusCode())
+	return n
+}
+
+func (x *IsFriendResponse) sizeField2() (n int) {
+	if x.StatusMsg == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetStatusMsg())
+	return n
+}
+
+func (x *IsFriendResponse) sizeField3() (n int) {
+	if !x.IsFriend {
+		return n
+	}
+	n += fastpb.SizeBool(3, x.GetIsFriend())
+	return n
+}
+
 var fieldIDToName_FollowActionRequest = map[int32]string{
 	1: "Token",
 	2: "ToUserId",
@@ -1112,6 +1546,28 @@ var fieldIDToName_IsFollowTargetResponse = map[int32]string{
 	1: "StatusCode",
 	2: "StatusMsg",
 	3: "Exist",
+}
+
+var fieldIDToName_IsFollowManyTargetsRequest = map[int32]string{
+	1: "UserId",
+	2: "TargetIds",
+}
+
+var fieldIDToName_IsFollowManyTargetsResponse = map[int32]string{
+	1: "StatusCode",
+	2: "StatusMsg",
+	3: "ManyExist",
+}
+
+var fieldIDToName_IsFriendRequest = map[int32]string{
+	1: "UserId",
+	2: "TargetId",
+}
+
+var fieldIDToName_IsFriendResponse = map[int32]string{
+	1: "StatusCode",
+	2: "StatusMsg",
+	3: "IsFriend",
 }
 
 var _ = user.File_user_proto

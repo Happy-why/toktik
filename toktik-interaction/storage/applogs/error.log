@@ -1,0 +1,26 @@
+2023-08-14T20:28:31.435+0800	ERROR	service/handler.go:61	is.interactionRepo.CancelFollowUser err:	{"error": "WHERE conditions required"}
+2023-08-14T20:46:23.804+0800	ERROR	service/handler.go:36	is.interactionRepo.IsRelationExist err:	{"error": "record not found"}
+2023-08-14T20:46:25.305+0800	ERROR	service/handler.go:36	is.interactionRepo.IsRelationExist err:	{"error": "record not found"}
+2023-08-14T20:46:29.959+0800	ERROR	service/handler.go:36	is.interactionRepo.IsRelationExist err:	{"error": "record not found"}
+2023-08-14T20:46:31.162+0800	ERROR	service/handler.go:36	is.interactionRepo.IsRelationExist err:	{"error": "record not found"}
+2023-08-14T20:47:50.507+0800	ERROR	service/handler.go:36	is.interactionRepo.IsRelationExist err:	{"error": "record not found"}
+2023-08-15T20:33:29.538+0800	ERROR	service/handler.go:76	is.interactionRepo.GetFollowList err:	{"error": "Error 1054 (42S22): Unknown column 'user_id' in 'where clause'"}
+2023-08-19T05:55:33.817+0800	ERROR	service/handler.go:64	is.interactionRepo.AddFollowCount err:	{"error": "Error 1054 (42S22): Unknown column 'follow_count' in 'field list'"}
+2023-08-19T06:04:26.928+0800	ERROR	service/handler.go:63	is.interactionRepo.AddFollowCount err:	{"error": "Error 1054 (42S22): Unknown column 'follow_count' in 'field list'"}
+2023-08-19T06:09:26.151+0800	ERROR	service/handler.go:63	is.interactionRepo.AddFollowCount err:	{"error": "Error 1054 (42S22): Unknown column 'follow_count' in 'field list'"}
+2023-08-19T06:09:34.994+0800	ERROR	service/handler.go:63	is.interactionRepo.AddFollowCount err:	{"error": "Error 1054 (42S22): Unknown column 'follow_count' in 'field list'"}
+2023-08-24T07:20:13.588+0800	ERROR	service/handler.go:77	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:20:42.495+0800	ERROR	service/handler.go:77	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:22:19.549+0800	ERROR	service/handler.go:109	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:23:03.299+0800	ERROR	service/handler.go:109	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:27:13.686+0800	ERROR	service/handler.go:79	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:29:37.435+0800	ERROR	service/handler.go:111	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:30:30.448+0800	ERROR	service/handler.go:111	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:31:24.511+0800	ERROR	service/handler.go:111	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T07:31:56.036+0800	ERROR	service/handler.go:111	client.InteractionClient.IsFollowTarget 返回空指针
+2023-08-24T08:19:40.710+0800	ERROR	service/handler.go:139	client.UserClient.GetUserList 返回空指针
+2023-08-24T08:20:23.311+0800	ERROR	service/handler.go:139	client.UserClient.GetUserList 返回空指针
+2023-08-24T08:35:40.980+0800	ERROR	service/handler.go:139	client.UserClient.GetUserList 返回空指针
+2023-08-24T08:36:16.368+0800	ERROR	service/handler.go:191	client.UserClient.GetUserList 返回空指针
+2023-08-28T21:43:38.343+0800	ERROR	service/handler.go:187	client.UserClient.GetUserList err:
+2023-08-28T22:06:22.126+0800	ERROR	service/handler.go:183	client.UserClient.GetUserList 返回空指针

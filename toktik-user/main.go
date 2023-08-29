@@ -2,19 +2,18 @@ package main
 
 import (
 	"fmt"
-	srv "github.com/Happy-Why/toktik-common/serveHTTP"
-	"github.com/Happy-Why/toktik-user/internal/global"
-	"github.com/Happy-Why/toktik-user/pkg/rpc"
-	"github.com/Happy-Why/toktik-user/pkg/rpc/client"
-	"github.com/Happy-Why/toktik-user/pkg/setting"
 	"github.com/gin-gonic/gin"
+	srv "toktik-common/serveHTTP"
+	"toktik-user/internal/global"
+	"toktik-user/pkg/rpc"
+	"toktik-user/pkg/rpc/client"
+	"toktik-user/pkg/setting"
 )
 
 func main() {
 	// 初始化
 	setting.InitAllSetting()
-	fmt.Printf("config:%#v\n", global.PbSettings)
-	fmt.Printf("config:%#v\n", global.PvSettings)
+	fmt.Printf("config:%#v\n", global.Settings)
 	// 初始化 gin
 	route := gin.Default()
 
@@ -24,5 +23,5 @@ func main() {
 	//服务端配置
 	stop := func() { kr.Stop() }
 	fmt.Println("------------------------------------------------")
-	srv.Run(route, global.PbSettings.Server.Name, global.PbSettings.Server.Addr, stop)
+	srv.Run(route, global.Settings.Server.Name, global.Settings.Server.Addr, stop)
 }

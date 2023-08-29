@@ -7,6 +7,7 @@ type InitSettings interface {
 }
 
 func InitAllSetting() {
+	InitBootStrap()
 	for _, setting := range Settings {
 		setting.InitSetting()
 	}

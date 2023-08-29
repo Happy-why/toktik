@@ -1,3 +1,3 @@
-module github.com/Happy-Why/toktik-interaction
+module toktik-interaction
 
 go 1.19

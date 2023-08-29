@@ -2,18 +2,25 @@ package config
 
 import "time"
 
-type Public struct {
-	Logger Logger
-	Server Server
-	Rpc    Rpc
-	Rules  Rules
-}
-
-type Private struct {
+type Config struct {
+	Logger    Logger
+	Server    Server
+	Rpc       Rpc
+	Rules     Rules
 	Mysql     Mysql
 	Redis     Redis
 	Etcd      Etcd
 	AliyunOSS AliyunOSS
+	Nacos     Nacos
+}
+
+type Nacos struct {
+	Namespace   string `json:"namespace"`
+	Group       string `json:"group"`
+	Addr        string `json:"addr"`
+	Port        int    `json:"port"`
+	Scheme      string `json:"scheme"`
+	ContextPath string `json:"context_path"`
 }
 
 type Server struct {
@@ -24,8 +31,10 @@ type Server struct {
 }
 
 type Rules struct {
-	DefaultUserAvatar    string
-	DefaultUserSignature string
+	DefaultUserAvatar       string
+	DefaultUserSignature    string
+	VideoInfoCacheExpire    time.Duration
+	FavoriteInfoCacheExpire time.Duration
 }
 
 type Rpc struct {

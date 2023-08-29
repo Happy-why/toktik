@@ -1,9 +1,9 @@
 package response
 
 import (
-	"github.com/Happy-Why/toktik-common/errcode"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"toktik-common/errcode"
 )
 
 type Response struct {

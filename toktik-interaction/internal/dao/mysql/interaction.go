@@ -3,8 +3,7 @@ package mysql
 import (
 	"context"
 	"fmt"
-	"github.com/Happy-Why/toktik-interaction/internal/model/auto"
-	"gorm.io/gorm"
+	"toktik-interaction/internal/model/auto"
 )
 
 type InteractionDao struct {
@@ -31,19 +30,19 @@ func (i *InteractionDao) FollowUserAction(c context.Context, conn DbConn, relati
 	return i.conn.Tx(c).Create(relationInfo).Error
 }
 
-func (i *InteractionDao) AddFollowCount(c context.Context, conn DbConn, userID uint) error {
-	i.conn = conn.(*GormConn)
-	return i.conn.Tx(c).Model(&auto.User{}).
-		Where("id = ?", userID).
-		Update("follow_count", gorm.Expr("follow_count + ?", 1)).Error
-}
+//func (i *InteractionDao) AddFollowCount(c context.Context, conn DbConn, userID uint) error {
+//	i.conn = conn.(*GormConn)
+//	return i.conn.Tx(c).Model(&auto.User{}).
+//		Where("id = ?", userID).
+//		Update("follow_count", gorm.Expr("follow_count + ?", 1)).Error
+//}
 
-func (i *InteractionDao) AddFollowerCount(c context.Context, conn DbConn, userID uint) error {
-	i.conn = conn.(*GormConn)
-	return i.conn.Tx(c).Model(&auto.User{}).
-		Where("id = ?", userID).
-		Update("follower_count", gorm.Expr("follower_count + ?", 1)).Error
-}
+//func (i *InteractionDao) AddFollowerCount(c context.Context, conn DbConn, userID uint) error {
+//	i.conn = conn.(*GormConn)
+//	return i.conn.Tx(c).Model(&auto.User{}).
+//		Where("id = ?", userID).
+//		Update("follower_count", gorm.Expr("follower_count + ?", 1)).Error
+//}
 
 func (i *InteractionDao) CancelFollowUser(c context.Context, conn DbConn, relationInfo *auto.Relation) error {
 	i.conn = conn.(*GormConn)
@@ -52,19 +51,19 @@ func (i *InteractionDao) CancelFollowUser(c context.Context, conn DbConn, relati
 		Unscoped().Delete(relationInfo).Error
 }
 
-func (i *InteractionDao) SubFollowCount(c context.Context, conn DbConn, userID uint) error {
-	i.conn = conn.(*GormConn)
-	return i.conn.Tx(c).Model(&auto.User{}).
-		Where("id = ?", userID).
-		Update("follow_count", gorm.Expr("follow_count - ?", 1)).Error
-}
+//func (i *InteractionDao) SubFollowCount(c context.Context, conn DbConn, userID uint) error {
+//	i.conn = conn.(*GormConn)
+//	return i.conn.Tx(c).Model(&auto.User{}).
+//		Where("id = ?", userID).
+//		Update("follow_count", gorm.Expr("follow_count - ?", 1)).Error
+//}
 
-func (i *InteractionDao) SubFollowerCount(c context.Context, conn DbConn, userID uint) error {
-	i.conn = conn.(*GormConn)
-	return i.conn.Tx(c).Model(&auto.User{}).
-		Where("id = ?", userID).
-		Update("follower_count", gorm.Expr("follower_count - ?", 1)).Error
-}
+//func (i *InteractionDao) SubFollowerCount(c context.Context, conn DbConn, userID uint) error {
+//	i.conn = conn.(*GormConn)
+//	return i.conn.Tx(c).Model(&auto.User{}).
+//		Where("id = ?", userID).
+//		Update("follower_count", gorm.Expr("follower_count - ?", 1)).Error
+//}
 
 func (i *InteractionDao) GetFollowIDs(c context.Context, userID uint) ([]int64, error) {
 	var userIDs []int64

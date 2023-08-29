@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"context"
-	"github.com/Happy-Why/toktik-user/internal/model/auto"
+	"toktik-user/internal/model/auto"
 	"gorm.io/gorm"
 )
 

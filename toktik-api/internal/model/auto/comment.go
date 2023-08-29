@@ -1,14 +1,11 @@
 package auto
 
-import "gorm.io/gorm"
-
 // Comment 评论表 /
 type Comment struct {
-	gorm.Model
-	CommentId uint   `json:"comment_id" column:"comment_id" gorm:"not null;index:comment_video"`
-	VideoId   uint   `json:"video_id" column:"video_id" gorm:"not null;index:comment_video"`
-	UserId    uint   `json:"user_id" column:"user_id" gorm:"not null"`
-	Content   string `json:"content" column:"content"`
+	BaseModel
+	VideoId uint   `json:"video_id,string" column:"video_id" gorm:"not null;index:comment_video"`
+	UserId  uint   `json:"user_id,string" column:"user_id" gorm:"not null"`
+	Content string `json:"content,string" column:"content"`
 }
 
 func (*Comment) TableName() string {

@@ -59,10 +59,34 @@ message IsFollowTargetResponse{
   bool exist = 3;
 }
 
+message IsFollowManyTargetsRequest{
+  int64 user_id = 1; // 用户id
+  repeated int64 target_ids = 2; // 用户id
+}
+
+message IsFollowManyTargetsResponse{
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
+  repeated bool many_exist = 3;
+}
+
+message IsFriendRequest{
+  int64 user_id = 1;
+  int64 target_id = 2;
+}
+
+message IsFriendResponse{
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
+  bool is_friend = 3;
+}
+
 service InteractionService{
   rpc FollowSB(FollowActionRequest) returns (FollowActionResponse) {}
   rpc FollowList(FollowListRequest) returns (FollowListResponse) {}
   rpc FansList(FansListRequest) returns (FansListResponse) {}
   rpc FriendList(FriendListRequest) returns (FriendListResponse) {}
   rpc IsFollowTarget(IsFollowTargetRequest) returns (IsFollowTargetResponse){}
+  rpc IsFollowManyTargets(IsFollowManyTargetsRequest)returns(IsFollowManyTargetsResponse){}
+  rpc IsFriend(IsFriendRequest)returns(IsFriendResponse){}
 }

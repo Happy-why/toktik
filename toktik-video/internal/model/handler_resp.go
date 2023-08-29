@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/Happy-Why/toktik-common/errcode"
+	"toktik-common/errcode"
 
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/video"
+	"toktik-rpc/kitex_gen/video"
 )
 
 type VideoFeedHandler struct {

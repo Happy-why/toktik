@@ -1,0 +1,49 @@
+2023-08-21T10:13:45.248+0800	ERROR	service/handler.go:67	utils.ReadFrameAsJpeg err:	{"error": "exit status 0xcbcfcb08"}
+2023-08-21T10:26:58.575+0800	ERROR	service/handler.go:67	utils.ReadFrameAsJpeg err:	{"error": "exit status 0xcbcfcb08"}
+2023-08-22T02:08:08.329+0800	ERROR	service/handler.go:269	vs.videoRepo.DeleteFavoriteRecord err:	{"error": "WHERE conditions required"}
+2023-08-22T02:08:10.008+0800	ERROR	service/handler.go:269	vs.videoRepo.DeleteFavoriteRecord err:	{"error": "WHERE conditions required"}
+2023-08-22T02:20:39.332+0800	ERROR	service/handler.go:269	vs.videoRepo.DeleteFavoriteRecord err:	{"error": "WHERE conditions required"}
+2023-08-22T02:21:53.297+0800	ERROR	service/handler.go:269	vs.videoRepo.DeleteFavoriteRecord err:	{"error": "WHERE conditions required"}
+2023-08-22T02:26:50.877+0800	ERROR	service/handler.go:269	vs.videoRepo.DeleteFavoriteRecord err:	{"error": "WHERE conditions required"}
+2023-08-22T02:35:00.533+0800	ERROR	service/handler.go:295	vs.videoRepo.GetUserInfoByID err:	{"error": "record not found"}
+2023-08-25T08:32:55.972+0800	ERROR	service/handler.go:201	client.UserClient.UserIndex err:
+2023-08-25T08:34:14.058+0800	ERROR	service/handler.go:201	client.UserClient.UserIndex err:
+2023-08-25T11:45:44.173+0800	ERROR	service/handler.go:180	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T13:48:30.993+0800	ERROR	service/handler.go:300	client.UserClient.UpdateUserFavoriteCount 返回空指针
+2023-08-25T18:06:50.478+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:08:11.680+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:09:40.719+0800	ERROR	service/handler.go:145	vs.ossRepo.UploadByteFile videoURL err:	{"error": "function formUploader.Put() Failed, err:Put \"http://why-bucket.oss-cn-beijing.aliyuncs.com/video%2F7093154536201650176%2F7093680441181339648%E5%8F%AF%E7%88%B1%E5%A5%B3%E4%BA%BA.mp4\": dial tcp: lookup why-bucket.oss-cn-beijing.aliyuncs.com: no such host"}
+2023-08-25T18:10:09.610+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:10:31.167+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:11:00.503+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:11:19.758+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:12:12.241+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:12:17.403+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:12:20.064+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:12:22.913+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:12:25.825+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-25T18:12:28.844+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-26T03:31:06.353+0800	ERROR	service/handler.go:215	client.UserClient.UserIndex 返回空指针
+2023-08-26T05:23:04.142+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-26T05:24:24.924+0800	ERROR	service/handler.go:190	client.UserClient.AddUserWorkCount 返回空指针
+2023-08-26T05:26:07.072+0800	ERROR	service/handler.go:317	client.UserClient.UpdateUserFavoriteCount 返回空指针
+2023-08-26T05:27:08.871+0800	ERROR	service/handler.go:366	client.UserClient.UserIndex 返回空指针
+2023-08-26T05:27:10.868+0800	ERROR	service/handler.go:370	client.UserClient.UserIndex err:
+2023-08-26T07:03:05.311+0800	ERROR	service/handler.go:538	client.UserClient.GetUserList 返回空指针
+2023-08-26T07:09:06.745+0800	ERROR	service/handler.go:542	client.UserClient.GetUserList err:
+2023-08-28T21:41:23.270+0800	ERROR	service/handler.go:370	client.UserClient.UserIndex 返回空指针
+2023-08-28T21:41:46.460+0800	ERROR	service/handler.go:96	client.UserClient.GetUserList 返回空指针
+2023-08-28T21:41:49.320+0800	ERROR	service/handler.go:96	client.UserClient.GetUserList 返回空指针
+2023-08-28T21:42:05.587+0800	ERROR	service/handler.go:100	client.UserClient.GetUserList err:
+2023-08-28T21:42:27.343+0800	ERROR	service/handler.go:96	client.UserClient.GetUserList 返回空指针
+2023-08-28T21:43:09.940+0800	ERROR	service/handler.go:96	client.UserClient.GetUserList 返回空指针
+2023-08-28T21:43:11.801+0800	ERROR	service/handler.go:96	client.UserClient.GetUserList 返回空指针
+2023-08-28T21:43:12.872+0800	ERROR	service/handler.go:100	client.UserClient.GetUserList err:
+2023-08-28T21:43:13.876+0800	ERROR	service/handler.go:100	client.UserClient.GetUserList err:
+2023-08-28T21:43:37.610+0800	ERROR	service/handler.go:370	client.UserClient.UserIndex 返回空指针
+2023-08-28T22:05:48.472+0800	ERROR	service/handler.go:100	client.UserClient.GetUserList err:
+2023-08-28T22:05:56.585+0800	ERROR	service/handler.go:370	client.UserClient.UserIndex 返回空指针
+2023-08-28T22:06:33.833+0800	ERROR	service/handler.go:96	client.UserClient.GetUserList 返回空指针
+2023-08-28T22:06:36.315+0800	ERROR	service/handler.go:96	client.UserClient.GetUserList 返回空指针
+2023-08-29T08:22:27.942+0800	ERROR	service/handler.go:76	vs.videoRepo.GetVideoInfoByVideoId err:	{"error": "record not found"}
+2023-08-29T09:18:59.286+0800	ERROR	service/handler.go:76	vs.videoRepo.GetVideoInfoByVideoId err:	{"error": "record not found"}

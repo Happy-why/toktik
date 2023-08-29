@@ -1,9 +1,9 @@
 package setting
 
 import (
-	"github.com/Happy-Why/toktik-video/internal/dao"
-	"github.com/Happy-Why/toktik-video/internal/dao/mysql"
-	"github.com/Happy-Why/toktik-video/internal/dao/redis"
+	"toktik-video/internal/dao"
+	"toktik-video/internal/dao/mysql"
+	"toktik-video/internal/dao/redis"
 )
 
 func init() {

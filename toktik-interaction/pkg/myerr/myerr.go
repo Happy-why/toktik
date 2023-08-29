@@ -1,6 +1,6 @@
 package myerr
 
-import "github.com/Happy-Why/toktik-common/errcode"
+import "toktik-common/errcode"
 
 var (
 	UserAlreadyFollowed = errcode.NewErr(200001, "已经关注该用户")

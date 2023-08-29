@@ -8,11 +8,11 @@ package video
 
 import (
 	context "context"
-	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
+	user "toktik-rpc/kitex_gen/user"
 )
 
 const (

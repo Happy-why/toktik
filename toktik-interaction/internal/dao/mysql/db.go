@@ -3,9 +3,6 @@ package mysql
 import (
 	"context"
 	"fmt"
-	"github.com/Happy-Why/toktik-interaction/internal/dao"
-	"github.com/Happy-Why/toktik-interaction/internal/global"
-	"github.com/Happy-Why/toktik-interaction/internal/model/auto"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -14,11 +11,14 @@ import (
 	"log"
 	"os"
 	"time"
+	"toktik-interaction/internal/dao"
+	"toktik-interaction/internal/global"
+	"toktik-interaction/internal/model/auto"
 )
 
 func InitMysql() {
 	//配置MySQL连接参数
-	m := global.PvSettings.Mysql
+	m := global.Settings.Mysql
 	fmt.Println(m)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", m.Username, m.Password, m.Host, m.Port, m.DB)
 	fmt.Println(dsn)

@@ -1,9 +1,9 @@
 package setting
 
 import (
-	"github.com/Happy-Why/toktik-interaction/internal/dao"
-	"github.com/Happy-Why/toktik-interaction/internal/dao/mysql"
-	"github.com/Happy-Why/toktik-interaction/internal/dao/redis"
+	"toktik-interaction/internal/dao"
+	"toktik-interaction/internal/dao/mysql"
+	"toktik-interaction/internal/dao/redis"
 )
 
 func init() {

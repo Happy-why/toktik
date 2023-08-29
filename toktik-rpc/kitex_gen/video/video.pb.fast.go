@@ -4,8 +4,8 @@ package video
 
 import (
 	fmt "fmt"
-	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	fastpb "github.com/cloudwego/fastpb"
+	user "toktik-rpc/kitex_gen/user"
 )
 
 var (

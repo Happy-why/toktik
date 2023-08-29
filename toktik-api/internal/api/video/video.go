@@ -1,15 +1,15 @@
 package video
 
 import (
-	"github.com/Happy-Why/toktik-api/internal/api"
-	"github.com/Happy-Why/toktik-api/internal/model/request"
-	"github.com/Happy-Why/toktik-api/internal/model/response"
-	"github.com/Happy-Why/toktik-common/errcode"
-	res2 "github.com/Happy-Why/toktik-common/response"
-	"github.com/Happy-Why/toktik-common/token"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/video"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"toktik-api/internal/api"
+	"toktik-api/internal/model/request"
+	"toktik-api/internal/model/response"
+	"toktik-common/errcode"
+	res2 "toktik-common/response"
+	"toktik-common/token"
+	"toktik-rpc/kitex_gen/video"
 )
 
 type HandlerVideo struct {

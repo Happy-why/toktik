@@ -1,6 +1,7 @@
 package setting
 
 import (
+	"io"
 	"log"
 
 	"github.com/fsnotify/fsnotify"
@@ -38,6 +39,18 @@ func NewSetting(configName, configType string, configPaths ...string) (*Setting,
 			log.Fatalln("更新配置失败:" + err.Error())
 		}
 	})
+	return s, nil
+}
+
+// ReadConfigFromBuf 从文件流中读取配置
+func ReadConfigFromBuf(configType string, fileBuf io.Reader) (*Setting, error) {
+	vp := viper.New()
+	vp.SetConfigType(configType)  // 设置配置文件类型
+	err := vp.ReadConfig(fileBuf) // 加载配置文件
+	if err != nil {
+		return nil, err
+	}
+	s := &Setting{vp: vp}
 	return s, nil
 }
 

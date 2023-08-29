@@ -4,9 +4,9 @@ package userservice
 
 import (
 	"context"
-	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
+	user "toktik-rpc/kitex_gen/user"
 )
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
@@ -18,6 +18,8 @@ type Client interface {
 	AddFollowCount(ctx context.Context, Req *user.AddFollowCountRequest, callOptions ...callopt.Option) (r *user.AddFollowCountResponse, err error)
 	SubFollowCount(ctx context.Context, Req *user.SubFollowCountRequest, callOptions ...callopt.Option) (r *user.SubFollowCountResponse, err error)
 	GetUserList(ctx context.Context, Req *user.GetUserListRequest, callOptions ...callopt.Option) (r *user.GetUserListResponse, err error)
+	AddUserWorkCount(ctx context.Context, Req *user.AddUserWorkCountRequest, callOptions ...callopt.Option) (r *user.AddUserWorkCountResponse, err error)
+	UpdateUserFavoriteCount(ctx context.Context, Req *user.UpdateUserFavoriteCountRequest, callOptions ...callopt.Option) (r *user.UpdateUserFavoriteCountResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -82,4 +84,14 @@ func (p *kUserServiceClient) SubFollowCount(ctx context.Context, Req *user.SubFo
 func (p *kUserServiceClient) GetUserList(ctx context.Context, Req *user.GetUserListRequest, callOptions ...callopt.Option) (r *user.GetUserListResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetUserList(ctx, Req)
+}
+
+func (p *kUserServiceClient) AddUserWorkCount(ctx context.Context, Req *user.AddUserWorkCountRequest, callOptions ...callopt.Option) (r *user.AddUserWorkCountResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.AddUserWorkCount(ctx, Req)
+}
+
+func (p *kUserServiceClient) UpdateUserFavoriteCount(ctx context.Context, Req *user.UpdateUserFavoriteCountRequest, callOptions ...callopt.Option) (r *user.UpdateUserFavoriteCountResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UpdateUserFavoriteCount(ctx, Req)
 }

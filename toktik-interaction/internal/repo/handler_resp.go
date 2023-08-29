@@ -1,9 +1,9 @@
 package repo
 
 import (
-	"github.com/Happy-Why/toktik-common/errcode"
-	"github.com/Happy-Why/toktik-interaction/internal/model"
-	inter "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
+	"toktik-common/errcode"
+	"toktik-interaction/internal/model"
+	inter "toktik-rpc/kitex_gen/interaction"
 )
 
 type HandlerResp interface {
@@ -12,6 +12,8 @@ type HandlerResp interface {
 	FansListResponse(err errcode.Err, msg string, resp *inter.FansListResponse) *inter.FansListResponse
 	FriendListResponse(err errcode.Err, msg string, resp *inter.FriendListResponse) *inter.FriendListResponse
 	IsFollowTargetResponse(err errcode.Err, msg string, resp *inter.IsFollowTargetResponse) *inter.IsFollowTargetResponse
+	IsFollowManyTargetsResponse(err errcode.Err, msg string, resp *inter.IsFollowManyTargetsResponse) *inter.IsFollowManyTargetsResponse
+	IsFriendResponse(err errcode.Err, msg string, resp *inter.IsFriendResponse) *inter.IsFriendResponse
 }
 
 type HandlerResps struct {
@@ -20,6 +22,8 @@ type HandlerResps struct {
 	model.FansListHandler
 	model.FriendListHandler
 	model.IsFollowTargetHandler
+	model.IsFollowManyTargetsHandler
+	model.IsFriendHandler
 }
 
 func NewHandlerResps() *HandlerResps {

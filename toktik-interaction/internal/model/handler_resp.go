@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/Happy-Why/toktik-common/errcode"
-	inter "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
+	"toktik-common/errcode"
+	inter "toktik-rpc/kitex_gen/interaction"
 )
 
 type FollowSBHandler struct {
@@ -45,6 +45,24 @@ type IsFollowTargetHandler struct {
 }
 
 func (IsFollowTargetHandler) IsFollowTargetResponse(err errcode.Err, msg string, resp *inter.IsFollowTargetResponse) *inter.IsFollowTargetResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type IsFollowManyTargetsHandler struct {
+}
+
+func (IsFollowManyTargetsHandler) IsFollowManyTargetsResponse(err errcode.Err, msg string, resp *inter.IsFollowManyTargetsResponse) *inter.IsFollowManyTargetsResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type IsFriendHandler struct {
+}
+
+func (IsFriendHandler) IsFriendResponse(err errcode.Err, msg string, resp *inter.IsFriendResponse) *inter.IsFriendResponse {
 	resp.StatusCode = err.ECode()
 	resp.StatusMsg = err.Error() + ":" + msg
 	return resp

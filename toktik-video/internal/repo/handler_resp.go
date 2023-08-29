@@ -1,9 +1,9 @@
 package repo
 
 import (
-	"github.com/Happy-Why/toktik-common/errcode"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/video"
-	"github.com/Happy-Why/toktik-video/internal/model"
+	"toktik-common/errcode"
+	"toktik-rpc/kitex_gen/video"
+	"toktik-video/internal/model"
 )
 
 type HandlerResp interface {

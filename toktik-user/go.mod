@@ -1,10 +1,10 @@
-module github.com/Happy-Why/toktik-user
+module toktik-user
 
 go 1.19
 
 require (
-	github.com/Happy-Why/toktik-common v0.0.0-00010101000000-000000000000
-	github.com/Happy-Why/toktik-rpc v0.0.0-00010101000000-000000000000
+	toktik-common v0.0.0-00010101000000-000000000000
+	toktik-rpc v0.0.0-00010101000000-000000000000
 	github.com/cloudwego/kitex v0.6.2
 	github.com/gin-gonic/gin v1.9.1
 	gorm.io/driver/mysql v1.5.1
@@ -84,7 +84,7 @@ require (
 replace github.com/apache/thrift => github.com/apache/thrift v0.13.0
 
 replace (
-	github.com/Happy-Why/toktik-api => ../toktik-api
-	github.com/Happy-Why/toktik-common => ../toktik-common
-	github.com/Happy-Why/toktik-rpc => ../toktik-rpc
+	toktik-api => ../toktik-api
+	toktik-common => ../toktik-common
+	toktik-rpc => ../toktik-rpc
 )

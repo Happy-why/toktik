@@ -1,15 +1,15 @@
 package interaction
 
 import (
-	"github.com/Happy-Why/toktik-api/internal/api"
-	"github.com/Happy-Why/toktik-api/internal/model/request"
-	"github.com/Happy-Why/toktik-api/internal/model/response"
-	"github.com/Happy-Why/toktik-common/errcode"
-	res2 "github.com/Happy-Why/toktik-common/response"
-	"github.com/Happy-Why/toktik-common/token"
-	inter "github.com/Happy-Why/toktik-rpc/kitex_gen/interaction"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"toktik-api/internal/api"
+	"toktik-api/internal/model/request"
+	"toktik-api/internal/model/response"
+	"toktik-common/errcode"
+	res2 "toktik-common/response"
+	"toktik-common/token"
+	inter "toktik-rpc/kitex_gen/interaction"
 )
 
 type HandlerInteraction struct {

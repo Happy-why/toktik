@@ -1,8 +1,8 @@
 package page
 
 import (
-	"github.com/Happy-Why/toktik-common/utils"
 	"net/http"
+	"toktik-common/utils"
 )
 
 // 分页处理

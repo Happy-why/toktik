@@ -7,6 +7,10 @@ const (
 type FileType string
 
 const (
+	RpcSuccess = 0
+)
+
+const (
 	MP4 = ".mp4"
 	JPG = ".jpg"
 )
@@ -19,6 +23,11 @@ const (
 const (
 	FAVORITE = iota + 1
 	CANCELFAVORITE
+)
+
+const (
+	COMMENT = iota + 1
+	CANCELCOMMENT
 )
 
 const (

@@ -2,8 +2,8 @@
 package userservice
 
 import (
-	user "github.com/Happy-Why/toktik-rpc/kitex_gen/user"
 	server "github.com/cloudwego/kitex/server"
+	user "toktik-rpc/kitex_gen/user"
 )
 
 // NewServer creates a server.Server with the given handler and options.

@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/Happy-Why/toktik-common/errcode"
-	"github.com/Happy-Why/toktik-rpc/kitex_gen/user"
+	"toktik-common/errcode"
+	"toktik-rpc/kitex_gen/user"
 )
 
 type RegisterHandler struct {
@@ -54,6 +54,24 @@ type GutUserListHandler struct {
 }
 
 func (GutUserListHandler) GetUserListResponse(err errcode.Err, msg string, resp *user.GetUserListResponse) *user.GetUserListResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type AddUserWorkCountHandler struct {
+}
+
+func (AddUserWorkCountHandler) AddUserWorkCountResponse(err errcode.Err, msg string, resp *user.AddUserWorkCountResponse) *user.AddUserWorkCountResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type UpdateUserFavoriteCountHandler struct {
+}
+
+func (UpdateUserFavoriteCountHandler) UpdateUserFavoriteCountResponse(err errcode.Err, msg string, resp *user.UpdateUserFavoriteCountResponse) *user.UpdateUserFavoriteCountResponse {
 	resp.StatusCode = err.ECode()
 	resp.StatusMsg = err.Error() + ":" + msg
 	return resp
