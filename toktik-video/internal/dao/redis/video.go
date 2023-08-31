@@ -70,7 +70,8 @@ func (vr *VideoRClient) DelFavorite(c context.Context, key string, videoId int64
 }
 
 func (vr *VideoRClient) IsFavRecordExist(c context.Context, key string, videoId int64) (bool, error) {
-	return vr.rClient.SIsExist(c, key, videoId)
+	videoStr := "1+" + strconv.FormatInt(videoId, 10)
+	return vr.rClient.SIsExist(c, key, videoStr)
 }
 
 func (vr *VideoRClient) HGetVideoInfo(c context.Context, key string) (*auto.Video, error) {
@@ -93,7 +94,13 @@ func (vr *VideoRClient) GetFavoriteVideoIds(c context.Context, key string) ([]in
 		return nil, nil
 	}
 	for _, v := range videoIdsStr {
-		videoId, err = strconv.ParseInt(v, 10, 64)
+		// 拆分 value
+		str := strings.Split(v, "+")
+		flag := str[0]
+		videoId, _ = strconv.ParseInt(str[1], 10, 64)
+		if flag == "2" {
+			continue
+		}
 		videoIds = append(videoIds, videoId)
 	}
 	return videoIds, err
