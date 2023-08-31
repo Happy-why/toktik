@@ -14,14 +14,13 @@ type BaseModel struct {
 }
 
 func CreateUserKey(userId uint) string {
-	userStr := strconv.Itoa(int(userId))
-	return "user_info::" + userStr
+	return "user_info::" + strconv.FormatInt(int64(userId), 10)
 }
 
 func CreatePublishKey() string {
 	return "video_publish"
 }
 
-func CreatePublishMember(videoUrl, coverUrl, nextTime string) string {
-	return videoUrl + "+" + coverUrl + "+" + nextTime
+func CreateUserVideoKey(userId uint) string {
+	return "user_video::" + strconv.FormatInt(int64(userId), 10)
 }

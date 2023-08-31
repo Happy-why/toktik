@@ -41,6 +41,12 @@ func (v *VideoDao) GetVideosByUserId(c context.Context, userId int64) ([]*auto.V
 	return videos, err
 }
 
+func (v *VideoDao) GetVideoIdsByUserId(c context.Context, userId int64) ([]int64, error) {
+	videoIds := make([]int64, 0)
+	err := v.conn.Session(c).Model(&auto.Video{}).Where("user_id = ?", userId).Pluck("id", &videoIds).Error
+	return videoIds, err
+}
+
 func (v *VideoDao) GetVideoInfoByVideoId(c context.Context, videoId int64) (*auto.Video, error) {
 	var videoInfo *auto.Video
 	err := v.conn.Session(c).Model(&auto.Video{}).Where("id = ?", videoId).First(&videoInfo).Error

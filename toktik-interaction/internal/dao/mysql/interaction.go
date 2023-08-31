@@ -30,40 +30,12 @@ func (i *InteractionDao) FollowUserAction(c context.Context, conn DbConn, relati
 	return i.conn.Tx(c).Create(relationInfo).Error
 }
 
-//func (i *InteractionDao) AddFollowCount(c context.Context, conn DbConn, userID uint) error {
-//	i.conn = conn.(*GormConn)
-//	return i.conn.Tx(c).Model(&auto.User{}).
-//		Where("id = ?", userID).
-//		Update("follow_count", gorm.Expr("follow_count + ?", 1)).Error
-//}
-
-//func (i *InteractionDao) AddFollowerCount(c context.Context, conn DbConn, userID uint) error {
-//	i.conn = conn.(*GormConn)
-//	return i.conn.Tx(c).Model(&auto.User{}).
-//		Where("id = ?", userID).
-//		Update("follower_count", gorm.Expr("follower_count + ?", 1)).Error
-//}
-
 func (i *InteractionDao) CancelFollowUser(c context.Context, conn DbConn, relationInfo *auto.Relation) error {
 	i.conn = conn.(*GormConn)
 	return i.conn.Tx(c).Model(&auto.Relation{}).
 		Where("user_id = ? AND target_id = ?", relationInfo.UserId, relationInfo.TargetId).
 		Unscoped().Delete(relationInfo).Error
 }
-
-//func (i *InteractionDao) SubFollowCount(c context.Context, conn DbConn, userID uint) error {
-//	i.conn = conn.(*GormConn)
-//	return i.conn.Tx(c).Model(&auto.User{}).
-//		Where("id = ?", userID).
-//		Update("follow_count", gorm.Expr("follow_count - ?", 1)).Error
-//}
-
-//func (i *InteractionDao) SubFollowerCount(c context.Context, conn DbConn, userID uint) error {
-//	i.conn = conn.(*GormConn)
-//	return i.conn.Tx(c).Model(&auto.User{}).
-//		Where("id = ?", userID).
-//		Update("follower_count", gorm.Expr("follower_count - ?", 1)).Error
-//}
 
 func (i *InteractionDao) GetFollowIDs(c context.Context, userID uint) ([]int64, error) {
 	var userIDs []int64
@@ -96,5 +68,14 @@ func (i *InteractionDao) IsFollowUser(c context.Context, myUserID, targetUserID 
 	var count int64
 	err := i.conn.Session(c).Model(&auto.Relation{}).
 		Where("user_id = ? AND target_id = ?", myUserID, targetUserID).Count(&count).Error
+	return count > 0, err
+}
+
+func (i *InteractionDao) IsFriend(c context.Context, userId, targetId int64) (bool, error) {
+	var count int64
+	session := i.conn.Session(c)
+	sql := fmt.Sprintf("SELECT COUNT(*) AS result FROM relation WHERE (user_id = ? AND target_id = ?) AND EXISTS ( SELECT 1 FROM relation WHERE user_id = ? AND target_id = ?);")
+	raw := session.Raw(sql, userId, targetId, targetId, userId)
+	err := raw.Scan(&count).Error
 	return count > 0, err
 }

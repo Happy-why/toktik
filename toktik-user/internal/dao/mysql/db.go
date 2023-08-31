@@ -3,9 +3,6 @@ package mysql
 import (
 	"context"
 	"fmt"
-	"toktik-user/internal/dao"
-	"toktik-user/internal/global"
-	"toktik-user/internal/model/auto"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -14,6 +11,9 @@ import (
 	"log"
 	"os"
 	"time"
+	"toktik-user/internal/dao"
+	"toktik-user/internal/global"
+	"toktik-user/internal/model/auto"
 )
 
 func InitMysql() {
@@ -40,7 +40,7 @@ func InitMysql() {
 		panic("连接数据库失败, error=" + err.Error())
 	}
 	dao.Group.Mdb = DB
-	_ = DB.AutoMigrate(&auto.User{})
+	_ = DB.AutoMigrate(&auto.User{}, &auto.UserCount{})
 
 }
 

@@ -25,8 +25,8 @@ go.work.sum
 
 .idea
 
-./toktik-video/config/private.yaml
-./toktik-api/config/private.yaml
-./toktik-user/config/private.yaml
-./toktik-interaction/config/private.yaml
-./toktik-chat/config/private.yaml
+./toktik-video/config/config.yaml
+./toktik-api/config/config.yaml
+./toktik-user/config/config.yaml
+./toktik-interaction/config/config.yaml
+./toktik-chat/config/config.yaml

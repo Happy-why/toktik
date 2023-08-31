@@ -38,6 +38,14 @@ func InitRedis() *redis2.Client {
 	return rdb
 }
 
+func (rc *RdbCache) GetKeys(c context.Context, pattern string) ([]string, error) {
+	return rc.rdb.Keys(c, pattern).Result()
+}
+
+func (rc *RdbCache) KeyExist(c context.Context, key string) (int64, error) {
+	return rc.rdb.Exists(c, key).Result()
+}
+
 func (rc *RdbCache) Put(c context.Context, key, value string, expire time.Duration) error {
 	err := rc.rdb.Set(c, key, value, expire).Err()
 	return err
@@ -47,6 +55,10 @@ func (rc *RdbCache) Get(c context.Context, key string) (string, error) {
 	fmt.Println(key)
 	result, err := rc.rdb.Get(c, key).Result()
 	return result, err
+}
+
+func (rc *RdbCache) Del(c context.Context, key string) error {
+	return rc.rdb.Del(c, key).Err()
 }
 
 func (rc *RdbCache) Expire(c context.Context, key string, expireTime time.Duration) (bool, error) {
