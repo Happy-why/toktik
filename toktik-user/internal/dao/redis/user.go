@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"time"
 	"toktik-user/internal/model/auto"
 )
 
@@ -17,10 +18,30 @@ func NewUserRClient() *UserRClient {
 }
 
 func (u *UserRClient) HSetUserInfo(c context.Context, key string, value map[string]interface{}) error {
-	return u.rClient.HSet(c, key, value)
+	err := u.rClient.HSet(c, key, value)
+	if err != nil {
+		return err
+	}
+	_, err = u.rClient.Expire(c, key, time.Hour*168)
+	return err
+}
+
+func (u *UserRClient) HSetUserCountInfo(c context.Context, key string, value map[string]interface{}) error {
+	return u.rClient.HSet(c, key, value) // 需要频繁更改的信息，不设置过期时间
 }
 
 func (u *UserRClient) HGetUserInfo(c context.Context, key string) (*auto.User, error) {
+	userMap, err := u.rClient.HGetAll(c, key)
+	if err != nil {
+		return nil, err
+	}
+	if len(userMap) == 0 {
+		return nil, nil
+	}
+	return auto.CreateUserInfo(userMap)
+}
+
+func (u *UserRClient) HGetUserCountInfo(c context.Context, key string) (*auto.UserCount, error) {
 	userMap, err := u.rClient.HGetAll(c, key)
 	fmt.Println("userMap:", userMap)
 	if err != nil {
@@ -29,7 +50,7 @@ func (u *UserRClient) HGetUserInfo(c context.Context, key string) (*auto.User, e
 	if len(userMap) == 0 {
 		return nil, nil
 	}
-	return auto.CreateUserInfo(userMap)
+	return auto.CreateUserCountInfo(userMap)
 }
 
 func (u *UserRClient) AddFollowCount(c context.Context, key string) error {

@@ -5,8 +5,8 @@ import "strconv"
 // Favorite 点赞表 /*
 type Favorite struct {
 	ID      uint `json:"id,string" gorm:"primarykey"`
-	UserId  uint `json:"user_id,string" gorm:"not null;uniqueIndex:user_video"`
-	VideoId uint `json:"video_id,string" gorm:"not null;uniqueIndex:user_video;index:video"`
+	UserId  uint `json:"user_id,string" gorm:"uniqueIndex:user_video_id,not null;"`
+	VideoId uint `json:"video_id,string" gorm:"uniqueIndex:user_video_id,not null;"`
 }
 
 func (*Favorite) TableName() string {
@@ -15,5 +15,5 @@ func (*Favorite) TableName() string {
 
 func CreateFavKey(userId uint) string {
 	favStr := strconv.Itoa(int(userId))
-	return "favorite::" + favStr
+	return "user_favorite::" + favStr
 }

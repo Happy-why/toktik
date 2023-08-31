@@ -11,6 +11,7 @@ type VideoRepo interface {
 	GetVideoInfoByVideoId(c context.Context, videoId int64) (*auto.Video, error)
 	GetVideosByTime(c context.Context, LatestTime int64) ([]*auto.Video, error)
 	GetVideosByUserId(c context.Context, userId int64) ([]*auto.Video, error)
+	GetVideoIdsByUserId(c context.Context, userId int64) ([]int64, error)
 	IsFavoriteVideo(c context.Context, userId, videoId int64) (bool, error)
 	IsVideoExist(c context.Context, videoId int64) (bool, error)
 	IsFavoriteRecordExist(c context.Context, userId, videoId int64) (bool, error)

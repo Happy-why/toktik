@@ -35,6 +35,7 @@ func InitRedis() *redis2.Client {
 		fmt.Println("redis初始化失败！！！！！")
 		panic(err)
 	}
+
 	return rdb
 }
 
@@ -47,6 +48,11 @@ func (rc *RdbCache) Get(c context.Context, key string) (string, error) {
 	fmt.Println(key)
 	result, err := rc.rdb.Get(c, key).Result()
 	return result, err
+}
+
+func (rc *RdbCache) Expire(c context.Context, key string, expireTime time.Duration) (bool, error) {
+	// 有目标key返回true，没有目标key，返回false
+	return rc.rdb.Expire(c, key, expireTime).Result()
 }
 
 func (rc *RdbCache) HSet(c context.Context, key string, value interface{}) error {

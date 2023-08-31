@@ -7,9 +7,9 @@ import (
 
 type Message struct {
 	BaseModel
-	UserId   uint   `json:"from_user_id"`
-	ToUserId uint   `json:"to_user_id"`
-	Content  string `json:"content"`
+	UserId   uint   `json:"from_user_id" gorm:"uniqueIndex:idx_message;not null"`
+	ToUserId uint   `json:"to_user_id" gorm:"uniqueIndex:idx_message;not null"`
+	Content  string `json:"content" gorm:"not null"`
 }
 
 func CreateChatHistoryKey(userId, targetId int64) string {

@@ -14,4 +14,5 @@ type InteractionRepo interface {
 	GetFansIDs(c context.Context, userID uint) ([]int64, error)
 	GetFriendIDs(c context.Context, userID uint) ([]int64, error)
 	IsFollowUser(c context.Context, myUserID, targetUserID int64) (bool, error)
+	IsFriend(c context.Context, userId, targetId int64) (bool, error)
 }

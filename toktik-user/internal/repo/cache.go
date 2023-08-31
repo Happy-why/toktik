@@ -13,7 +13,9 @@ type Cache interface {
 
 type RClientRepo interface {
 	HSetUserInfo(c context.Context, key string, value map[string]interface{}) error
+	HSetUserCountInfo(c context.Context, key string, value map[string]interface{}) error
 	HGetUserInfo(c context.Context, key string) (*auto.User, error)
+	HGetUserCountInfo(c context.Context, key string) (*auto.UserCount, error)
 	AddFollowCount(c context.Context, key string) error
 	AddFollowerCount(c context.Context, key string) error
 	SubFollowCount(c context.Context, key string) error

@@ -16,6 +16,11 @@ type Err interface {
 	WithDetails(details ...string) Err
 }
 
+type RespErr struct {
+	Err    Err
+	ErrStr string
+}
+
 var globalMap map[int64]Err
 var once sync.Once
 

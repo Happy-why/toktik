@@ -38,15 +38,25 @@ func InitRedis() *redis2.Client {
 	return rdb
 }
 
-func (rc *RdbCache) Put(c context.Context, key, value string, expire time.Duration) error {
-	err := rc.rdb.Set(c, key, value, expire).Err()
-	return err
+func (rc *RdbCache) KeyExist(c context.Context, key string) (int64, error) {
+	return rc.rdb.Exists(c, key).Result()
+}
+
+func (rc *RdbCache) Set(c context.Context, key, value string, expire time.Duration) error {
+	return rc.rdb.Set(c, key, value, expire).Err()
 }
 
 func (rc *RdbCache) Get(c context.Context, key string) (string, error) {
-	fmt.Println(key)
-	result, err := rc.rdb.Get(c, key).Result()
-	return result, err
+	return rc.rdb.Get(c, key).Result()
+}
+
+func (rc *RdbCache) Del(c context.Context, key string) error {
+	return rc.rdb.Del(c, key).Err()
+}
+
+func (rc *RdbCache) Expire(c context.Context, key string, expireTime time.Duration) (bool, error) {
+	// 有目标key返回true，没有目标key，返回false
+	return rc.rdb.Expire(c, key, expireTime).Result()
 }
 
 func (rc *RdbCache) HSet(c context.Context, key string, value interface{}) error {
