@@ -114,7 +114,6 @@ func FavoriteRecordMoveToDB() {
 }
 
 func getKeys(ctx context.Context, keyPatten string) ([]string, error) {
-	//keys, cursor, err := GetRedisHelper().Scan(ctx, 0, keyPatten, 10).Result()
 	keys, err := redis.GetRdbCache().GetKeys(ctx, keyPatten)
 	if err != nil {
 		return nil, err

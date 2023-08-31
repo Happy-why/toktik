@@ -38,6 +38,14 @@ func InitRedis() *redis2.Client {
 	return rdb
 }
 
+func (rc *RdbCache) GetKeys(c context.Context, pattern string) ([]string, error) {
+	return rc.rdb.Keys(c, pattern).Result()
+}
+
+func (rc *RdbCache) KeyExist(c context.Context, key string) (int64, error) {
+	return rc.rdb.Exists(c, key).Result()
+}
+
 func (rc *RdbCache) Put(c context.Context, key, value string, expire time.Duration) error {
 	err := rc.rdb.Set(c, key, value, expire).Err()
 	return err
@@ -47,6 +55,11 @@ func (rc *RdbCache) Get(c context.Context, key string) (string, error) {
 	fmt.Println(key)
 	result, err := rc.rdb.Get(c, key).Result()
 	return result, err
+}
+
+func (rc *RdbCache) Expire(c context.Context, key string, expireTime time.Duration) (bool, error) {
+	// 有目标key返回true，没有目标key，返回false
+	return rc.rdb.Expire(c, key, expireTime).Result()
 }
 
 func (rc *RdbCache) HSet(c context.Context, key string, value interface{}) error {
@@ -97,6 +110,10 @@ func (rc *RdbCache) ZGetRevRange(c context.Context, key string, min, max string,
 
 func (rc *RdbCache) ZGetRangeWithScores(c context.Context, key string, start, stop int64) ([]redis2.Z, error) {
 	return rc.rdb.ZRangeWithScores(c, key, start, stop).Result()
+}
+
+func (rc *RdbCache) ZDel(c context.Context, key string, value interface{}) (int64, error) {
+	return rc.rdb.ZRem(c, key, value).Result()
 }
 
 func (rc *RdbCache) LPush(c context.Context, key string, values ...interface{}) (int64, error) {

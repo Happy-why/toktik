@@ -275,17 +275,17 @@ func (vs *VideoServiceImpl) FavoriteAction(ctx context.Context, req *video.Favor
 		return vs.respRepo.FavoriteActionResponse(errcode.ErrDB, err.Error(), &video.FavoriteActionResponse{}), nil
 	}
 	// ② 去redis，判断是否对该视频有点赞记录,点赞记录没有过期时间
-	//exist, err := vs.rClient.IsFavRecordExist(ctx, favKey, req.VideoId)
-	//if err != nil {
-	//	zap.L().Error("vs.rClient.IsFavRecordExist err:", zap.Error(err))
-	//	return vs.respRepo.FavoriteActionResponse(errcode.ErrRedis, err.Error(), &video.FavoriteActionResponse{}), nil
-	//}
+	exist, err := vs.rClient.IsFavRecordExist(ctx, favKey, req.VideoId)
+	if err != nil {
+		zap.L().Error("vs.rClient.IsFavRecordExist err:", zap.Error(err))
+		return vs.respRepo.FavoriteActionResponse(errcode.ErrRedis, err.Error(), &video.FavoriteActionResponse{}), nil
+	}
 	// 2.处理业务
 	switch req.ActionType {
 	case model.FAVORITE:
-		//if exist {
-		//	return vs.respRepo.FavoriteActionResponse(myerr.AlreadyFavorite, model.MsgNil, &video.FavoriteActionResponse{}), nil
-		//}
+		if exist {
+			return vs.respRepo.FavoriteActionResponse(myerr.AlreadyFavorite, model.MsgNil, &video.FavoriteActionResponse{}), nil
+		}
 		// ① 将 点赞关系 添加到 redis中
 		err = vs.rClient.CreateFavorite(ctx, favKey, req.VideoId)
 		if err != nil {
@@ -314,9 +314,9 @@ func (vs *VideoServiceImpl) FavoriteAction(ctx context.Context, req *video.Favor
 			return vs.respRepo.FavoriteActionResponse(errcode.CreateErr(updateUserFavCntResp.StatusCode, model.MsgNil), updateUserFavCntResp.StatusMsg, &video.FavoriteActionResponse{}), nil
 		}
 	case model.CANCELFAVORITE:
-		//if !exist {
-		//	return vs.respRepo.FavoriteActionResponse(myerr.IsNotFavorite, err.Error(), &video.FavoriteActionResponse{}), nil
-		//}
+		if !exist {
+			return vs.respRepo.FavoriteActionResponse(myerr.IsNotFavorite, err.Error(), &video.FavoriteActionResponse{}), nil
+		}
 		// ① 将 点赞关系 从redis中删除
 		err = vs.rClient.DelFavorite(ctx, favKey, req.VideoId)
 		if err != nil {
