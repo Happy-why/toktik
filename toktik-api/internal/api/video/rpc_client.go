@@ -10,7 +10,7 @@ import (
 	"toktik-rpc/kitex_gen/video/videoservice"
 )
 
-func InitRpcInteractionClient() {
+func InitRpcVideoClient() {
 	r, err := etcd.NewEtcdResolver(global.Settings.Etcd.Addr)
 	if err != nil {
 		panic(err)
@@ -23,7 +23,7 @@ func InitRpcInteractionClient() {
 		client.WithResolver(r),
 	)
 	if err != nil {
-		zap.L().Error("apiServer InitRpcVideoClient err:", zap.Error(err))
+		zap.L().Error("apiServer InitRpc Video Client err:", zap.Error(err))
 		panic(err)
 	}
 	api.VideoClient = c

@@ -6,12 +6,9 @@ import (
 	"toktik-user/internal/model/auto"
 )
 
-type Cache interface {
-	Put(c context.Context, key, value string, expire time.Duration) error
-	Get(c context.Context, key string) (string, error)
-}
-
-type RClientRepo interface {
+type RCacheRepo interface {
+	SetToken(c context.Context, key, value string, expire time.Duration) error
+	GetToken(c context.Context, key string) (string, error)
 	HSetUserInfo(c context.Context, key string, value map[string]interface{}) error
 	HSetUserCountInfo(c context.Context, key string, value map[string]interface{}) error
 	HGetUserInfo(c context.Context, key string) (*auto.User, error)

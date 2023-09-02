@@ -3,16 +3,16 @@ package service
 import (
 	"context"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 	"strconv"
 	"time"
 	"toktik-common/errcode"
 	"toktik-common/oss"
 	"toktik-common/utils"
+	"toktik-rpc/kitex_gen/favor"
 	"toktik-rpc/kitex_gen/user"
 	"toktik-rpc/kitex_gen/video"
+	"toktik-video/internal/cache"
 	"toktik-video/internal/dao/mysql"
-	"toktik-video/internal/dao/redis"
 	"toktik-video/internal/global"
 	"toktik-video/internal/model"
 	"toktik-video/internal/model/auto"
@@ -23,9 +23,8 @@ import (
 
 // VideoServiceImpl implements the last service interface defined in the IDL.
 type VideoServiceImpl struct {
-	cache       repo.Cache
 	videoRepo   repo.VideoRepo
-	rClient     repo.RClientRepo
+	rCache      repo.RCacheRepo
 	respRepo    repo.HandlerResp
 	transaction mysql.Transaction
 	ossRepo     oss.OSS
@@ -33,9 +32,8 @@ type VideoServiceImpl struct {
 
 func NewVideoService() *VideoServiceImpl {
 	return &VideoServiceImpl{
-		cache:       redis.GetRdbCache(),
 		videoRepo:   mysql.NewVideoDao(),
-		rClient:     redis.NewVideoRClient(),
+		rCache:      cache.NewVideoCache(),
 		respRepo:    repo.NewHandlerResps(),
 		transaction: mysql.NewTransaction(),
 		ossRepo:     global.OSS,
@@ -50,19 +48,19 @@ func (vs *VideoServiceImpl) VideoFeed(ctx context.Context, req *video.VideoFeedR
 	// 2.业务处理
 	// ① 先查询缓存，按投稿时间查询最多30个video，按投稿时间降序
 	feedKey := auto.CreatePublishKey()
-	nextTime, videoIds, err := vs.rClient.ZGetVideoIds(ctx, feedKey, *req.LatestTime)
+	nextTime, videoIds, err := vs.rCache.ZGetVideoIds(ctx, feedKey, *req.LatestTime)
 	if videoIds == nil {
 		return vs.respRepo.VideoFeedResponse(myerr.CanNotSearchVideo, model.MsgNil, &video.VideoFeedResponse{}), nil
 	}
 	if err != nil {
-		zap.L().Error("vs.rClient.ZGetVideoIds err:", zap.Error(err))
+		zap.L().Error("vs.rCache.ZGetVideoIds err:", zap.Error(err))
 		return vs.respRepo.VideoFeedResponse(errcode.ErrRedis, err.Error(), &video.VideoFeedResponse{}), nil
 	}
 	videoInfos := make([]*auto.Video, len(videoIds))
 	userIds := make([]int64, len(videoIds))
 	for i, videoId := range videoIds {
 		// ② 根据 video_id 从缓存中查询 video_info
-		videoInfo, err := vs.GetVideoInfo(ctx, videoId)
+		videoInfo, err := vs.GetVideoInfoSelf(ctx, videoId)
 		if err != nil {
 			return vs.respRepo.VideoFeedResponse(errcode.ErrDB, err.Error(), &video.VideoFeedResponse{}), nil
 		}
@@ -86,14 +84,25 @@ func (vs *VideoServiceImpl) VideoFeed(ctx context.Context, req *video.VideoFeedR
 	for _, userInfo := range userListResp.UserList {
 		userListMap[uint(userInfo.Id)] = userInfo
 	}
-	for _, v := range videoInfos {
-		isFavorite := false
-		if isLogin {
-			isFavorite, err = vs.IsFavoriteVideo(ctx, req.UserId, int64(v.ID))
-			if err != nil {
-				return vs.respRepo.VideoFeedResponse(errcode.ErrDB, err.Error(), &video.VideoFeedResponse{}), nil
-			}
+	manyIsFavorite := make([]bool, len(videoIds))
+	if isLogin {
+		// ⑤ 查询出用户 对每个视频是否点赞
+		IsFavoriteResp, _ := client.FavorClient.IsFavoriteVideos(ctx, &favor.IsFavoriteVideosRequest{
+			UserId:   req.UserId,
+			VideoIds: videoIds,
+		})
+		if IsFavoriteResp == nil {
+			zap.L().Error("client.FavorClient.IsFavoriteVideos 返回空指针")
+			return vs.respRepo.VideoFeedResponse(errcode.ErrServer, model.MsgNil, &video.VideoFeedResponse{}), nil
 		}
+		if IsFavoriteResp.StatusCode != model.RpcSuccess {
+			zap.L().Error("client.FavorClient.IsFavoriteVideos err:", zap.Error(err))
+			return vs.respRepo.VideoFeedResponse(errcode.CreateErr(IsFavoriteResp.StatusCode, model.MsgNil), userListResp.StatusMsg, &video.VideoFeedResponse{}), nil
+		}
+		manyIsFavorite = IsFavoriteResp.ManyIsFavorite
+	}
+
+	for i, v := range videoInfos {
 		resp.VideoList = append(resp.VideoList, &video.Video{
 			Id:            int64(v.ID),
 			Author:        userListMap[v.UserId],
@@ -101,7 +110,7 @@ func (vs *VideoServiceImpl) VideoFeed(ctx context.Context, req *video.VideoFeedR
 			CoverUrl:      v.CoverURL,
 			FavoriteCount: v.FavoriteCount,
 			CommentCount:  v.CommentCount,
-			IsFavorite:    isFavorite,
+			IsFavorite:    manyIsFavorite[i],
 			Title:         v.Title,
 		})
 	}
@@ -168,8 +177,8 @@ func (vs *VideoServiceImpl) VideoPublish(ctx context.Context, req *video.VideoPu
 	// ⑥ 将 video 信息存入 redis，并对 user 的 work_count+1
 	videoKey := auto.CreateVideoKey(uint(videoId))
 	videoMap := auto.CreateMapVideoInfo(videoInfo)
-	if err = vs.rClient.HSetVideoInfo(ctx, videoKey, videoMap); err != nil {
-		zap.L().Error("vs.rClient.HSetVideoInfo err:", zap.Error(err))
+	if err = vs.rCache.HSetVideoInfo(ctx, videoKey, videoMap); err != nil {
+		zap.L().Error("vs.rCache.HSetVideoInfo err:", zap.Error(err))
 		return vs.respRepo.VideoPublishResponse(errcode.ErrDB, err.Error(), &video.VideoPublishResponse{}), nil
 	}
 	addWorkCountResp, _ := client.UserClient.AddUserWorkCount(ctx, &user.AddUserWorkCountRequest{UserId: req.UserId})
@@ -183,14 +192,14 @@ func (vs *VideoServiceImpl) VideoPublish(ctx context.Context, req *video.VideoPu
 	}
 	// ⑦ 将video_id作为member，时间作为 score使用 zset 添加到 redis中
 	publishKey := auto.CreatePublishKey()
-	if err = vs.rClient.PublishVideo(ctx, publishKey, float64(timeNow.Unix()), videoId); err != nil {
-		zap.L().Error("vs.rClient.PublishVideo err:", zap.Error(err))
+	if err = vs.rCache.PublishVideo(ctx, publishKey, float64(timeNow.Unix()), videoId); err != nil {
+		zap.L().Error("vs.rCache.PublishVideo err:", zap.Error(err))
 		return vs.respRepo.VideoPublishResponse(errcode.ErrRedis, err.Error(), &video.VideoPublishResponse{}), nil
 	}
 	// ⑧ 删除用户的视频缓存，user_video::video_ids
 	userVideoKey := auto.CreateUserVideoKey(uint(req.UserId))
-	if err = vs.rClient.SDelUserVideo(ctx, userVideoKey); err != nil {
-		zap.L().Error("vs.rClient.SDelUserVideo err:", zap.Error(err))
+	if err = vs.rCache.SDelUserVideo(ctx, userVideoKey); err != nil {
+		zap.L().Error("vs.rCache.SDelUserVideo err:", zap.Error(err))
 		return vs.respRepo.VideoPublishResponse(errcode.ErrRedis, err.Error(), &video.VideoPublishResponse{}), nil
 	}
 
@@ -215,9 +224,9 @@ func (vs *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishL
 	// ② 根据 user_id 在 video表中查询 当前用户发表的视频信息，和视频id
 	// 去缓存查询 user 的 video_ids
 	userVideoKey := auto.CreateUserVideoKey(uint(req.UserId))
-	videoIds, err := vs.rClient.SGetUserVideoIds(ctx, userVideoKey)
+	videoIds, err := vs.rCache.SGetUserVideoIds(ctx, userVideoKey)
 	if err != nil {
-		zap.L().Error("vs.rClient.SGetUserVideoIds err:", zap.Error(err))
+		zap.L().Error("vs.rCache.SGetUserVideoIds err:", zap.Error(err))
 		return vs.respRepo.PublishListResponse(errcode.ErrRedis, err.Error(), &video.PublishListResponse{}), nil
 	}
 	if videoIds == nil {
@@ -227,25 +236,53 @@ func (vs *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishL
 			zap.L().Error("vs.videoRepo.GetVideoIdsByUserId err:", zap.Error(err))
 			return vs.respRepo.PublishListResponse(errcode.ErrDB, err.Error(), &video.PublishListResponse{}), nil
 		}
+		if len(videoIds) == 0 {
+			return vs.respRepo.PublishListResponse(errcode.StatusOK, model.MsgNil, resp), nil
+		}
 		// 添加缓存
-		if err = vs.rClient.SAddUserVideoIds(ctx, userVideoKey, videoIds); err != nil {
-			zap.L().Error("vs.rClient.SAddUserVideoIds err:", zap.Error(err))
+		if err = vs.rCache.SAddUserVideoIds(ctx, userVideoKey, videoIds); err != nil {
+			zap.L().Error("vs.rCache.SAddUserVideoIds err:", zap.Error(err))
 			return vs.respRepo.PublishListResponse(errcode.ErrRedis, err.Error(), &video.PublishListResponse{}), nil
 		}
 	}
-	// 扩容
+	// ③ 判断 用户对每个视频是否点赞
+	IsFavoriteResp, _ := client.FavorClient.IsFavoriteVideos(ctx, &favor.IsFavoriteVideosRequest{
+		UserId:   req.UserId,
+		VideoIds: videoIds,
+	})
+	if IsFavoriteResp == nil {
+		zap.L().Error("client.FavorClient.IsFavoriteVideos 返回空指针")
+		return vs.respRepo.PublishListResponse(errcode.ErrServer, model.MsgNil, &video.PublishListResponse{}), nil
+	}
+	if IsFavoriteResp.StatusCode != model.RpcSuccess {
+		zap.L().Error("client.FavorClient.IsFavoriteVideos err:", zap.Error(err))
+		return vs.respRepo.PublishListResponse(errcode.CreateErr(IsFavoriteResp.StatusCode, model.MsgNil), IsFavoriteResp.StatusMsg, &video.PublishListResponse{}), nil
+	}
 	resp.VideoList = make([]*video.Video, len(videoIds))
 	// ③ 查找 videoInfos ，
 	for i, videoId := range videoIds {
 		// 根据 video_id 从缓存中查询 video_info
-		videoInfo, err := vs.GetVideoInfo(ctx, videoId)
+		videoKey := auto.CreateVideoKey(uint(videoId))
+		videoInfo, err := vs.rCache.HGetVideoInfo(ctx, videoKey)
 		if err != nil {
+			zap.L().Error("vs.rCache.HGetVideoInfo err:", zap.Error(err))
 			return vs.respRepo.PublishListResponse(errcode.ErrDB, err.Error(), &video.PublishListResponse{}), nil
 		}
-		// ④ 判断视频是否点赞
-		isFavorite, err := vs.IsFavoriteVideo(ctx, req.UserId, videoId)
-		if err != nil {
-			return vs.respRepo.PublishListResponse(errcode.ErrRedis, err.Error(), &video.PublishListResponse{}), nil
+		if videoInfo == nil {
+			// 没有缓存，查数据库
+			videoInfo, err = vs.videoRepo.GetVideoInfoByVideoId(ctx, videoId)
+			if err != nil {
+				zap.L().Error("vs.rCache.GetVideoInfoByVideoId err:", zap.Error(err))
+				return vs.respRepo.PublishListResponse(errcode.ErrDB, err.Error(), &video.PublishListResponse{}), nil
+			}
+			if videoInfo == nil {
+				return vs.respRepo.PublishListResponse(myerr.VideoNotExist, model.MsgNil, &video.PublishListResponse{}), nil
+			}
+			// 添加缓存
+			if err = vs.rCache.HSetVideoInfo(ctx, videoKey, auto.CreateMapVideoInfo(videoInfo)); err != nil {
+				zap.L().Error("vs.rCache.HSetVideoInfo err:", zap.Error(err))
+				return vs.respRepo.PublishListResponse(errcode.ErrRedis, err.Error(), &video.PublishListResponse{}), nil
+			}
 		}
 		resp.VideoList[i] = &video.Video{
 			Id:            videoId,
@@ -254,338 +291,176 @@ func (vs *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishL
 			CoverUrl:      videoInfo.CoverURL,
 			FavoriteCount: videoInfo.FavoriteCount,
 			CommentCount:  videoInfo.CommentCount,
-			IsFavorite:    isFavorite,
+			IsFavorite:    IsFavoriteResp.ManyIsFavorite[i],
 			Title:         videoInfo.Title,
 		}
 	}
 	return vs.respRepo.PublishListResponse(errcode.StatusOK, model.MsgNil, resp), nil
-
 }
 
-func (vs *VideoServiceImpl) FavoriteAction(ctx context.Context, req *video.FavoriteActionRequest) (resp *video.FavoriteActionResponse, err error) {
-	videoKey := auto.CreateVideoKey(uint(req.VideoId))
-	favKey := auto.CreateFavKey(uint(req.UserId))
-	// 1.校验业务逻辑
-	// ① 判断该视频是否存在,去redis查询video_info，并获取作者user_id，没有查到就去查数据库，数据库中没有返回错误，查到开启线程池添加缓存
-	videoInfo, err := vs.GetVideoInfo(ctx, req.VideoId)
-	if err == gorm.ErrRecordNotFound {
-		return vs.respRepo.FavoriteActionResponse(myerr.VideoNotExist, err.Error(), &video.FavoriteActionResponse{}), nil
-	}
+func (vs *VideoServiceImpl) GetVideoInfo(ctx context.Context, req *video.GetVideoInfoRequest) (resp *video.GetVideoInfoResponse, err error) {
+	resp = new(video.GetVideoInfoResponse)
+	videoInfo, err := vs.GetVideoInfoSelf(ctx, req.VideoId)
 	if err != nil {
-		return vs.respRepo.FavoriteActionResponse(errcode.ErrDB, err.Error(), &video.FavoriteActionResponse{}), nil
+		zap.L().Error("vs.GetVideoInfoSelf err:", zap.Error(err))
+		return vs.respRepo.GetVideoInfoResponse(errcode.ErrDB, err.Error(), &video.GetVideoInfoResponse{}), nil
 	}
-	// ② 去redis，判断是否对该视频有点赞记录,点赞记录没有过期时间
-	exist, err := vs.rClient.IsFavRecordExist(ctx, favKey, req.VideoId)
-	if err != nil {
-		zap.L().Error("vs.rClient.IsFavRecordExist err:", zap.Error(err))
-		return vs.respRepo.FavoriteActionResponse(errcode.ErrRedis, err.Error(), &video.FavoriteActionResponse{}), nil
-	}
-	// 2.处理业务
-	switch req.ActionType {
-	case model.FAVORITE:
-		if exist {
-			return vs.respRepo.FavoriteActionResponse(myerr.AlreadyFavorite, model.MsgNil, &video.FavoriteActionResponse{}), nil
-		}
-		// ① 将 点赞关系 添加到 redis中
-		err = vs.rClient.CreateFavorite(ctx, favKey, req.VideoId)
-		if err != nil {
-			zap.L().Error("vs.rClient.CreateFavorite err:", zap.Error(err))
-			return vs.respRepo.FavoriteActionResponse(errcode.ErrRedis, err.Error(), &video.FavoriteActionResponse{}), nil
-		}
-		// 直接对redis中 user_info 和 video_info 的 count进行更改
-		// ② 对视频 的 favorite_count+1
-		err = vs.rClient.AddVideoFavoriteCount(ctx, videoKey)
-		if err != nil {
-			zap.L().Error("vs.rClient.AddVideoFavoriteCount err:", zap.Error(err))
-			return vs.respRepo.FavoriteActionResponse(errcode.ErrRedis, err.Error(), &video.FavoriteActionResponse{}), nil
-		}
-		// ③ 对当前用户的 favorite_count+1，对视频的作者的 total_favorite+1
-		updateUserFavCntResp, _ := client.UserClient.UpdateUserFavoriteCount(ctx, &user.UpdateUserFavoriteCountRequest{
-			UserId:     req.UserId,
-			AuthorId:   int64(videoInfo.UserId),
-			ActionType: model.FAVORITE,
-		})
-		if updateUserFavCntResp == nil {
-			zap.L().Error("client.UserClient.UpdateUserFavoriteCount 返回空指针")
-			return vs.respRepo.FavoriteActionResponse(errcode.ErrServer, model.MsgNil, &video.FavoriteActionResponse{}), nil
-		}
-		if updateUserFavCntResp.StatusCode != 0 {
-			zap.L().Error("client.UserClient.UpdateUserFavoriteCount err:", zap.Error(err))
-			return vs.respRepo.FavoriteActionResponse(errcode.CreateErr(updateUserFavCntResp.StatusCode, model.MsgNil), updateUserFavCntResp.StatusMsg, &video.FavoriteActionResponse{}), nil
-		}
-	case model.CANCELFAVORITE:
-		if !exist {
-			return vs.respRepo.FavoriteActionResponse(myerr.IsNotFavorite, err.Error(), &video.FavoriteActionResponse{}), nil
-		}
-		// ① 将 点赞关系 从redis中删除
-		err = vs.rClient.DelFavorite(ctx, favKey, req.VideoId)
-		if err != nil {
-			zap.L().Error("vs.rClient.DelFavorite err:", zap.Error(err))
-			return vs.respRepo.FavoriteActionResponse(errcode.ErrRedis, err.Error(), &video.FavoriteActionResponse{}), nil
-		}
-		// 直接对redis中 user_info 和 video_info 的 count进行更改
-		// ② 对视频 的 favorite_count-1
-		err = vs.rClient.SubVideoFavoriteCount(ctx, videoKey)
-		if err != nil {
-			zap.L().Error("vs.rClient.SubVideoFavoriteCount err:", zap.Error(err))
-			return vs.respRepo.FavoriteActionResponse(errcode.ErrRedis, err.Error(), &video.FavoriteActionResponse{}), nil
-		}
-		// ③ 对当前用户的 favorite_count-1，对视频的作者的 total_favorite-1
-		updateUserFavCntResp, _ := client.UserClient.UpdateUserFavoriteCount(ctx, &user.UpdateUserFavoriteCountRequest{
-			UserId:     req.UserId,
-			AuthorId:   int64(videoInfo.UserId),
-			ActionType: model.CANCELFAVORITE,
-		})
-		if updateUserFavCntResp == nil {
-			zap.L().Error("client.UserClient.UpdateUserFavoriteCount 返回空指针")
-			return vs.respRepo.FavoriteActionResponse(errcode.ErrServer, model.MsgNil, &video.FavoriteActionResponse{}), nil
-		}
-		if updateUserFavCntResp.StatusCode != 0 {
-			zap.L().Error("client.UserClient.UpdateUserFavoriteCount err:", zap.Error(err))
-			return vs.respRepo.FavoriteActionResponse(errcode.CreateErr(updateUserFavCntResp.StatusCode, model.MsgNil), updateUserFavCntResp.StatusMsg, &video.FavoriteActionResponse{}), nil
-		}
-	}
-	return vs.respRepo.FavoriteActionResponse(errcode.StatusOK, model.MsgNil, &video.FavoriteActionResponse{}), nil
-}
-
-func (vs *VideoServiceImpl) FavoriteList(ctx context.Context, req *video.FavoriteListRequest) (resp *video.FavoriteListResponse, err error) {
-	resp = new(video.FavoriteListResponse)
-	// 1.校验业务逻辑
-	// 2.处理业务
-	// ① 根据 user_id 查询当前用户的所有信息
-	userIndexResp, err := client.UserClient.UserIndex(ctx, &user.UserIndexRequest{UserId: req.UserId, Token: "", MyUserId: req.UserId})
+	// 通过 user_id 去查 user_info
+	userIndexResp, _ := client.UserClient.UserIndex(ctx, &user.UserIndexRequest{
+		UserId:   int64(videoInfo.UserId),
+		Token:    "",
+		MyUserId: req.UserId,
+	})
 	if userIndexResp == nil {
 		zap.L().Error("client.UserClient.UserIndex 返回空指针")
-		return vs.respRepo.FavoriteListResponse(errcode.ErrServer, model.MsgNil, &video.FavoriteListResponse{}), nil
+		return vs.respRepo.GetVideoInfoResponse(errcode.ErrServer, model.MsgNil, &video.GetVideoInfoResponse{}), nil
 	}
-	if userIndexResp.StatusCode != 0 {
+	if userIndexResp.StatusCode != model.RpcSuccess {
 		zap.L().Error("client.UserClient.UserIndex err:", zap.Error(err))
-		return vs.respRepo.FavoriteListResponse(errcode.CreateErr(userIndexResp.StatusCode, model.MsgNil), userIndexResp.StatusMsg, &video.FavoriteListResponse{}), nil
+		return vs.respRepo.GetVideoInfoResponse(errcode.CreateErr(userIndexResp.StatusCode, model.MsgNil), userIndexResp.StatusMsg, &video.GetVideoInfoResponse{}), nil
 	}
-	// ② 根据 user_id 在 redis中查询 点赞的video_ids
-	favoriteKey := auto.CreateFavKey(uint(req.UserId))
-	videoIds, err := vs.rClient.GetFavoriteVideoIds(ctx, favoriteKey)
-	if err != nil {
-		zap.L().Error("vs.rClient.GetFavoriteVideoIds err:", zap.Error(err))
-		return vs.respRepo.FavoriteListResponse(errcode.ErrRedis, err.Error(), &video.FavoriteListResponse{}), nil
+	// 判断是否对该视频点过赞
+	isFavorVideoResp, _ := client.FavorClient.IsFavoriteVideos(ctx, &favor.IsFavoriteVideosRequest{
+		UserId:   req.UserId,
+		VideoIds: []int64{req.VideoId},
+	})
+	if isFavorVideoResp == nil {
+		zap.L().Error("client.FavorClient.IsFavoriteVideos 返回空指针")
+		return vs.respRepo.GetVideoInfoResponse(errcode.ErrServer, model.MsgNil, &video.GetVideoInfoResponse{}), nil
 	}
-	if videoIds == nil {
-		return vs.respRepo.FavoriteListResponse(errcode.StatusOK, model.MsgNil, resp), nil
+	if isFavorVideoResp.StatusCode != model.RpcSuccess {
+		zap.L().Error("client.FavorClient.IsFavoriteVideos err:", zap.Error(err))
+		return vs.respRepo.GetVideoInfoResponse(errcode.CreateErr(isFavorVideoResp.StatusCode, model.MsgNil), isFavorVideoResp.StatusMsg, &video.GetVideoInfoResponse{}), nil
 	}
-	// ③ 根据 video_id 在 redis中查询 video_info
-	for _, videoId := range videoIds {
-		videoInfo, err := vs.GetVideoInfo(ctx, videoId)
+	resp.VideoInfo = &video.Video{
+		Id:            int64(videoInfo.ID),
+		Author:        userIndexResp.User,
+		PlayUrl:       videoInfo.PlayURL,
+		CoverUrl:      videoInfo.CoverURL,
+		FavoriteCount: videoInfo.FavoriteCount,
+		CommentCount:  videoInfo.CommentCount,
+		IsFavorite:    isFavorVideoResp.ManyIsFavorite[0],
+		Title:         videoInfo.Title,
+	}
+	return vs.respRepo.GetVideoInfoResponse(errcode.StatusOK, model.MsgNil, resp), nil
+}
+
+func (vs *VideoServiceImpl) GetManyVideoInfos(ctx context.Context, req *video.GetManyVideoInfosRequest) (resp *video.GetManyVideoInfosResponse, err error) {
+	resp = new(video.GetManyVideoInfosResponse)
+	// 判断是否对每个 video 点过赞
+	isFavorVideosResp, _ := client.FavorClient.IsFavoriteVideos(ctx, &favor.IsFavoriteVideosRequest{
+		UserId:   req.UserId,
+		VideoIds: req.VideoIds,
+	})
+	if isFavorVideosResp == nil {
+		zap.L().Error("client.FavorClient.IsFavoriteVideos 返回空指针")
+		return vs.respRepo.GetManyVideoInfosResponse(errcode.ErrServer, model.MsgNil, &video.GetManyVideoInfosResponse{}), nil
+	}
+	if isFavorVideosResp.StatusCode != model.RpcSuccess {
+		zap.L().Error("client.FavorClient.IsFavoriteVideos err:", zap.Error(err))
+		return vs.respRepo.GetManyVideoInfosResponse(errcode.CreateErr(isFavorVideosResp.StatusCode, model.MsgNil), isFavorVideosResp.StatusMsg, &video.GetManyVideoInfosResponse{}), nil
+	}
+	// 先获取所有video_info
+	resp.VideoInfos = make([]*video.Video, len(req.VideoIds))
+	authorIds := make([]int64, len(req.VideoIds))
+	for i, videoId := range req.VideoIds {
+		videoInfo, err := vs.GetVideoInfoSelf(ctx, videoId)
 		if err != nil {
-			return vs.respRepo.FavoriteListResponse(errcode.ErrDB, err.Error(), &video.FavoriteListResponse{}), nil
+			zap.L().Error("vs.GetVideoInfoSelf err:", zap.Error(err))
+			return vs.respRepo.GetManyVideoInfosResponse(errcode.ErrDB, err.Error(), &video.GetManyVideoInfosResponse{}), nil
 		}
-		isFavorite, err := vs.IsFavoriteVideo(ctx, req.UserId, videoId)
-		if err != nil {
-			return vs.respRepo.FavoriteListResponse(errcode.ErrDB, err.Error(), &video.FavoriteListResponse{}), nil
-		}
-		resp.VideoList = append(resp.VideoList, &video.Video{
-			Id:            int64(videoInfo.ID),
-			Author:        userIndexResp.User,
+		resp.VideoInfos[i] = &video.Video{
+			Id: int64(videoInfo.ID),
+			//Author:        getUserListResp.UserList[i],
 			PlayUrl:       videoInfo.PlayURL,
 			CoverUrl:      videoInfo.CoverURL,
 			FavoriteCount: videoInfo.FavoriteCount,
 			CommentCount:  videoInfo.CommentCount,
-			IsFavorite:    isFavorite,
+			IsFavorite:    isFavorVideosResp.ManyIsFavorite[i],
 			Title:         videoInfo.Title,
-		})
+		}
+		// 根据 video_id 查询到每个 video 的作者 ，方便下面添加作者信息
+		authorIds[i] = int64(videoInfo.UserId)
 	}
-	// 4.返回数据
-	return vs.respRepo.FavoriteListResponse(errcode.StatusOK, model.MsgNil, resp), nil
-}
 
-func (vs *VideoServiceImpl) CommentAction(ctx context.Context, req *video.CommentActionRequest) (resp *video.CommentActionResponse, err error) {
-	resp = new(video.CommentActionResponse)
-	videoKey := auto.CreateVideoKey(uint(req.VideoId))
-	// 1.校验业务逻辑
-	// ① 判断该视频是否存在,去redis查询video_info，并获取作者user_id，没有查到就去查数据库，数据库中没有返回错误，查到开启线程池添加缓存
-	//videoInfo, err := vs.GetVideoInfo(ctx, req.VideoId)
-	//if err != nil {
-	//	return vs.respRepo.CommentActionResponse(errcode.ErrDB, err.Error(), &video.CommentActionResponse{}), nil
-	//}
-	// 2.处理业务
-	switch req.ActionType {
-	case model.COMMENT:
-		// ① 将 评论信息添加到数据库中
-		// 构建评论实例
-		commentId, _ := global.SnowFlake.NextId()
-		timeNow := time.Now()
-		commentInfo := &auto.Comment{
-			BaseModel: auto.BaseModel{ID: uint(commentId), CreatedAt: timeNow, UpdatedAt: timeNow},
-			VideoId:   uint(req.VideoId),
-			UserId:    uint(req.UserId),
-			Content:   *req.CommentText,
-		}
-		err = vs.videoRepo.CreateComment(ctx, commentInfo)
-		if err != nil {
-			zap.L().Error("vs.videoRepo.CreateComment err:", zap.Error(err))
-			return vs.respRepo.CommentActionResponse(errcode.ErrDB, err.Error(), &video.CommentActionResponse{}), nil
-		}
-		// 直接对redis中video_info 的 comment_count进行更改
-		// ② 对视频 的 comment_count+1
-		err = vs.rClient.AddVideoCommentCount(ctx, videoKey)
-		if err != nil {
-			zap.L().Error("vs.rClient.AddVideoCommentCount err:", zap.Error(err))
-			return vs.respRepo.CommentActionResponse(errcode.ErrRedis, err.Error(), &video.CommentActionResponse{}), nil
-		}
-		// ③ 将comment加入 redis，用zset
-		commentKey := auto.CreateCommentKey(req.VideoId)
-		content := auto.CreateCommentValue(commentId, req.UserId, *req.CommentText)
-		if err = vs.rClient.ZSAddCommentInfo(ctx, commentKey, float64(timeNow.Unix()), content); err != nil {
-			zap.L().Error("vs.rClient.ZSAddCommentInfo err:", zap.Error(err))
-			return vs.respRepo.CommentActionResponse(errcode.ErrRedis, err.Error(), &video.CommentActionResponse{}), nil
-		}
-		// ④ 获取用户信息
-		userIndexResp, _ := client.UserClient.UserIndex(ctx, &user.UserIndexRequest{
-			UserId:   req.UserId,
-			Token:    "",
-			MyUserId: req.UserId,
-		})
-		if userIndexResp == nil {
-			zap.L().Error("client.UserClient.UserIndex 返回空指针")
-			return vs.respRepo.CommentActionResponse(errcode.ErrServer, model.MsgNil, &video.CommentActionResponse{}), nil
-		}
-		if userIndexResp.StatusCode != 0 {
-			zap.L().Error("client.UserClient.UserIndex err:", zap.Error(err))
-			return vs.respRepo.CommentActionResponse(errcode.CreateErr(userIndexResp.StatusCode, model.MsgNil), userIndexResp.StatusMsg, &video.CommentActionResponse{}), nil
-		}
-		// 模型转换，格式化时间
-		createDate := timeNow.Format("01-02")
-		resp = &video.CommentActionResponse{
-			Comment: &video.Comment{
-				Id:         commentId,
-				User:       userIndexResp.User,
-				Content:    *req.CommentText,
-				CreateDate: createDate,
-			},
-		}
-
-	case model.CANCELCOMMENT:
-		// ① 从数据库中删除评论数据
-		commentInfo := &auto.Comment{
-			BaseModel: auto.BaseModel{ID: uint(*req.CommentId)},
-		}
-		// 删除缓存
-		commentKey := auto.CreateCommentKey(req.VideoId)
-		if err = vs.rClient.DelComment(ctx, commentKey); err != nil {
-			zap.L().Error("vs.rClient.DelComment err:", zap.Error(err))
-			return vs.respRepo.CommentActionResponse(errcode.ErrRedis, err.Error(), &video.CommentActionResponse{}), nil
-		}
-		err = vs.videoRepo.DeleteComment(ctx, commentInfo)
-		if err != nil {
-			zap.L().Error("vs.videoRepo.DeleteComment err:", zap.Error(err))
-			return vs.respRepo.CommentActionResponse(errcode.ErrDB, err.Error(), &video.CommentActionResponse{}), nil
-		}
-		// 延迟 删除缓存
-		time.Sleep(time.Millisecond * 50)
-		if err = vs.rClient.DelComment(ctx, commentKey); err != nil {
-			zap.L().Error("vs.rClient.DelComment err:", zap.Error(err))
-			return vs.respRepo.CommentActionResponse(errcode.ErrRedis, err.Error(), &video.CommentActionResponse{}), nil
-		}
-		// 直接对redis中 video_info 的 comment_count进行更改
-		// ② 对视频 的 comment_count-1
-		err = vs.rClient.SubVideoCommentCount(ctx, videoKey)
-		if err != nil {
-			zap.L().Error("vs.rClient.SubVideoCommentCount err:", zap.Error(err))
-			return vs.respRepo.CommentActionResponse(errcode.ErrRedis, err.Error(), &video.CommentActionResponse{}), nil
-		}
-		resp = &video.CommentActionResponse{}
-	}
-	return vs.respRepo.CommentActionResponse(errcode.StatusOK, model.MsgNil, resp), nil
-}
-
-func (vs *VideoServiceImpl) CommentList(ctx context.Context, req *video.CommentListRequest) (resp *video.CommentListResponse, err error) {
-	resp = new(video.CommentListResponse)
-	// 1.校验业务逻辑
-	// 2.处理业务，读评论多，写评论相对没那么多
-	// ① 去 redis 直接查评论信息
-	commentKey := auto.CreateCommentKey(req.VideoId)
-	userIds, commentList, err := vs.rClient.ZGetCommentList(ctx, commentKey)
-	if err != nil {
-		zap.L().Error("client.UserClient.ZGetCommentList err:", zap.Error(err))
-		return vs.respRepo.CommentListResponse(errcode.ErrServer, model.MsgNil, &video.CommentListResponse{}), nil
-	}
-	// 无缓存,去数据库
-	userIds, err = vs.videoRepo.GetCommentAuthorIds(ctx, req.VideoId)
-	if err != nil {
-		zap.L().Error("client.UserClient.GetCommentAuthorIds err:", zap.Error(err))
-		return vs.respRepo.CommentListResponse(errcode.ErrDB, model.MsgNil, &video.CommentListResponse{}), nil
-	}
-	if userIds == nil {
-		return vs.respRepo.CommentListResponse(errcode.StatusOK, model.MsgNil, &video.CommentListResponse{}), nil
-	}
-	commentList, err = vs.videoRepo.GetCommentList(ctx, req.VideoId)
-	if err != nil {
-		zap.L().Error("client.UserClient.GetCommentList err:", zap.Error(err))
-		return vs.respRepo.CommentListResponse(errcode.ErrDB, model.MsgNil, &video.CommentListResponse{}), nil
-	}
-	// 添加缓存，消息队列
-	for i, v := range commentList {
-		// ③ 将comment加入 redis，用zset
-		commentKey = auto.CreateCommentKey(req.VideoId)
-		content := auto.CreateCommentValue(int64(v.ID), userIds[i], v.Content)
-		if err = vs.rClient.ZSAddCommentInfo(ctx, commentKey, float64(v.CreatedAt.Unix()), content); err != nil {
-			zap.L().Error("vs.rClient.ZSAddCommentInfo err:", zap.Error(err))
-			return vs.respRepo.CommentListResponse(errcode.ErrRedis, err.Error(), &video.CommentListResponse{}), nil
-		}
-	}
-	// ② 查出所有 user_id的详细信息
-	userListResp, _ := client.UserClient.GetUserList(ctx, &user.GetUserListRequest{
+	getUserListResp, _ := client.UserClient.GetUserList(ctx, &user.GetUserListRequest{
 		UserId:   req.UserId,
-		TargetId: userIds,
+		TargetId: authorIds,
 	})
-	if userListResp == nil {
-		zap.L().Error("client.UserClient.GetUserList 返回空指针")
-		return vs.respRepo.CommentListResponse(errcode.ErrServer, model.MsgNil, &video.CommentListResponse{}), nil
+	if getUserListResp == nil {
+		zap.L().Error("client.UserClient.GetUserListRequest 返回空指针")
+		return vs.respRepo.GetManyVideoInfosResponse(errcode.ErrServer, model.MsgNil, &video.GetManyVideoInfosResponse{}), nil
 	}
-	if userListResp.StatusCode != 0 {
-		zap.L().Error("client.UserClient.GetUserList err:", zap.Error(err))
-		return vs.respRepo.CommentListResponse(errcode.CreateErr(userListResp.StatusCode, model.MsgNil), userListResp.StatusMsg, &video.CommentListResponse{}), nil
+	if getUserListResp.StatusCode != model.RpcSuccess {
+		zap.L().Error("client.UserClient.GetUserListRequest err:", zap.Error(err))
+		return vs.respRepo.GetManyVideoInfosResponse(errcode.CreateErr(getUserListResp.StatusCode, model.MsgNil), getUserListResp.StatusMsg, &video.GetManyVideoInfosResponse{}), nil
 	}
-	// 3.模型转换并返回
-	for i, comment := range commentList {
-		resp.CommentList = append(resp.CommentList, &video.Comment{
-			Id:         int64(comment.ID),
-			User:       userListResp.UserList[i],
-			Content:    comment.Content,
-			CreateDate: comment.CreatedAt.Format("01-02"),
-		})
+	for i, authorInfo := range getUserListResp.UserList {
+		resp.VideoInfos[i].Author = authorInfo
 	}
-	// 4.返回数据
-	return vs.respRepo.CommentListResponse(errcode.StatusOK, model.MsgNil, resp), nil
+	return vs.respRepo.GetManyVideoInfosResponse(errcode.StatusOK, model.MsgNil, resp), nil
 }
 
-func (vs *VideoServiceImpl) IsFavoriteVideo(ctx context.Context, userId, videoId int64) (bool, error) {
-	// 查缓存
-	favKey := auto.CreateFavKey(uint(userId))
-	exist, err := vs.rClient.IsFavRecordExist(ctx, favKey, videoId)
-	if err != nil {
-		zap.L().Error("vs.rClient.IsFavRecordExist err:", zap.Error(err))
-		return false, err
+func (vs *VideoServiceImpl) AddVideoFavoriteCount(ctx context.Context, req *video.AddVideoFavoriteCountRequest) (resp *video.AddVideoFavoriteCountResponse, err error) {
+	// 添加缓存中 video_info 中的 favorite_count
+	videoKey := auto.CreateVideoKey(uint(req.VideoId))
+	if err = vs.rCache.AddVideoFavoriteCount(ctx, videoKey); err != nil {
+		zap.L().Error("vs.rCache.AddVideoFavoriteCount err:", zap.Error(err))
+		return vs.respRepo.AddVideoFavoriteCountResponse(errcode.ErrRedis, err.Error(), &video.AddVideoFavoriteCountResponse{}), nil
 	}
-	return exist, nil
+	return vs.respRepo.AddVideoFavoriteCountResponse(errcode.StatusOK, model.MsgNil, &video.AddVideoFavoriteCountResponse{}), nil
 }
 
-func (vs *VideoServiceImpl) GetVideoInfo(ctx context.Context, videoId int64) (*auto.Video, error) {
+func (vs *VideoServiceImpl) SubVideoFavoriteCount(ctx context.Context, req *video.SubVideoFavoriteCountRequest) (resp *video.SubVideoFavoriteCountResponse, err error) {
+	// 减少缓存中 video_info 中的 favorite_count
+	videoKey := auto.CreateVideoKey(uint(req.VideoId))
+	if err = vs.rCache.SubVideoFavoriteCount(ctx, videoKey); err != nil {
+		zap.L().Error("vs.rCache.SubVideoFavoriteCount err:", zap.Error(err))
+		return vs.respRepo.SubVideoFavoriteCountResponse(errcode.ErrRedis, err.Error(), &video.SubVideoFavoriteCountResponse{}), nil
+	}
+	return vs.respRepo.SubVideoFavoriteCountResponse(errcode.StatusOK, model.MsgNil, &video.SubVideoFavoriteCountResponse{}), nil
+}
+
+func (vs *VideoServiceImpl) AddVideoCommentCount(ctx context.Context, req *video.AddVideoCommentCountRequest) (resp *video.AddVideoCommentCountResponse, err error) {
+	// 添加缓存中 video_info 中的 comment_count
+	videoKey := auto.CreateVideoKey(uint(req.VideoId))
+	if err = vs.rCache.AddVideoCommentCount(ctx, videoKey); err != nil {
+		zap.L().Error("vs.rCache.AddVideoCommentCount err:", zap.Error(err))
+		return vs.respRepo.AddVideoCommentCountResponse(errcode.ErrRedis, err.Error(), &video.AddVideoCommentCountResponse{}), nil
+	}
+	return vs.respRepo.AddVideoCommentCountResponse(errcode.StatusOK, model.MsgNil, &video.AddVideoCommentCountResponse{}), nil
+}
+
+func (vs *VideoServiceImpl) SubVideoCommentCount(ctx context.Context, req *video.SubVideoCommentCountRequest) (resp *video.SubVideoCommentCountResponse, err error) {
+	// 添加缓存中 video_info 中的 comment_count
+	videoKey := auto.CreateVideoKey(uint(req.VideoId))
+	if err = vs.rCache.SubVideoCommentCount(ctx, videoKey); err != nil {
+		zap.L().Error("vs.rCache.SubVideoCommentCount err:", zap.Error(err))
+		return vs.respRepo.SubVideoCommentCountResponse(errcode.ErrRedis, err.Error(), &video.SubVideoCommentCountResponse{}), nil
+	}
+	return vs.respRepo.SubVideoCommentCountResponse(errcode.StatusOK, model.MsgNil, &video.SubVideoCommentCountResponse{}), nil
+}
+
+func (vs *VideoServiceImpl) GetVideoInfoSelf(ctx context.Context, videoId int64) (*auto.Video, error) {
 	videoKey := auto.CreateVideoKey(uint(videoId))
-	videoInfo, err := vs.rClient.HGetVideoInfo(ctx, videoKey)
+	videoInfo, err := vs.rCache.HGetVideoInfo(ctx, videoKey)
 	if err != nil {
-		zap.L().Error("vs.rClient.HGetVideoInfo err:", zap.Error(err))
+		zap.L().Error("vs.rCache.HGetVideoInfo err:", zap.Error(err))
 		return nil, err
 	}
 	if videoInfo == nil {
 		// 没有缓存，查数据库
 		videoInfo, err = vs.videoRepo.GetVideoInfoByVideoId(ctx, videoId)
 		if err != nil {
-			zap.L().Error("vs.rClient.GetVideoInfoByVideoId err:", zap.Error(err))
+			zap.L().Error("vs.rCache.GetVideoInfoByVideoId err:", zap.Error(err))
+			return nil, err
+		}
+		if videoInfo == nil {
 			return nil, err
 		}
 		// 添加缓存
-		if err = vs.rClient.HSetVideoInfo(ctx, videoKey, auto.CreateMapVideoInfo(videoInfo)); err != nil {
-			zap.L().Error("vs.rClient.HSetVideoInfo err:", zap.Error(err))
+		if err = vs.rCache.HSetVideoInfo(ctx, videoKey, auto.CreateMapVideoInfo(videoInfo)); err != nil {
+			zap.L().Error("vs.rCache.HSetVideoInfo err:", zap.Error(err))
 			return nil, err
 		}
 	}

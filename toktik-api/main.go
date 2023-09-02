@@ -9,6 +9,8 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"log"
 	_ "toktik-api/internal/api/chat"
+	_ "toktik-api/internal/api/comment"
+	_ "toktik-api/internal/api/favor"
 	_ "toktik-api/internal/api/interaction"
 	_ "toktik-api/internal/api/user"
 	_ "toktik-api/internal/api/video"

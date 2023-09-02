@@ -40,7 +40,7 @@ func InitMysql() {
 		panic("连接数据库失败, error=" + err.Error())
 	}
 	dao.Group.Mdb = DB
-	_ = DB.AutoMigrate(&auto.Video{}, &auto.Favorite{}, &auto.Comment{})
+	_ = DB.AutoMigrate(&auto.Video{})
 }
 
 func GetDB() *gorm.DB {

@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"toktik-api/internal/api"
@@ -65,7 +66,7 @@ func (h *HandlerChat) MessageList(c *gin.Context) {
 		return
 	}
 	req.UserId = content.ID
-
+	fmt.Printf("MessageListReq:%#v\n", req)
 	// 2.调用 rpc服务 获取响应
 	params := &chat.MessageListRequest{}
 	_ = copier.Copy(params, req)

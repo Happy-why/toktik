@@ -1,9 +1,9 @@
 package setting
 
 import (
+	"toktik-interaction/internal/cache"
 	"toktik-interaction/internal/dao"
 	"toktik-interaction/internal/dao/mysql"
-	"toktik-interaction/internal/dao/redis"
 )
 
 func init() {
@@ -16,5 +16,5 @@ type Dao struct {
 
 func (Dao) InitSetting() {
 	mysql.InitMysql()
-	dao.Group.Rdb = redis.InitRedis()
+	dao.Group.Rdb = cache.InitRedis()
 }

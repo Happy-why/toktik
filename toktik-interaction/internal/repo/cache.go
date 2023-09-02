@@ -2,15 +2,9 @@ package repo
 
 import (
 	"context"
-	"time"
 )
 
-type Cache interface {
-	Put(c context.Context, key, value string, expire time.Duration) error
-	Get(c context.Context, key string) (string, error)
-}
-
-type RClientRepo interface {
+type RCacheRepo interface {
 	KeyExist(c context.Context, key string) (bool, error)
 	SAddFollow(c context.Context, key string, targetId int64) error
 	SAddManyIds(c context.Context, key string, followIds []int64) error

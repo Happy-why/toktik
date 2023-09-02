@@ -14,10 +14,12 @@ type Client interface {
 	VideoFeed(ctx context.Context, Req *video.VideoFeedRequest, callOptions ...callopt.Option) (r *video.VideoFeedResponse, err error)
 	VideoPublish(ctx context.Context, Req *video.VideoPublishRequest, callOptions ...callopt.Option) (r *video.VideoPublishResponse, err error)
 	PublishList(ctx context.Context, Req *video.PublishListRequest, callOptions ...callopt.Option) (r *video.PublishListResponse, err error)
-	FavoriteList(ctx context.Context, Req *video.FavoriteListRequest, callOptions ...callopt.Option) (r *video.FavoriteListResponse, err error)
-	FavoriteAction(ctx context.Context, Req *video.FavoriteActionRequest, callOptions ...callopt.Option) (r *video.FavoriteActionResponse, err error)
-	CommentAction(ctx context.Context, Req *video.CommentActionRequest, callOptions ...callopt.Option) (r *video.CommentActionResponse, err error)
-	CommentList(ctx context.Context, Req *video.CommentListRequest, callOptions ...callopt.Option) (r *video.CommentListResponse, err error)
+	GetVideoInfo(ctx context.Context, Req *video.GetVideoInfoRequest, callOptions ...callopt.Option) (r *video.GetVideoInfoResponse, err error)
+	GetManyVideoInfos(ctx context.Context, Req *video.GetManyVideoInfosRequest, callOptions ...callopt.Option) (r *video.GetManyVideoInfosResponse, err error)
+	AddVideoFavoriteCount(ctx context.Context, Req *video.AddVideoFavoriteCountRequest, callOptions ...callopt.Option) (r *video.AddVideoFavoriteCountResponse, err error)
+	SubVideoFavoriteCount(ctx context.Context, Req *video.SubVideoFavoriteCountRequest, callOptions ...callopt.Option) (r *video.SubVideoFavoriteCountResponse, err error)
+	AddVideoCommentCount(ctx context.Context, Req *video.AddVideoCommentCountRequest, callOptions ...callopt.Option) (r *video.AddVideoCommentCountResponse, err error)
+	SubVideoCommentCount(ctx context.Context, Req *video.SubVideoCommentCountRequest, callOptions ...callopt.Option) (r *video.SubVideoCommentCountResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -64,22 +66,32 @@ func (p *kVideoServiceClient) PublishList(ctx context.Context, Req *video.Publis
 	return p.kClient.PublishList(ctx, Req)
 }
 
-func (p *kVideoServiceClient) FavoriteList(ctx context.Context, Req *video.FavoriteListRequest, callOptions ...callopt.Option) (r *video.FavoriteListResponse, err error) {
+func (p *kVideoServiceClient) GetVideoInfo(ctx context.Context, Req *video.GetVideoInfoRequest, callOptions ...callopt.Option) (r *video.GetVideoInfoResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.FavoriteList(ctx, Req)
+	return p.kClient.GetVideoInfo(ctx, Req)
 }
 
-func (p *kVideoServiceClient) FavoriteAction(ctx context.Context, Req *video.FavoriteActionRequest, callOptions ...callopt.Option) (r *video.FavoriteActionResponse, err error) {
+func (p *kVideoServiceClient) GetManyVideoInfos(ctx context.Context, Req *video.GetManyVideoInfosRequest, callOptions ...callopt.Option) (r *video.GetManyVideoInfosResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.FavoriteAction(ctx, Req)
+	return p.kClient.GetManyVideoInfos(ctx, Req)
 }
 
-func (p *kVideoServiceClient) CommentAction(ctx context.Context, Req *video.CommentActionRequest, callOptions ...callopt.Option) (r *video.CommentActionResponse, err error) {
+func (p *kVideoServiceClient) AddVideoFavoriteCount(ctx context.Context, Req *video.AddVideoFavoriteCountRequest, callOptions ...callopt.Option) (r *video.AddVideoFavoriteCountResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.CommentAction(ctx, Req)
+	return p.kClient.AddVideoFavoriteCount(ctx, Req)
 }
 
-func (p *kVideoServiceClient) CommentList(ctx context.Context, Req *video.CommentListRequest, callOptions ...callopt.Option) (r *video.CommentListResponse, err error) {
+func (p *kVideoServiceClient) SubVideoFavoriteCount(ctx context.Context, Req *video.SubVideoFavoriteCountRequest, callOptions ...callopt.Option) (r *video.SubVideoFavoriteCountResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.CommentList(ctx, Req)
+	return p.kClient.SubVideoFavoriteCount(ctx, Req)
+}
+
+func (p *kVideoServiceClient) AddVideoCommentCount(ctx context.Context, Req *video.AddVideoCommentCountRequest, callOptions ...callopt.Option) (r *video.AddVideoCommentCountResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.AddVideoCommentCount(ctx, Req)
+}
+
+func (p *kVideoServiceClient) SubVideoCommentCount(ctx context.Context, Req *video.SubVideoCommentCountRequest, callOptions ...callopt.Option) (r *video.SubVideoCommentCountResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.SubVideoCommentCount(ctx, Req)
 }

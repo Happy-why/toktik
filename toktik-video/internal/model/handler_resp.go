@@ -33,37 +33,55 @@ func (PublishListHandler) PublishListResponse(err errcode.Err, msg string, resp 
 	return resp
 }
 
-type FavoriteListHandler struct {
+type GetVideoInfoHandler struct {
 }
 
-func (FavoriteListHandler) FavoriteListResponse(err errcode.Err, msg string, resp *video.FavoriteListResponse) *video.FavoriteListResponse {
+func (GetVideoInfoHandler) GetVideoInfoResponse(err errcode.Err, msg string, resp *video.GetVideoInfoResponse) *video.GetVideoInfoResponse {
 	resp.StatusCode = err.ECode()
 	resp.StatusMsg = err.Error() + ":" + msg
 	return resp
 }
 
-type FavoriteActionHandler struct {
+type GetManyVideoInfosHandler struct {
 }
 
-func (FavoriteActionHandler) FavoriteActionResponse(err errcode.Err, msg string, resp *video.FavoriteActionResponse) *video.FavoriteActionResponse {
+func (GetManyVideoInfosHandler) GetManyVideoInfosResponse(err errcode.Err, msg string, resp *video.GetManyVideoInfosResponse) *video.GetManyVideoInfosResponse {
 	resp.StatusCode = err.ECode()
 	resp.StatusMsg = err.Error() + ":" + msg
 	return resp
 }
 
-type CommentActionHandler struct {
+type AddVideoFavoriteCountHandler struct {
 }
 
-func (CommentActionHandler) CommentActionResponse(err errcode.Err, msg string, resp *video.CommentActionResponse) *video.CommentActionResponse {
+func (AddVideoFavoriteCountHandler) AddVideoFavoriteCountResponse(err errcode.Err, msg string, resp *video.AddVideoFavoriteCountResponse) *video.AddVideoFavoriteCountResponse {
 	resp.StatusCode = err.ECode()
 	resp.StatusMsg = err.Error() + ":" + msg
 	return resp
 }
 
-type CommentListHandler struct {
+type SubVideoFavoriteCountHandler struct {
 }
 
-func (CommentListHandler) CommentListResponse(err errcode.Err, msg string, resp *video.CommentListResponse) *video.CommentListResponse {
+func (SubVideoFavoriteCountHandler) SubVideoFavoriteCountResponse(err errcode.Err, msg string, resp *video.SubVideoFavoriteCountResponse) *video.SubVideoFavoriteCountResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type AddVideoCommentCountHandler struct {
+}
+
+func (AddVideoCommentCountHandler) AddVideoCommentCountResponse(err errcode.Err, msg string, resp *video.AddVideoCommentCountResponse) *video.AddVideoCommentCountResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}
+
+type SubVideoCommentCountHandler struct {
+}
+
+func (SubVideoCommentCountHandler) SubVideoCommentCountResponse(err errcode.Err, msg string, resp *video.SubVideoCommentCountResponse) *video.SubVideoCommentCountResponse {
 	resp.StatusCode = err.ECode()
 	resp.StatusMsg = err.Error() + ":" + msg
 	return resp

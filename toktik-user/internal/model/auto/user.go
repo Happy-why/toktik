@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	BaseModel
-	Username        string `json:"username" gorm:"not null"`
+	Username        string `json:"username" gorm:"uniqueIndex:username,not null"` // 设置唯一索引，判断用户名是否重复
 	Password        string `json:"password" gorm:"not null"`
 	Avatar          string `json:"avatar" gorm:"not null"`           // 用户头像
 	BackgroundImage string `json:"background_image" gorm:"not null"` //背景图片

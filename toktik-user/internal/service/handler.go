@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	redis2 "github.com/go-redis/redis/v8"
+	redis "github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"strconv"
@@ -13,8 +13,8 @@ import (
 	"toktik-common/utils"
 	"toktik-rpc/kitex_gen/interaction"
 	"toktik-rpc/kitex_gen/user"
+	"toktik-user/internal/cache"
 	"toktik-user/internal/dao/mysql"
-	"toktik-user/internal/dao/redis"
 	"toktik-user/internal/global"
 	"toktik-user/internal/model"
 	"toktik-user/internal/model/auto"
@@ -26,18 +26,16 @@ import (
 // UserServiceImpl implements the last service interface defined in the IDL.
 type UserServiceImpl struct {
 	respRepo    repo.HandlerResp
-	cache       repo.Cache
-	userRepo    repo.UserRepo
-	rClient     repo.RClientRepo
+	UserRepo    repo.UserRepo
+	rCache      repo.RCacheRepo
 	transaction mysql.Transaction
 }
 
 func NewUserService() *UserServiceImpl {
 	return &UserServiceImpl{
-		cache:       redis.GetRdbCache(),
 		respRepo:    repo.NewHandlerResps(),
-		userRepo:    mysql.NewUserDao(),
-		rClient:     redis.NewUserRClient(),
+		UserRepo:    mysql.NewUserDao(),
+		rCache:      cache.NewUserCache(),
 		transaction: mysql.NewTransaction(),
 	}
 }
@@ -46,9 +44,9 @@ func NewUserService() *UserServiceImpl {
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterRequest) (*user.RegisterResponse, error) {
 	// 1.可以校验参数
 	// 2.校验业务逻辑(邮箱、账号、手机号是否被注册)
-	exist, err := s.userRepo.GetUserByUsername(ctx, req.Username)
+	exist, err := s.UserRepo.GetUserByUsername(ctx, req.Username)
 	if err != nil {
-		zap.L().Error("s.userRepo.GetUserByUsername err:", zap.Error(err))
+		zap.L().Error("s.UserRepo.GetUserByUsername err:", zap.Error(err))
 		return s.respRepo.RegisterResponse(errcode.ErrDB, err.Error(), &user.RegisterResponse{}), nil
 	}
 	if exist {
@@ -79,12 +77,12 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReques
 	}
 	// 将 userInfo 存储 数据库
 	if err = s.transaction.Action(func(conn mysql.DbConn) error {
-		if err = s.userRepo.SetUserInfo(ctx, conn, userInfo); err != nil {
-			zap.L().Error("s.userRepo.UserRegister err:", zap.Error(err))
+		if err = s.UserRepo.SetUserInfo(ctx, conn, userInfo); err != nil {
+			zap.L().Error("s.UserRepo.Useregister err:", zap.Error(err))
 			return err
 		}
-		if err = s.userRepo.SetUserCountInfo(ctx, conn, userCountInfo); err != nil {
-			zap.L().Error("s.userRepo.SetUserCountInfo err:", zap.Error(err))
+		if err = s.UserRepo.SetUserCountInfo(ctx, conn, userCountInfo); err != nil {
+			zap.L().Error("s.UserRepo.SetUserCountInfo err:", zap.Error(err))
 			return err
 		}
 		return nil
@@ -92,13 +90,13 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReques
 		return s.respRepo.RegisterResponse(errcode.ErrDB, err.Error(), &user.RegisterResponse{}), nil
 	}
 	// 将 userInfo 存储 redis
-	if err = s.rClient.HSetUserInfo(ctx, auto.CreateUserKey(uint(userID)), auto.CreateMapUserInfo(userInfo)); err != nil {
-		zap.L().Error("s.rClient.HSetUserInfo err:", zap.Error(err))
+	if err = s.rCache.HSetUserInfo(ctx, auto.CreateUserKey(uint(userID)), auto.CreateMapUserInfo(userInfo)); err != nil {
+		zap.L().Error("s.rCache.HSetUserInfo err:", zap.Error(err))
 		return s.respRepo.RegisterResponse(errcode.ErrRedis, err.Error(), &user.RegisterResponse{}), nil
 	}
 	// 将 userCount 存储 redis
-	if err = s.rClient.HSetUserCountInfo(ctx, auto.CreateUserCountKey(uint(userID)), auto.CreateMapUserCount(userCountInfo)); err != nil {
-		zap.L().Error("s.rClient.HSetUserInfo err:", zap.Error(err))
+	if err = s.rCache.HSetUserCountInfo(ctx, auto.CreateUserCountKey(uint(userID)), auto.CreateMapUserCount(userCountInfo)); err != nil {
+		zap.L().Error("s.rCache.HSetUserInfo err:", zap.Error(err))
 		return s.respRepo.RegisterResponse(errcode.ErrRedis, err.Error(), &user.RegisterResponse{}), nil
 	}
 	// 生成token
@@ -110,7 +108,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReques
 	// 将 token 中的 content 加入缓存，以便身份校验时的判断身份
 	a := make(chan struct{})
 	go func() {
-		if err := s.cache.Put(ctx, model.TypeUserToken+strconv.Itoa(int(userInfo.ID)), content, global.Settings.Token.UserTokenExp); err != nil {
+		if err := s.rCache.SetToken(ctx, model.TypeUserToken+strconv.Itoa(int(userInfo.ID)), content, global.Settings.Token.UserTokenExp); err != nil {
 			zap.L().Error("s.cache.Put err:", zap.Error(err))
 		}
 		a <- struct{}{}
@@ -128,9 +126,9 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginRequest) (re
 	c, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 	// 通过 username 查询 UserInfo
-	userInfo, err := s.userRepo.GetUserInfoByUsername(c, req.Username)
+	userInfo, err := s.UserRepo.GetUserInfoByUsername(c, req.Username)
 	if err != nil {
-		zap.L().Error("s.userRepo.GetUserByUsername err:", zap.Error(err))
+		zap.L().Error("s.UserRepo.GetUserByUsername err:", zap.Error(err))
 		return s.respRepo.LoginResponse(errcode.ErrDB, err.Error(), &user.LoginResponse{}), nil
 	}
 
@@ -149,7 +147,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginRequest) (re
 	//将 token 中的 content 加入缓存，以便身份校验时的判断身份
 	a := make(chan struct{}, 0)
 	go func() {
-		if err := s.cache.Put(c, model.TypeUserToken+strconv.Itoa(int(userInfo.ID)), content, global.Settings.Token.UserTokenExp); err != nil {
+		if err := s.rCache.SetToken(c, model.TypeUserToken+strconv.Itoa(int(userInfo.ID)), content, global.Settings.Token.UserTokenExp); err != nil {
 			zap.L().Error("s.cache.Put err:", zap.Error(err))
 		}
 		a <- struct{}{}
@@ -165,9 +163,9 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginRequest) (re
 
 func (s *UserServiceImpl) TokenVerify(ctx context.Context, req *user.TokenVerifyRequest) (resp *user.TokenVerifyResponse, err error) {
 	// 从缓存中查询 token 中的 content，校验身份
-	content, err := s.cache.Get(ctx, model.TypeUserToken+strconv.Itoa(int(req.UserId)))
+	content, err := s.rCache.GetToken(ctx, model.TypeUserToken+strconv.FormatInt(req.UserId, 10))
 	fmt.Println("content:", content)
-	if err == redis2.Nil {
+	if err == redis.Nil {
 		return nil, errors.New("查无此人")
 	}
 	if err != nil {
@@ -181,7 +179,7 @@ func (s *UserServiceImpl) UserIndex(ctx context.Context, req *user.UserIndexRequ
 	// 1.校验逻辑
 	// 通过 查询 relation表 判断是否关注该用户 来决定 is_follow字段 , 获得的 userInfo.ID 是 target_id
 	var isFollow bool
-	if req.UserId == req.UserId {
+	if req.UserId == req.MyUserId {
 		isFollow = false
 	} else {
 		isFollowResp, _ := client.InteractionClient.IsFollowTarget(ctx, &interaction.IsFollowTargetRequest{UserId: req.MyUserId, TargetId: req.UserId})
@@ -199,14 +197,14 @@ func (s *UserServiceImpl) UserIndex(ctx context.Context, req *user.UserIndexRequ
 	// 2.查询缓存
 	userKey := auto.CreateUserKey(uint(req.UserId))
 	userCountKey := auto.CreateUserCountKey(uint(req.UserId))
-	userInfo, err := s.rClient.HGetUserInfo(ctx, userKey)
+	userInfo, err := s.rCache.HGetUserInfo(ctx, userKey)
 	if err != nil {
-		zap.L().Error("s.rClient.HGetUserInfo err:", zap.Error(err))
+		zap.L().Error("s.rCache.HGetUserInfo err:", zap.Error(err))
 		return s.respRepo.UserIndexResponse(errcode.ErrRedis, err.Error(), &user.UserIndexResponse{}), nil
 	}
-	userCountInfo, err := s.rClient.HGetUserCountInfo(ctx, userCountKey)
+	userCountInfo, err := s.rCache.HGetUserCountInfo(ctx, userCountKey)
 	if err != nil {
-		zap.L().Error("s.rClient.HGetUserInfo err:", zap.Error(err))
+		zap.L().Error("s.rCache.HGetUserInfo err:", zap.Error(err))
 		return s.respRepo.UserIndexResponse(errcode.ErrRedis, err.Error(), &user.UserIndexResponse{}), nil
 	}
 	if userInfo != nil {
@@ -231,20 +229,22 @@ func (s *UserServiceImpl) UserIndex(ctx context.Context, req *user.UserIndexRequ
 
 	// 3.进行业务
 	// 根据 user_id 查询 userInfo
-	userInfo, err = s.userRepo.GetUserInfoByUserID(ctx, req.UserId)
+	userInfo, err = s.UserRepo.GetUserInfoByUserID(ctx, req.UserId)
 	if err == gorm.ErrRecordNotFound {
+		zap.L().Error("s.UserRepo.GetUserInfoByUserID err:", zap.Error(err))
 		return s.respRepo.UserIndexResponse(myerr.UserNotFound, model.MsgNil, &user.UserIndexResponse{}), nil
 	}
 	if err != nil {
-		zap.L().Error("s.userRepo.GetUserInfoByUserID err:", zap.Error(err))
+		zap.L().Error("s.UserRepo.GetUserInfoByUserID err:", zap.Error(err))
 		return s.respRepo.UserIndexResponse(errcode.ErrDB, err.Error(), &user.UserIndexResponse{}), nil
 	}
-	userCountInfo, err = s.userRepo.GetUserCountInfoByUserID(ctx, req.UserId)
+	userCountInfo, err = s.UserRepo.GetUserCountInfoByUserID(ctx, req.UserId)
 	if err == gorm.ErrRecordNotFound {
+		zap.L().Error("s.UserRepo.GetUserCountInfoByUserID err:", zap.Error(err))
 		return s.respRepo.UserIndexResponse(myerr.UserNotFound, model.MsgNil, &user.UserIndexResponse{}), nil
 	}
 	if err != nil {
-		zap.L().Error("s.userRepo.GetUserCountInfoByUserID err:", zap.Error(err))
+		zap.L().Error("s.UserRepo.GetUserCountInfoByUserID err:", zap.Error(err))
 		return s.respRepo.UserIndexResponse(errcode.ErrDB, err.Error(), &user.UserIndexResponse{}), nil
 	}
 	// 模型转换
@@ -264,12 +264,12 @@ func (s *UserServiceImpl) UserIndex(ctx context.Context, req *user.UserIndexRequ
 		},
 	}
 	//TODO 使用消息队列 将 userInfo 存储 redis
-	if err = s.rClient.HSetUserInfo(ctx, auto.CreateUserKey(uint(req.UserId)), auto.CreateMapUserInfo(userInfo)); err != nil {
-		zap.L().Error("s.rClient.HSetUserInfo err:", zap.Error(err))
+	if err = s.rCache.HSetUserInfo(ctx, auto.CreateUserKey(uint(req.UserId)), auto.CreateMapUserInfo(userInfo)); err != nil {
+		zap.L().Error("s.rCache.HSetUserInfo err:", zap.Error(err))
 		return s.respRepo.UserIndexResponse(errcode.ErrRedis, err.Error(), &user.UserIndexResponse{}), nil
 	}
-	if err = s.rClient.HSetUserCountInfo(ctx, auto.CreateUserCountKey(uint(req.UserId)), auto.CreateMapUserCount(userCountInfo)); err != nil {
-		zap.L().Error("s.rClient.HSetUserCountInfo err:", zap.Error(err))
+	if err = s.rCache.HSetUserCountInfo(ctx, auto.CreateUserCountKey(uint(req.UserId)), auto.CreateMapUserCount(userCountInfo)); err != nil {
+		zap.L().Error("s.rCache.HSetUserCountInfo err:", zap.Error(err))
 		return s.respRepo.UserIndexResponse(errcode.ErrRedis, err.Error(), &user.UserIndexResponse{}), nil
 	}
 	return s.respRepo.UserIndexResponse(errcode.StatusOK, model.MsgNil, resp), nil
@@ -280,12 +280,12 @@ func (s *UserServiceImpl) AddFollowCount(ctx context.Context, req *user.AddFollo
 	// 2.处理业务
 	//// 执行事务，对当前userId_follow_count+1，对targetId_follower_count+1
 	//if err = s.transaction.Action(func(conn mysql.DbConn) error {
-	//	if err = s.userRepo.AddFollowCount(ctx, conn, uint(req.UserId)); err != nil {
-	//		zap.L().Error("s.userRepo.AddFollowCount err:", zap.Error(err))
+	//	if err = s.UserRepo.AddFollowCount(ctx, conn, uint(req.UserId)); err != nil {
+	//		zap.L().Error("s.UserRepo.AddFollowCount err:", zap.Error(err))
 	//		return err
 	//	}
-	//	if err = s.userRepo.AddFollowerCount(ctx, conn, uint(req.TargetId)); err != nil {
-	//		zap.L().Error("s.userRepo.AddFollowerCount err:", zap.Error(err))
+	//	if err = s.UserRepo.AddFollowerCount(ctx, conn, uint(req.TargetId)); err != nil {
+	//		zap.L().Error("s.UserRepo.AddFollowerCount err:", zap.Error(err))
 	//		return err
 	//	}
 	//	return nil
@@ -295,14 +295,14 @@ func (s *UserServiceImpl) AddFollowCount(ctx context.Context, req *user.AddFollo
 	// 对 redis中 userInfo中的follow_count做更改
 	userCountKey := auto.CreateUserCountKey(uint(req.UserId))
 	targetCountKey := auto.CreateUserCountKey(uint(req.TargetId))
-	err = s.rClient.AddFollowCount(ctx, userCountKey)
+	err = s.rCache.AddFollowCount(ctx, userCountKey)
 	if err != nil {
-		zap.L().Error("s.rClient.AddFollowCount err:", zap.Error(err))
+		zap.L().Error("s.rCache.AddFollowCount err:", zap.Error(err))
 		return s.respRepo.AddFollowCountResponse(errcode.ErrRedis, err.Error(), &user.AddFollowCountResponse{}), nil
 	}
-	err = s.rClient.AddFollowerCount(ctx, targetCountKey)
+	err = s.rCache.AddFollowerCount(ctx, targetCountKey)
 	if err != nil {
-		zap.L().Error("s.rClient.AddFollowerCount err:", zap.Error(err))
+		zap.L().Error("s.rCache.AddFollowerCount err:", zap.Error(err))
 		return s.respRepo.AddFollowCountResponse(errcode.ErrRedis, err.Error(), &user.AddFollowCountResponse{}), nil
 	}
 	return s.respRepo.AddFollowCountResponse(errcode.StatusOK, model.MsgNil, &user.AddFollowCountResponse{}), nil
@@ -313,12 +313,12 @@ func (s *UserServiceImpl) SubFollowCount(ctx context.Context, req *user.SubFollo
 	// 2.处理业务
 	// 执行事务，对当前userId_follow_count-1，对targetId_follower_count-1
 	//if err = s.transaction.Action(func(conn mysql.DbConn) error {
-	//	if err = s.userRepo.SubFollowCount(ctx, conn, uint(req.UserId)); err != nil {
-	//		zap.L().Error("s.userRepo.SubFollowCount err:", zap.Error(err))
+	//	if err = s.UserRepo.SubFollowCount(ctx, conn, uint(req.UserId)); err != nil {
+	//		zap.L().Error("s.UserRepo.SubFollowCount err:", zap.Error(err))
 	//		return err
 	//	}
-	//	if err = s.userRepo.SubFollowerCount(ctx, conn, uint(req.TargetId)); err != nil {
-	//		zap.L().Error("s.userRepo.SubFollowerCount err:", zap.Error(err))
+	//	if err = s.UserRepo.SubFollowerCount(ctx, conn, uint(req.TargetId)); err != nil {
+	//		zap.L().Error("s.UserRepo.SubFollowerCount err:", zap.Error(err))
 	//		return err
 	//	}
 	//	return nil
@@ -328,14 +328,14 @@ func (s *UserServiceImpl) SubFollowCount(ctx context.Context, req *user.SubFollo
 	// 对 redis中 userInfo中的follow_count做更改
 	userCountKey := auto.CreateUserCountKey(uint(req.UserId))
 	targetCountKey := auto.CreateUserCountKey(uint(req.TargetId))
-	err = s.rClient.SubFollowCount(ctx, userCountKey)
+	err = s.rCache.SubFollowCount(ctx, userCountKey)
 	if err != nil {
-		zap.L().Error("s.rClient.SubFollowCount err:", zap.Error(err))
+		zap.L().Error("s.rCache.SubFollowCount err:", zap.Error(err))
 		return s.respRepo.SubFollowCountResponse(errcode.ErrRedis, err.Error(), &user.SubFollowCountResponse{}), nil
 	}
-	err = s.rClient.SubFollowerCount(ctx, targetCountKey)
+	err = s.rCache.SubFollowerCount(ctx, targetCountKey)
 	if err != nil {
-		zap.L().Error("s.rClient.SubFollowCount err:", zap.Error(err))
+		zap.L().Error("s.rCache.SubFollowCount err:", zap.Error(err))
 		return s.respRepo.SubFollowCountResponse(errcode.ErrRedis, err.Error(), &user.SubFollowCountResponse{}), nil
 	}
 	return s.respRepo.SubFollowCountResponse(errcode.StatusOK, model.MsgNil, &user.SubFollowCountResponse{}), nil
@@ -365,41 +365,41 @@ func (s *UserServiceImpl) GetUserList(ctx context.Context, req *user.GetUserList
 	for i, targetId := range req.TargetId {
 		userKey = auto.CreateUserKey(uint(targetId))
 		userCntKey = auto.CreateUserCountKey(uint(targetId))
-		userInfo, err := s.rClient.HGetUserInfo(ctx, userKey)
+		userInfo, err := s.rCache.HGetUserInfo(ctx, userKey)
 		if err != nil {
-			zap.L().Error("s.rClient.HGetUserInfo err:", zap.Error(err))
+			zap.L().Error("s.rCache.HGetUserInfo err:", zap.Error(err))
 			return s.respRepo.GetUserListResponse(errcode.ErrRedis, err.Error(), &user.GetUserListResponse{}), nil
 		}
 		// 缓存没查到，查数据库
 		if userInfo == nil {
-			userInfo, err = s.userRepo.GetUserInfoByUserID(ctx, targetId)
+			userInfo, err = s.UserRepo.GetUserInfoByUserID(ctx, targetId)
 			if err != nil {
-				zap.L().Error("s.userRepo.GetUserInfoByUserID err:", zap.Error(err))
+				zap.L().Error("s.UserRepo.GetUserInfoByUserID err:", zap.Error(err))
 				return s.respRepo.GetUserListResponse(errcode.ErrDB, err.Error(), &user.GetUserListResponse{}), nil
 			}
 			// 存缓存
-			err = s.rClient.HSetUserInfo(ctx, userKey, auto.CreateMapUserInfo(userInfo))
+			err = s.rCache.HSetUserInfo(ctx, userKey, auto.CreateMapUserInfo(userInfo))
 			if err != nil {
-				zap.L().Error("s.rClient.HSetUserInfo err:", zap.Error(err))
+				zap.L().Error("s.rCache.HSetUserInfo err:", zap.Error(err))
 				return s.respRepo.GetUserListResponse(errcode.ErrRedis, err.Error(), &user.GetUserListResponse{}), nil
 			}
 		}
-		userCntInfo, err := s.rClient.HGetUserCountInfo(ctx, userCntKey)
+		userCntInfo, err := s.rCache.HGetUserCountInfo(ctx, userCntKey)
 		if err != nil {
-			zap.L().Error("s.rClient.HGetUserCountInfo err:", zap.Error(err))
+			zap.L().Error("s.rCache.HGetUserCountInfo err:", zap.Error(err))
 			return s.respRepo.GetUserListResponse(errcode.ErrRedis, err.Error(), &user.GetUserListResponse{}), nil
 		}
 		// 缓存没查到，查数据库
 		if userCntInfo == nil {
-			userCntInfo, err = s.userRepo.GetUserCountInfoByUserID(ctx, targetId)
+			userCntInfo, err = s.UserRepo.GetUserCountInfoByUserID(ctx, targetId)
 			if err != nil {
-				zap.L().Error("s.userRepo.GetUserInfoByUserID err:", zap.Error(err))
+				zap.L().Error("s.UserRepo.GetUserInfoByUserID err:", zap.Error(err))
 				return s.respRepo.GetUserListResponse(errcode.ErrDB, err.Error(), &user.GetUserListResponse{}), nil
 			}
 			// 存缓存
-			err = s.rClient.HSetUserCountInfo(ctx, userCntKey, auto.CreateMapUserCount(userCntInfo))
+			err = s.rCache.HSetUserCountInfo(ctx, userCntKey, auto.CreateMapUserCount(userCntInfo))
 			if err != nil {
-				zap.L().Error("s.rClient.HSetUserCountInfo err:", zap.Error(err))
+				zap.L().Error("s.rCache.HSetUserCountInfo err:", zap.Error(err))
 				return s.respRepo.GetUserListResponse(errcode.ErrRedis, err.Error(), &user.GetUserListResponse{}), nil
 			}
 		}
@@ -426,9 +426,9 @@ func (s *UserServiceImpl) AddUserWorkCount(ctx context.Context, req *user.AddUse
 	// 2.处理业务
 	// 将redis中信息 更改
 	userKey := auto.CreateUserCountKey(uint(req.UserId))
-	err = s.rClient.AddWorkCount(ctx, userKey)
+	err = s.rCache.AddWorkCount(ctx, userKey)
 	if err != nil {
-		zap.L().Error("s.rClient.AddFollowCount err:", zap.Error(err))
+		zap.L().Error("s.rCache.AddFollowCount err:", zap.Error(err))
 		return s.respRepo.AddUserWorkCountResponse(errcode.ErrRedis, err.Error(), &user.AddUserWorkCountResponse{}), nil
 	}
 	//TODO 数据库更改交给定时任务
@@ -443,25 +443,25 @@ func (s *UserServiceImpl) UpdateUserFavoriteCount(ctx context.Context, req *user
 	authorCntKey := auto.CreateUserCountKey(uint(req.AuthorId))
 	switch req.ActionType {
 	case model.FAVORITE:
-		err = s.rClient.AddFavoriteCount(ctx, userCntKey)
+		err = s.rCache.AddFavoriteCount(ctx, userCntKey)
 		if err != nil {
-			zap.L().Error("s.rClient.AddFavoriteCount err:", zap.Error(err))
+			zap.L().Error("s.rCache.AddFavoriteCount err:", zap.Error(err))
 			return s.respRepo.UpdateUserFavoriteCountResponse(errcode.ErrRedis, err.Error(), &user.UpdateUserFavoriteCountResponse{}), nil
 		}
-		err = s.rClient.AddTotalFavoriteCount(ctx, authorCntKey)
+		err = s.rCache.AddTotalFavoriteCount(ctx, authorCntKey)
 		if err != nil {
-			zap.L().Error("s.rClient.AddTotalFavoriteCount err:", zap.Error(err))
+			zap.L().Error("s.rCache.AddTotalFavoriteCount err:", zap.Error(err))
 			return s.respRepo.UpdateUserFavoriteCountResponse(errcode.ErrRedis, err.Error(), &user.UpdateUserFavoriteCountResponse{}), nil
 		}
 	case model.CANCELFAVORITE:
-		err = s.rClient.SubFavoriteCount(ctx, userCntKey)
+		err = s.rCache.SubFavoriteCount(ctx, userCntKey)
 		if err != nil {
-			zap.L().Error("s.rClient.SubFavoriteCount err:", zap.Error(err))
+			zap.L().Error("s.rCache.SubFavoriteCount err:", zap.Error(err))
 			return s.respRepo.UpdateUserFavoriteCountResponse(errcode.ErrRedis, err.Error(), &user.UpdateUserFavoriteCountResponse{}), nil
 		}
-		err = s.rClient.SubTotalFavoriteCount(ctx, authorCntKey)
+		err = s.rCache.SubTotalFavoriteCount(ctx, authorCntKey)
 		if err != nil {
-			zap.L().Error("s.rClient.SubTotalFavoriteCount err:", zap.Error(err))
+			zap.L().Error("s.rCache.SubTotalFavoriteCount err:", zap.Error(err))
 			return s.respRepo.UpdateUserFavoriteCountResponse(errcode.ErrRedis, err.Error(), &user.UpdateUserFavoriteCountResponse{}), nil
 		}
 	}

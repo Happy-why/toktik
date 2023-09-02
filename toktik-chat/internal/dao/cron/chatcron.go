@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"toktik-chat/internal/cache"
 	"toktik-chat/internal/dao/mysql"
-	"toktik-chat/internal/dao/redis"
 	"toktik-common/timing_job"
 )
 
@@ -20,7 +20,7 @@ func TimingJob() {
 func ChatMessageMoveToDB() {
 	zap.L().Info("ChatMessage start move to DB !!!")
 	ctx := context.Background()
-	rclient := redis.GetRdbCache()
+	rCache := cache.GetRdbCache()
 	dbConn := mysql.NewGormConn()
 	// ① 获得 keys chat::message::user_id+target_id
 	keys, err := getKeys(ctx, "chat::message::*")
@@ -33,9 +33,9 @@ func ChatMessageMoveToDB() {
 	}
 	for _, key := range keys {
 		// ② 使用 key 去 redis 中查询 value
-		messageList, err := rclient.ZGetRangeWithScores(ctx, key, 0, -1)
+		messageList, err := rCache.ZGetRangeWithScores(ctx, key, 0, -1)
 		if err != nil {
-			zap.L().Error("ChatMessageMoveToDB rClient.ZGetRangeWithScores err:", zap.Error(err))
+			zap.L().Error("ChatMessageMoveToDB rCache.ZGetRangeWithScores err:", zap.Error(err))
 			return
 		}
 		for _, message := range messageList {
@@ -59,7 +59,7 @@ func ChatMessageMoveToDB() {
 				return
 			}
 			// ⑤ 将 redis 用于 持久化的 message 删掉
-			_, err = rclient.ZDel(ctx, key, message.Member)
+			_, err = rCache.ZDel(ctx, key, message.Member)
 			if err != nil {
 				zap.L().Error("ChatMessageMoveToDB DelMessageInfo err:", zap.Error(err))
 				return
@@ -70,7 +70,7 @@ func ChatMessageMoveToDB() {
 }
 
 func getKeys(ctx context.Context, keyPatten string) ([]string, error) {
-	keys, err := redis.GetRdbCache().GetKeys(ctx, keyPatten)
+	keys, err := cache.GetRdbCache().GetKeys(ctx, keyPatten)
 	if err != nil {
 		return nil, err
 	}
