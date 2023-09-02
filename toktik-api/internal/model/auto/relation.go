@@ -1,5 +1,7 @@
 package auto
 
+import "strconv"
+
 type Relation struct {
 	BaseModel
 	UserId   uint `json:"user_id,string" gorm:"index:idx_relation,not null"`   // 用户ID
@@ -11,7 +13,14 @@ func (*Relation) TableName() string {
 	return "relation"
 }
 
-// 保证 relation_id 唯一，两个人中只要有一个人发起关注，就会创建一个 relation_id ，
-// 在创建 relation_id，先查询 两人是否存在关系（比如 对方是否已经关注自己）
-// 若对方没有关注自己，则直接创建 relation
-// 对方已经关注自己，将 isFriend 值改为 1
+func CreateFollowKey(userId int64) string {
+	return "follow::" + strconv.FormatInt(userId, 10)
+}
+
+func CreateFanKey(userId int64) string {
+	return "fan::" + strconv.FormatInt(userId, 10)
+}
+
+func CreateFriendKey(userId int64) string {
+	return "friend::" + strconv.FormatInt(userId, 10)
+}

@@ -2,7 +2,9 @@ package api
 
 import (
 	"toktik-rpc/kitex_gen/chat/chatservice"
-	//_ "toktik-api/internal/api/user"
+	"toktik-rpc/kitex_gen/comment/commentservice"
+	"toktik-rpc/kitex_gen/favor/favorservice"
+
 	"toktik-rpc/kitex_gen/interaction/interactionservice"
 	"toktik-rpc/kitex_gen/user/userservice"
 	"toktik-rpc/kitex_gen/video/videoservice"
@@ -13,4 +15,6 @@ var (
 	InteractionClient interactionservice.Client
 	VideoClient       videoservice.Client
 	ChatClient        chatservice.Client
+	FavorClient       favorservice.Client
+	Comment           commentservice.Client
 )

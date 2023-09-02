@@ -1,6 +1,7 @@
 package client
 
 func NewRpcClient() {
-	InitRpcUserClient()
+	InitRpcUserCache()
 	InitRpcInteractionClient()
+	InitRpcFavorCache()
 }

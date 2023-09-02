@@ -11,7 +11,7 @@ import (
 
 var UserClient userservice.Client
 
-func InitRpcUserClient() {
+func InitRpcUserCache() {
 	r, err := etcd.NewEtcdResolver(global.Settings.Etcd.Addr)
 	if err != nil {
 		panic(err)
@@ -24,7 +24,7 @@ func InitRpcUserClient() {
 		client.WithResolver(r),
 	)
 	if err != nil {
-		zap.L().Error("InitRpcUserClient err:", zap.Error(err))
+		zap.L().Error("InitRpcUserCache err:", zap.Error(err))
 		panic(err)
 	}
 	UserClient = c

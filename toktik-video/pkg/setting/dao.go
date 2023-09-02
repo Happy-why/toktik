@@ -1,10 +1,10 @@
 package setting
 
 import (
+	"toktik-video/internal/cache"
 	"toktik-video/internal/dao"
 	"toktik-video/internal/dao/cron"
 	"toktik-video/internal/dao/mysql"
-	"toktik-video/internal/dao/redis"
 )
 
 func init() {
@@ -17,6 +17,6 @@ type Dao struct {
 
 func (Dao) InitSetting() {
 	mysql.InitMysql()
-	dao.Group.Rdb = redis.InitRedis()
+	dao.Group.Rdb = cache.InitRedis()
 	go cron.TimingJob()
 }

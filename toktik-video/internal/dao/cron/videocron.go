@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"toktik-common/timing_job"
+	"toktik-video/internal/cache"
 	"toktik-video/internal/dao/mysql"
-	"toktik-video/internal/dao/redis"
 	"toktik-video/internal/model/auto"
 )
 
@@ -21,7 +21,7 @@ func TimingJob() {
 func VideoInfoMoveToDB() {
 	zap.L().Info("VideoInfos start move to DB !!!")
 	ctx := context.Background()
-	rClient := redis.GetRdbCache()
+	rCache := cache.GetRdbCache()
 	dbConn := mysql.NewGormConn()
 	// 从数据库取 video_ids
 	videoIds := make([]int64, 0)
@@ -33,7 +33,7 @@ func VideoInfoMoveToDB() {
 	// 去 redis中获取video_info
 	for _, v := range videoIds {
 		videoKey := auto.CreateVideoKey(uint(v))
-		videoMap, err := rClient.HGetAll(ctx, videoKey)
+		videoMap, err := rCache.HGetAll(ctx, videoKey)
 		if err != nil {
 			zap.L().Error("TimingJob VideoInfoMoveToDB rdb.HGetAll err:", zap.Error(err))
 			return
@@ -55,7 +55,7 @@ func VideoInfoMoveToDB() {
 func FavoriteRecordMoveToDB() {
 	zap.L().Info("FavoriteRecords start move to DB !!!")
 	ctx := context.Background()
-	rclient := redis.GetRdbCache()
+	rCache := cache.GetRdbCache()
 	dbConn := mysql.NewGormConn()
 	// 遍历key = user_favorite::* ，获得 一堆 user_id,
 	// 将 user_id 点赞的视频 video_id 拿到，判断 标志为 "1" or "2" ,1是点赞记录，2是取消点赞
@@ -71,9 +71,9 @@ func FavoriteRecordMoveToDB() {
 	}
 	for _, key := range keys {
 		// ② 使用 key 去 redis 中查询 value
-		videoIdsStr, err := rclient.SGetAll(ctx, key)
+		videoIdsStr, err := rCache.SGetAll(ctx, key)
 		if err != nil {
-			zap.L().Error("FavoriteRecordMoveToDB rClient.SGetAll err:", zap.Error(err))
+			zap.L().Error("FavoriteRecordMoveToDB rCache.SGetAll err:", zap.Error(err))
 			return
 		}
 		// ③ 将 user_id 从 key 中 拆出来
@@ -103,7 +103,7 @@ func FavoriteRecordMoveToDB() {
 					return
 				}
 				// ⑥ 删除 缓存 中 标志 为 2 的点赞记录
-				_, err = rclient.SDel(ctx, key, videoIdStr)
+				_, err = rCache.SDel(ctx, key, videoIdStr)
 				if err != nil {
 					zap.L().Error("FavoriteRecordMoveToDB delRedisRecord err:", zap.Error(err))
 					return
@@ -114,7 +114,7 @@ func FavoriteRecordMoveToDB() {
 }
 
 func getKeys(ctx context.Context, keyPatten string) ([]string, error) {
-	keys, err := redis.GetRdbCache().GetKeys(ctx, keyPatten)
+	keys, err := cache.GetRdbCache().GetKeys(ctx, keyPatten)
 	if err != nil {
 		return nil, err
 	}

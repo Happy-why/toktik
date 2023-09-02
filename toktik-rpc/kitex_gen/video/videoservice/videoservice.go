@@ -22,13 +22,15 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "VideoService"
 	handlerType := (*video.VideoService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"VideoFeed":      kitex.NewMethodInfo(videoFeedHandler, newVideoFeedArgs, newVideoFeedResult, false),
-		"VideoPublish":   kitex.NewMethodInfo(videoPublishHandler, newVideoPublishArgs, newVideoPublishResult, false),
-		"PublishList":    kitex.NewMethodInfo(publishListHandler, newPublishListArgs, newPublishListResult, false),
-		"FavoriteList":   kitex.NewMethodInfo(favoriteListHandler, newFavoriteListArgs, newFavoriteListResult, false),
-		"FavoriteAction": kitex.NewMethodInfo(favoriteActionHandler, newFavoriteActionArgs, newFavoriteActionResult, false),
-		"CommentAction":  kitex.NewMethodInfo(commentActionHandler, newCommentActionArgs, newCommentActionResult, false),
-		"CommentList":    kitex.NewMethodInfo(commentListHandler, newCommentListArgs, newCommentListResult, false),
+		"VideoFeed":             kitex.NewMethodInfo(videoFeedHandler, newVideoFeedArgs, newVideoFeedResult, false),
+		"VideoPublish":          kitex.NewMethodInfo(videoPublishHandler, newVideoPublishArgs, newVideoPublishResult, false),
+		"PublishList":           kitex.NewMethodInfo(publishListHandler, newPublishListArgs, newPublishListResult, false),
+		"GetVideoInfo":          kitex.NewMethodInfo(getVideoInfoHandler, newGetVideoInfoArgs, newGetVideoInfoResult, false),
+		"GetManyVideoInfos":     kitex.NewMethodInfo(getManyVideoInfosHandler, newGetManyVideoInfosArgs, newGetManyVideoInfosResult, false),
+		"AddVideoFavoriteCount": kitex.NewMethodInfo(addVideoFavoriteCountHandler, newAddVideoFavoriteCountArgs, newAddVideoFavoriteCountResult, false),
+		"SubVideoFavoriteCount": kitex.NewMethodInfo(subVideoFavoriteCountHandler, newSubVideoFavoriteCountArgs, newSubVideoFavoriteCountResult, false),
+		"AddVideoCommentCount":  kitex.NewMethodInfo(addVideoCommentCountHandler, newAddVideoCommentCountArgs, newAddVideoCommentCountResult, false),
+		"SubVideoCommentCount":  kitex.NewMethodInfo(subVideoCommentCountHandler, newSubVideoCommentCountArgs, newSubVideoCommentCountResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "video",
@@ -503,73 +505,73 @@ func (p *PublishListResult) GetResult() interface{} {
 	return p.Success
 }
 
-func favoriteListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+func getVideoInfoHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(video.FavoriteListRequest)
+		req := new(video.GetVideoInfoRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(video.VideoService).FavoriteList(ctx, req)
+		resp, err := handler.(video.VideoService).GetVideoInfo(ctx, req)
 		if err != nil {
 			return err
 		}
 		if err := st.SendMsg(resp); err != nil {
 			return err
 		}
-	case *FavoriteListArgs:
-		success, err := handler.(video.VideoService).FavoriteList(ctx, s.Req)
+	case *GetVideoInfoArgs:
+		success, err := handler.(video.VideoService).GetVideoInfo(ctx, s.Req)
 		if err != nil {
 			return err
 		}
-		realResult := result.(*FavoriteListResult)
+		realResult := result.(*GetVideoInfoResult)
 		realResult.Success = success
 	}
 	return nil
 }
-func newFavoriteListArgs() interface{} {
-	return &FavoriteListArgs{}
+func newGetVideoInfoArgs() interface{} {
+	return &GetVideoInfoArgs{}
 }
 
-func newFavoriteListResult() interface{} {
-	return &FavoriteListResult{}
+func newGetVideoInfoResult() interface{} {
+	return &GetVideoInfoResult{}
 }
 
-type FavoriteListArgs struct {
-	Req *video.FavoriteListRequest
+type GetVideoInfoArgs struct {
+	Req *video.GetVideoInfoRequest
 }
 
-func (p *FavoriteListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *GetVideoInfoArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(video.FavoriteListRequest)
+		p.Req = new(video.GetVideoInfoRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
 
-func (p *FavoriteListArgs) FastWrite(buf []byte) (n int) {
+func (p *GetVideoInfoArgs) FastWrite(buf []byte) (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.FastWrite(buf)
 }
 
-func (p *FavoriteListArgs) Size() (n int) {
+func (p *GetVideoInfoArgs) Size() (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.Size()
 }
 
-func (p *FavoriteListArgs) Marshal(out []byte) ([]byte, error) {
+func (p *GetVideoInfoArgs) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetReq() {
-		return out, fmt.Errorf("No req in FavoriteListArgs")
+		return out, fmt.Errorf("No req in GetVideoInfoArgs")
 	}
 	return proto.Marshal(p.Req)
 }
 
-func (p *FavoriteListArgs) Unmarshal(in []byte) error {
-	msg := new(video.FavoriteListRequest)
+func (p *GetVideoInfoArgs) Unmarshal(in []byte) error {
+	msg := new(video.GetVideoInfoRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -577,59 +579,59 @@ func (p *FavoriteListArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var FavoriteListArgs_Req_DEFAULT *video.FavoriteListRequest
+var GetVideoInfoArgs_Req_DEFAULT *video.GetVideoInfoRequest
 
-func (p *FavoriteListArgs) GetReq() *video.FavoriteListRequest {
+func (p *GetVideoInfoArgs) GetReq() *video.GetVideoInfoRequest {
 	if !p.IsSetReq() {
-		return FavoriteListArgs_Req_DEFAULT
+		return GetVideoInfoArgs_Req_DEFAULT
 	}
 	return p.Req
 }
 
-func (p *FavoriteListArgs) IsSetReq() bool {
+func (p *GetVideoInfoArgs) IsSetReq() bool {
 	return p.Req != nil
 }
 
-func (p *FavoriteListArgs) GetFirstArgument() interface{} {
+func (p *GetVideoInfoArgs) GetFirstArgument() interface{} {
 	return p.Req
 }
 
-type FavoriteListResult struct {
-	Success *video.FavoriteListResponse
+type GetVideoInfoResult struct {
+	Success *video.GetVideoInfoResponse
 }
 
-var FavoriteListResult_Success_DEFAULT *video.FavoriteListResponse
+var GetVideoInfoResult_Success_DEFAULT *video.GetVideoInfoResponse
 
-func (p *FavoriteListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *GetVideoInfoResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(video.FavoriteListResponse)
+		p.Success = new(video.GetVideoInfoResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
 
-func (p *FavoriteListResult) FastWrite(buf []byte) (n int) {
+func (p *GetVideoInfoResult) FastWrite(buf []byte) (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.FastWrite(buf)
 }
 
-func (p *FavoriteListResult) Size() (n int) {
+func (p *GetVideoInfoResult) Size() (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.Size()
 }
 
-func (p *FavoriteListResult) Marshal(out []byte) ([]byte, error) {
+func (p *GetVideoInfoResult) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetSuccess() {
-		return out, fmt.Errorf("No req in FavoriteListResult")
+		return out, fmt.Errorf("No req in GetVideoInfoResult")
 	}
 	return proto.Marshal(p.Success)
 }
 
-func (p *FavoriteListResult) Unmarshal(in []byte) error {
-	msg := new(video.FavoriteListResponse)
+func (p *GetVideoInfoResult) Unmarshal(in []byte) error {
+	msg := new(video.GetVideoInfoResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -637,92 +639,92 @@ func (p *FavoriteListResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *FavoriteListResult) GetSuccess() *video.FavoriteListResponse {
+func (p *GetVideoInfoResult) GetSuccess() *video.GetVideoInfoResponse {
 	if !p.IsSetSuccess() {
-		return FavoriteListResult_Success_DEFAULT
+		return GetVideoInfoResult_Success_DEFAULT
 	}
 	return p.Success
 }
 
-func (p *FavoriteListResult) SetSuccess(x interface{}) {
-	p.Success = x.(*video.FavoriteListResponse)
+func (p *GetVideoInfoResult) SetSuccess(x interface{}) {
+	p.Success = x.(*video.GetVideoInfoResponse)
 }
 
-func (p *FavoriteListResult) IsSetSuccess() bool {
+func (p *GetVideoInfoResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *FavoriteListResult) GetResult() interface{} {
+func (p *GetVideoInfoResult) GetResult() interface{} {
 	return p.Success
 }
 
-func favoriteActionHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+func getManyVideoInfosHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(video.FavoriteActionRequest)
+		req := new(video.GetManyVideoInfosRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(video.VideoService).FavoriteAction(ctx, req)
+		resp, err := handler.(video.VideoService).GetManyVideoInfos(ctx, req)
 		if err != nil {
 			return err
 		}
 		if err := st.SendMsg(resp); err != nil {
 			return err
 		}
-	case *FavoriteActionArgs:
-		success, err := handler.(video.VideoService).FavoriteAction(ctx, s.Req)
+	case *GetManyVideoInfosArgs:
+		success, err := handler.(video.VideoService).GetManyVideoInfos(ctx, s.Req)
 		if err != nil {
 			return err
 		}
-		realResult := result.(*FavoriteActionResult)
+		realResult := result.(*GetManyVideoInfosResult)
 		realResult.Success = success
 	}
 	return nil
 }
-func newFavoriteActionArgs() interface{} {
-	return &FavoriteActionArgs{}
+func newGetManyVideoInfosArgs() interface{} {
+	return &GetManyVideoInfosArgs{}
 }
 
-func newFavoriteActionResult() interface{} {
-	return &FavoriteActionResult{}
+func newGetManyVideoInfosResult() interface{} {
+	return &GetManyVideoInfosResult{}
 }
 
-type FavoriteActionArgs struct {
-	Req *video.FavoriteActionRequest
+type GetManyVideoInfosArgs struct {
+	Req *video.GetManyVideoInfosRequest
 }
 
-func (p *FavoriteActionArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *GetManyVideoInfosArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(video.FavoriteActionRequest)
+		p.Req = new(video.GetManyVideoInfosRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
 
-func (p *FavoriteActionArgs) FastWrite(buf []byte) (n int) {
+func (p *GetManyVideoInfosArgs) FastWrite(buf []byte) (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.FastWrite(buf)
 }
 
-func (p *FavoriteActionArgs) Size() (n int) {
+func (p *GetManyVideoInfosArgs) Size() (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.Size()
 }
 
-func (p *FavoriteActionArgs) Marshal(out []byte) ([]byte, error) {
+func (p *GetManyVideoInfosArgs) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetReq() {
-		return out, fmt.Errorf("No req in FavoriteActionArgs")
+		return out, fmt.Errorf("No req in GetManyVideoInfosArgs")
 	}
 	return proto.Marshal(p.Req)
 }
 
-func (p *FavoriteActionArgs) Unmarshal(in []byte) error {
-	msg := new(video.FavoriteActionRequest)
+func (p *GetManyVideoInfosArgs) Unmarshal(in []byte) error {
+	msg := new(video.GetManyVideoInfosRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -730,59 +732,59 @@ func (p *FavoriteActionArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var FavoriteActionArgs_Req_DEFAULT *video.FavoriteActionRequest
+var GetManyVideoInfosArgs_Req_DEFAULT *video.GetManyVideoInfosRequest
 
-func (p *FavoriteActionArgs) GetReq() *video.FavoriteActionRequest {
+func (p *GetManyVideoInfosArgs) GetReq() *video.GetManyVideoInfosRequest {
 	if !p.IsSetReq() {
-		return FavoriteActionArgs_Req_DEFAULT
+		return GetManyVideoInfosArgs_Req_DEFAULT
 	}
 	return p.Req
 }
 
-func (p *FavoriteActionArgs) IsSetReq() bool {
+func (p *GetManyVideoInfosArgs) IsSetReq() bool {
 	return p.Req != nil
 }
 
-func (p *FavoriteActionArgs) GetFirstArgument() interface{} {
+func (p *GetManyVideoInfosArgs) GetFirstArgument() interface{} {
 	return p.Req
 }
 
-type FavoriteActionResult struct {
-	Success *video.FavoriteActionResponse
+type GetManyVideoInfosResult struct {
+	Success *video.GetManyVideoInfosResponse
 }
 
-var FavoriteActionResult_Success_DEFAULT *video.FavoriteActionResponse
+var GetManyVideoInfosResult_Success_DEFAULT *video.GetManyVideoInfosResponse
 
-func (p *FavoriteActionResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *GetManyVideoInfosResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(video.FavoriteActionResponse)
+		p.Success = new(video.GetManyVideoInfosResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
 
-func (p *FavoriteActionResult) FastWrite(buf []byte) (n int) {
+func (p *GetManyVideoInfosResult) FastWrite(buf []byte) (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.FastWrite(buf)
 }
 
-func (p *FavoriteActionResult) Size() (n int) {
+func (p *GetManyVideoInfosResult) Size() (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.Size()
 }
 
-func (p *FavoriteActionResult) Marshal(out []byte) ([]byte, error) {
+func (p *GetManyVideoInfosResult) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetSuccess() {
-		return out, fmt.Errorf("No req in FavoriteActionResult")
+		return out, fmt.Errorf("No req in GetManyVideoInfosResult")
 	}
 	return proto.Marshal(p.Success)
 }
 
-func (p *FavoriteActionResult) Unmarshal(in []byte) error {
-	msg := new(video.FavoriteActionResponse)
+func (p *GetManyVideoInfosResult) Unmarshal(in []byte) error {
+	msg := new(video.GetManyVideoInfosResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -790,92 +792,92 @@ func (p *FavoriteActionResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *FavoriteActionResult) GetSuccess() *video.FavoriteActionResponse {
+func (p *GetManyVideoInfosResult) GetSuccess() *video.GetManyVideoInfosResponse {
 	if !p.IsSetSuccess() {
-		return FavoriteActionResult_Success_DEFAULT
+		return GetManyVideoInfosResult_Success_DEFAULT
 	}
 	return p.Success
 }
 
-func (p *FavoriteActionResult) SetSuccess(x interface{}) {
-	p.Success = x.(*video.FavoriteActionResponse)
+func (p *GetManyVideoInfosResult) SetSuccess(x interface{}) {
+	p.Success = x.(*video.GetManyVideoInfosResponse)
 }
 
-func (p *FavoriteActionResult) IsSetSuccess() bool {
+func (p *GetManyVideoInfosResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *FavoriteActionResult) GetResult() interface{} {
+func (p *GetManyVideoInfosResult) GetResult() interface{} {
 	return p.Success
 }
 
-func commentActionHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+func addVideoFavoriteCountHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(video.CommentActionRequest)
+		req := new(video.AddVideoFavoriteCountRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(video.VideoService).CommentAction(ctx, req)
+		resp, err := handler.(video.VideoService).AddVideoFavoriteCount(ctx, req)
 		if err != nil {
 			return err
 		}
 		if err := st.SendMsg(resp); err != nil {
 			return err
 		}
-	case *CommentActionArgs:
-		success, err := handler.(video.VideoService).CommentAction(ctx, s.Req)
+	case *AddVideoFavoriteCountArgs:
+		success, err := handler.(video.VideoService).AddVideoFavoriteCount(ctx, s.Req)
 		if err != nil {
 			return err
 		}
-		realResult := result.(*CommentActionResult)
+		realResult := result.(*AddVideoFavoriteCountResult)
 		realResult.Success = success
 	}
 	return nil
 }
-func newCommentActionArgs() interface{} {
-	return &CommentActionArgs{}
+func newAddVideoFavoriteCountArgs() interface{} {
+	return &AddVideoFavoriteCountArgs{}
 }
 
-func newCommentActionResult() interface{} {
-	return &CommentActionResult{}
+func newAddVideoFavoriteCountResult() interface{} {
+	return &AddVideoFavoriteCountResult{}
 }
 
-type CommentActionArgs struct {
-	Req *video.CommentActionRequest
+type AddVideoFavoriteCountArgs struct {
+	Req *video.AddVideoFavoriteCountRequest
 }
 
-func (p *CommentActionArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *AddVideoFavoriteCountArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(video.CommentActionRequest)
+		p.Req = new(video.AddVideoFavoriteCountRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
 
-func (p *CommentActionArgs) FastWrite(buf []byte) (n int) {
+func (p *AddVideoFavoriteCountArgs) FastWrite(buf []byte) (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.FastWrite(buf)
 }
 
-func (p *CommentActionArgs) Size() (n int) {
+func (p *AddVideoFavoriteCountArgs) Size() (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.Size()
 }
 
-func (p *CommentActionArgs) Marshal(out []byte) ([]byte, error) {
+func (p *AddVideoFavoriteCountArgs) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetReq() {
-		return out, fmt.Errorf("No req in CommentActionArgs")
+		return out, fmt.Errorf("No req in AddVideoFavoriteCountArgs")
 	}
 	return proto.Marshal(p.Req)
 }
 
-func (p *CommentActionArgs) Unmarshal(in []byte) error {
-	msg := new(video.CommentActionRequest)
+func (p *AddVideoFavoriteCountArgs) Unmarshal(in []byte) error {
+	msg := new(video.AddVideoFavoriteCountRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -883,59 +885,59 @@ func (p *CommentActionArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var CommentActionArgs_Req_DEFAULT *video.CommentActionRequest
+var AddVideoFavoriteCountArgs_Req_DEFAULT *video.AddVideoFavoriteCountRequest
 
-func (p *CommentActionArgs) GetReq() *video.CommentActionRequest {
+func (p *AddVideoFavoriteCountArgs) GetReq() *video.AddVideoFavoriteCountRequest {
 	if !p.IsSetReq() {
-		return CommentActionArgs_Req_DEFAULT
+		return AddVideoFavoriteCountArgs_Req_DEFAULT
 	}
 	return p.Req
 }
 
-func (p *CommentActionArgs) IsSetReq() bool {
+func (p *AddVideoFavoriteCountArgs) IsSetReq() bool {
 	return p.Req != nil
 }
 
-func (p *CommentActionArgs) GetFirstArgument() interface{} {
+func (p *AddVideoFavoriteCountArgs) GetFirstArgument() interface{} {
 	return p.Req
 }
 
-type CommentActionResult struct {
-	Success *video.CommentActionResponse
+type AddVideoFavoriteCountResult struct {
+	Success *video.AddVideoFavoriteCountResponse
 }
 
-var CommentActionResult_Success_DEFAULT *video.CommentActionResponse
+var AddVideoFavoriteCountResult_Success_DEFAULT *video.AddVideoFavoriteCountResponse
 
-func (p *CommentActionResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *AddVideoFavoriteCountResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(video.CommentActionResponse)
+		p.Success = new(video.AddVideoFavoriteCountResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
 
-func (p *CommentActionResult) FastWrite(buf []byte) (n int) {
+func (p *AddVideoFavoriteCountResult) FastWrite(buf []byte) (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.FastWrite(buf)
 }
 
-func (p *CommentActionResult) Size() (n int) {
+func (p *AddVideoFavoriteCountResult) Size() (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.Size()
 }
 
-func (p *CommentActionResult) Marshal(out []byte) ([]byte, error) {
+func (p *AddVideoFavoriteCountResult) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetSuccess() {
-		return out, fmt.Errorf("No req in CommentActionResult")
+		return out, fmt.Errorf("No req in AddVideoFavoriteCountResult")
 	}
 	return proto.Marshal(p.Success)
 }
 
-func (p *CommentActionResult) Unmarshal(in []byte) error {
-	msg := new(video.CommentActionResponse)
+func (p *AddVideoFavoriteCountResult) Unmarshal(in []byte) error {
+	msg := new(video.AddVideoFavoriteCountResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -943,92 +945,92 @@ func (p *CommentActionResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *CommentActionResult) GetSuccess() *video.CommentActionResponse {
+func (p *AddVideoFavoriteCountResult) GetSuccess() *video.AddVideoFavoriteCountResponse {
 	if !p.IsSetSuccess() {
-		return CommentActionResult_Success_DEFAULT
+		return AddVideoFavoriteCountResult_Success_DEFAULT
 	}
 	return p.Success
 }
 
-func (p *CommentActionResult) SetSuccess(x interface{}) {
-	p.Success = x.(*video.CommentActionResponse)
+func (p *AddVideoFavoriteCountResult) SetSuccess(x interface{}) {
+	p.Success = x.(*video.AddVideoFavoriteCountResponse)
 }
 
-func (p *CommentActionResult) IsSetSuccess() bool {
+func (p *AddVideoFavoriteCountResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *CommentActionResult) GetResult() interface{} {
+func (p *AddVideoFavoriteCountResult) GetResult() interface{} {
 	return p.Success
 }
 
-func commentListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+func subVideoFavoriteCountHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(video.CommentListRequest)
+		req := new(video.SubVideoFavoriteCountRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(video.VideoService).CommentList(ctx, req)
+		resp, err := handler.(video.VideoService).SubVideoFavoriteCount(ctx, req)
 		if err != nil {
 			return err
 		}
 		if err := st.SendMsg(resp); err != nil {
 			return err
 		}
-	case *CommentListArgs:
-		success, err := handler.(video.VideoService).CommentList(ctx, s.Req)
+	case *SubVideoFavoriteCountArgs:
+		success, err := handler.(video.VideoService).SubVideoFavoriteCount(ctx, s.Req)
 		if err != nil {
 			return err
 		}
-		realResult := result.(*CommentListResult)
+		realResult := result.(*SubVideoFavoriteCountResult)
 		realResult.Success = success
 	}
 	return nil
 }
-func newCommentListArgs() interface{} {
-	return &CommentListArgs{}
+func newSubVideoFavoriteCountArgs() interface{} {
+	return &SubVideoFavoriteCountArgs{}
 }
 
-func newCommentListResult() interface{} {
-	return &CommentListResult{}
+func newSubVideoFavoriteCountResult() interface{} {
+	return &SubVideoFavoriteCountResult{}
 }
 
-type CommentListArgs struct {
-	Req *video.CommentListRequest
+type SubVideoFavoriteCountArgs struct {
+	Req *video.SubVideoFavoriteCountRequest
 }
 
-func (p *CommentListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *SubVideoFavoriteCountArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(video.CommentListRequest)
+		p.Req = new(video.SubVideoFavoriteCountRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
 
-func (p *CommentListArgs) FastWrite(buf []byte) (n int) {
+func (p *SubVideoFavoriteCountArgs) FastWrite(buf []byte) (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.FastWrite(buf)
 }
 
-func (p *CommentListArgs) Size() (n int) {
+func (p *SubVideoFavoriteCountArgs) Size() (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.Size()
 }
 
-func (p *CommentListArgs) Marshal(out []byte) ([]byte, error) {
+func (p *SubVideoFavoriteCountArgs) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetReq() {
-		return out, fmt.Errorf("No req in CommentListArgs")
+		return out, fmt.Errorf("No req in SubVideoFavoriteCountArgs")
 	}
 	return proto.Marshal(p.Req)
 }
 
-func (p *CommentListArgs) Unmarshal(in []byte) error {
-	msg := new(video.CommentListRequest)
+func (p *SubVideoFavoriteCountArgs) Unmarshal(in []byte) error {
+	msg := new(video.SubVideoFavoriteCountRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -1036,59 +1038,59 @@ func (p *CommentListArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var CommentListArgs_Req_DEFAULT *video.CommentListRequest
+var SubVideoFavoriteCountArgs_Req_DEFAULT *video.SubVideoFavoriteCountRequest
 
-func (p *CommentListArgs) GetReq() *video.CommentListRequest {
+func (p *SubVideoFavoriteCountArgs) GetReq() *video.SubVideoFavoriteCountRequest {
 	if !p.IsSetReq() {
-		return CommentListArgs_Req_DEFAULT
+		return SubVideoFavoriteCountArgs_Req_DEFAULT
 	}
 	return p.Req
 }
 
-func (p *CommentListArgs) IsSetReq() bool {
+func (p *SubVideoFavoriteCountArgs) IsSetReq() bool {
 	return p.Req != nil
 }
 
-func (p *CommentListArgs) GetFirstArgument() interface{} {
+func (p *SubVideoFavoriteCountArgs) GetFirstArgument() interface{} {
 	return p.Req
 }
 
-type CommentListResult struct {
-	Success *video.CommentListResponse
+type SubVideoFavoriteCountResult struct {
+	Success *video.SubVideoFavoriteCountResponse
 }
 
-var CommentListResult_Success_DEFAULT *video.CommentListResponse
+var SubVideoFavoriteCountResult_Success_DEFAULT *video.SubVideoFavoriteCountResponse
 
-func (p *CommentListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *SubVideoFavoriteCountResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(video.CommentListResponse)
+		p.Success = new(video.SubVideoFavoriteCountResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
 
-func (p *CommentListResult) FastWrite(buf []byte) (n int) {
+func (p *SubVideoFavoriteCountResult) FastWrite(buf []byte) (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.FastWrite(buf)
 }
 
-func (p *CommentListResult) Size() (n int) {
+func (p *SubVideoFavoriteCountResult) Size() (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.Size()
 }
 
-func (p *CommentListResult) Marshal(out []byte) ([]byte, error) {
+func (p *SubVideoFavoriteCountResult) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetSuccess() {
-		return out, fmt.Errorf("No req in CommentListResult")
+		return out, fmt.Errorf("No req in SubVideoFavoriteCountResult")
 	}
 	return proto.Marshal(p.Success)
 }
 
-func (p *CommentListResult) Unmarshal(in []byte) error {
-	msg := new(video.CommentListResponse)
+func (p *SubVideoFavoriteCountResult) Unmarshal(in []byte) error {
+	msg := new(video.SubVideoFavoriteCountResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -1096,22 +1098,328 @@ func (p *CommentListResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *CommentListResult) GetSuccess() *video.CommentListResponse {
+func (p *SubVideoFavoriteCountResult) GetSuccess() *video.SubVideoFavoriteCountResponse {
 	if !p.IsSetSuccess() {
-		return CommentListResult_Success_DEFAULT
+		return SubVideoFavoriteCountResult_Success_DEFAULT
 	}
 	return p.Success
 }
 
-func (p *CommentListResult) SetSuccess(x interface{}) {
-	p.Success = x.(*video.CommentListResponse)
+func (p *SubVideoFavoriteCountResult) SetSuccess(x interface{}) {
+	p.Success = x.(*video.SubVideoFavoriteCountResponse)
 }
 
-func (p *CommentListResult) IsSetSuccess() bool {
+func (p *SubVideoFavoriteCountResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *CommentListResult) GetResult() interface{} {
+func (p *SubVideoFavoriteCountResult) GetResult() interface{} {
+	return p.Success
+}
+
+func addVideoCommentCountHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(video.AddVideoCommentCountRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(video.VideoService).AddVideoCommentCount(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *AddVideoCommentCountArgs:
+		success, err := handler.(video.VideoService).AddVideoCommentCount(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*AddVideoCommentCountResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newAddVideoCommentCountArgs() interface{} {
+	return &AddVideoCommentCountArgs{}
+}
+
+func newAddVideoCommentCountResult() interface{} {
+	return &AddVideoCommentCountResult{}
+}
+
+type AddVideoCommentCountArgs struct {
+	Req *video.AddVideoCommentCountRequest
+}
+
+func (p *AddVideoCommentCountArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(video.AddVideoCommentCountRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *AddVideoCommentCountArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *AddVideoCommentCountArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *AddVideoCommentCountArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in AddVideoCommentCountArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *AddVideoCommentCountArgs) Unmarshal(in []byte) error {
+	msg := new(video.AddVideoCommentCountRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var AddVideoCommentCountArgs_Req_DEFAULT *video.AddVideoCommentCountRequest
+
+func (p *AddVideoCommentCountArgs) GetReq() *video.AddVideoCommentCountRequest {
+	if !p.IsSetReq() {
+		return AddVideoCommentCountArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *AddVideoCommentCountArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *AddVideoCommentCountArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type AddVideoCommentCountResult struct {
+	Success *video.AddVideoCommentCountResponse
+}
+
+var AddVideoCommentCountResult_Success_DEFAULT *video.AddVideoCommentCountResponse
+
+func (p *AddVideoCommentCountResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(video.AddVideoCommentCountResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *AddVideoCommentCountResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *AddVideoCommentCountResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *AddVideoCommentCountResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in AddVideoCommentCountResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *AddVideoCommentCountResult) Unmarshal(in []byte) error {
+	msg := new(video.AddVideoCommentCountResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *AddVideoCommentCountResult) GetSuccess() *video.AddVideoCommentCountResponse {
+	if !p.IsSetSuccess() {
+		return AddVideoCommentCountResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *AddVideoCommentCountResult) SetSuccess(x interface{}) {
+	p.Success = x.(*video.AddVideoCommentCountResponse)
+}
+
+func (p *AddVideoCommentCountResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *AddVideoCommentCountResult) GetResult() interface{} {
+	return p.Success
+}
+
+func subVideoCommentCountHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(video.SubVideoCommentCountRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(video.VideoService).SubVideoCommentCount(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *SubVideoCommentCountArgs:
+		success, err := handler.(video.VideoService).SubVideoCommentCount(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*SubVideoCommentCountResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newSubVideoCommentCountArgs() interface{} {
+	return &SubVideoCommentCountArgs{}
+}
+
+func newSubVideoCommentCountResult() interface{} {
+	return &SubVideoCommentCountResult{}
+}
+
+type SubVideoCommentCountArgs struct {
+	Req *video.SubVideoCommentCountRequest
+}
+
+func (p *SubVideoCommentCountArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(video.SubVideoCommentCountRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *SubVideoCommentCountArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *SubVideoCommentCountArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *SubVideoCommentCountArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in SubVideoCommentCountArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *SubVideoCommentCountArgs) Unmarshal(in []byte) error {
+	msg := new(video.SubVideoCommentCountRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var SubVideoCommentCountArgs_Req_DEFAULT *video.SubVideoCommentCountRequest
+
+func (p *SubVideoCommentCountArgs) GetReq() *video.SubVideoCommentCountRequest {
+	if !p.IsSetReq() {
+		return SubVideoCommentCountArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *SubVideoCommentCountArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *SubVideoCommentCountArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type SubVideoCommentCountResult struct {
+	Success *video.SubVideoCommentCountResponse
+}
+
+var SubVideoCommentCountResult_Success_DEFAULT *video.SubVideoCommentCountResponse
+
+func (p *SubVideoCommentCountResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(video.SubVideoCommentCountResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *SubVideoCommentCountResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *SubVideoCommentCountResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *SubVideoCommentCountResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in SubVideoCommentCountResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *SubVideoCommentCountResult) Unmarshal(in []byte) error {
+	msg := new(video.SubVideoCommentCountResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *SubVideoCommentCountResult) GetSuccess() *video.SubVideoCommentCountResponse {
+	if !p.IsSetSuccess() {
+		return SubVideoCommentCountResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *SubVideoCommentCountResult) SetSuccess(x interface{}) {
+	p.Success = x.(*video.SubVideoCommentCountResponse)
+}
+
+func (p *SubVideoCommentCountResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *SubVideoCommentCountResult) GetResult() interface{} {
 	return p.Success
 }
 
@@ -1155,41 +1463,61 @@ func (p *kClient) PublishList(ctx context.Context, Req *video.PublishListRequest
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) FavoriteList(ctx context.Context, Req *video.FavoriteListRequest) (r *video.FavoriteListResponse, err error) {
-	var _args FavoriteListArgs
+func (p *kClient) GetVideoInfo(ctx context.Context, Req *video.GetVideoInfoRequest) (r *video.GetVideoInfoResponse, err error) {
+	var _args GetVideoInfoArgs
 	_args.Req = Req
-	var _result FavoriteListResult
-	if err = p.c.Call(ctx, "FavoriteList", &_args, &_result); err != nil {
+	var _result GetVideoInfoResult
+	if err = p.c.Call(ctx, "GetVideoInfo", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) FavoriteAction(ctx context.Context, Req *video.FavoriteActionRequest) (r *video.FavoriteActionResponse, err error) {
-	var _args FavoriteActionArgs
+func (p *kClient) GetManyVideoInfos(ctx context.Context, Req *video.GetManyVideoInfosRequest) (r *video.GetManyVideoInfosResponse, err error) {
+	var _args GetManyVideoInfosArgs
 	_args.Req = Req
-	var _result FavoriteActionResult
-	if err = p.c.Call(ctx, "FavoriteAction", &_args, &_result); err != nil {
+	var _result GetManyVideoInfosResult
+	if err = p.c.Call(ctx, "GetManyVideoInfos", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) CommentAction(ctx context.Context, Req *video.CommentActionRequest) (r *video.CommentActionResponse, err error) {
-	var _args CommentActionArgs
+func (p *kClient) AddVideoFavoriteCount(ctx context.Context, Req *video.AddVideoFavoriteCountRequest) (r *video.AddVideoFavoriteCountResponse, err error) {
+	var _args AddVideoFavoriteCountArgs
 	_args.Req = Req
-	var _result CommentActionResult
-	if err = p.c.Call(ctx, "CommentAction", &_args, &_result); err != nil {
+	var _result AddVideoFavoriteCountResult
+	if err = p.c.Call(ctx, "AddVideoFavoriteCount", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) CommentList(ctx context.Context, Req *video.CommentListRequest) (r *video.CommentListResponse, err error) {
-	var _args CommentListArgs
+func (p *kClient) SubVideoFavoriteCount(ctx context.Context, Req *video.SubVideoFavoriteCountRequest) (r *video.SubVideoFavoriteCountResponse, err error) {
+	var _args SubVideoFavoriteCountArgs
 	_args.Req = Req
-	var _result CommentListResult
-	if err = p.c.Call(ctx, "CommentList", &_args, &_result); err != nil {
+	var _result SubVideoFavoriteCountResult
+	if err = p.c.Call(ctx, "SubVideoFavoriteCount", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) AddVideoCommentCount(ctx context.Context, Req *video.AddVideoCommentCountRequest) (r *video.AddVideoCommentCountResponse, err error) {
+	var _args AddVideoCommentCountArgs
+	_args.Req = Req
+	var _result AddVideoCommentCountResult
+	if err = p.c.Call(ctx, "AddVideoCommentCount", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) SubVideoCommentCount(ctx context.Context, Req *video.SubVideoCommentCountRequest) (r *video.SubVideoCommentCountResponse, err error) {
+	var _args SubVideoCommentCountArgs
+	_args.Req = Req
+	var _result SubVideoCommentCountResult
+	if err = p.c.Call(ctx, "SubVideoCommentCount", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

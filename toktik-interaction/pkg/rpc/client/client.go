@@ -1,5 +1,5 @@
 package client
 
 func NewRpcClient() {
-	InitRpcUserClient()
+	InitRpcUserCache()
 }

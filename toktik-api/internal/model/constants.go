@@ -5,4 +5,6 @@ const (
 	RpcVideo       = "rpc-video"
 	RpcInteraction = "rpc-interaction"
 	RpcChat        = "rpc-chat"
+	RpcFavor       = "rpc-favor"
+	RpcComment     = "rpc-comment"
 )

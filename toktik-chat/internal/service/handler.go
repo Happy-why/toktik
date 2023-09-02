@@ -2,10 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"go.uber.org/zap"
 	"time"
+	"toktik-chat/internal/cache"
 	"toktik-chat/internal/dao/mysql"
-	"toktik-chat/internal/dao/redis"
 	"toktik-chat/internal/model"
 	"toktik-chat/internal/model/auto"
 	"toktik-chat/internal/repo"
@@ -19,18 +20,16 @@ import (
 // ChatServiceImpl implements the last service interface defined in the IDL.
 type ChatServiceImpl struct {
 	respRepo    repo.HandlerResp
-	cache       repo.Cache
 	ChatRepo    repo.ChatRepo
-	rClient     repo.RClientRepo
+	rCache      repo.RCacheRepo
 	transaction mysql.Transaction
 }
 
 func NewUserService() *ChatServiceImpl {
 	return &ChatServiceImpl{
-		cache:       redis.GetRdbCache(),
 		respRepo:    repo.NewHandlerResps(),
 		ChatRepo:    mysql.NewChatDao(),
-		rClient:     redis.NewChatRClient(),
+		rCache:      cache.NewChatrCache(),
 		transaction: mysql.NewTransaction(),
 	}
 }
@@ -62,14 +61,14 @@ func (cs *ChatServiceImpl) ChatAction(ctx context.Context, req *chat.ChatActionR
 	//content := auto.CreateMessageContent(req.Content)
 	timeNow := time.Now().Unix()
 	content := auto.CreateMessageContent(req.UserId, req.ToUserId, req.Content)
-	err = cs.rClient.PushHistoryMessage(ctx, historyKey, float64(timeNow), content)
+	err = cs.rCache.PushHistoryMessage(ctx, historyKey, float64(timeNow), content)
 	if err != nil {
-		zap.L().Error("cs.rClient.PushHistoryMessage err:", zap.Error(err))
+		zap.L().Error("cs.rCache.PushHistoryMessage err:", zap.Error(err))
 		return cs.respRepo.ChatActionResponse(errcode.ErrRedis, err.Error(), &chat.ChatActionResponse{}), nil
 	}
-	err = cs.rClient.PushDBMessage(ctx, messageKey, float64(timeNow), content)
+	err = cs.rCache.PushDBMessage(ctx, messageKey, float64(timeNow), content)
 	if err != nil {
-		zap.L().Error("cs.rClient.PushDBMessage err:", zap.Error(err))
+		zap.L().Error("cs.rCache.PushDBMessage err:", zap.Error(err))
 		return cs.respRepo.ChatActionResponse(errcode.ErrRedis, err.Error(), &chat.ChatActionResponse{}), nil
 	}
 
@@ -79,25 +78,39 @@ func (cs *ChatServiceImpl) ChatAction(ctx context.Context, req *chat.ChatActionR
 // MessageList implements the ChatServiceImpl interface.
 func (cs *ChatServiceImpl) MessageList(ctx context.Context, req *chat.MessageListRequest) (resp *chat.MessageListResponse, err error) {
 	resp = new(chat.MessageListResponse)
+	req.PreMsgTime = req.PreMsgTime + 1
 	// 1.处理业务逻辑
 	// 2.处理业务
 	// 从redis取消息，后发的消息先取
 	historyKey := auto.CreateChatHistoryKey(req.UserId, req.ToUserId)
-	messageList, err := cs.rClient.ZRangeMessageList(ctx, historyKey)
+	messageList, err := cs.rCache.ZRangeMessageList(ctx, historyKey, req.PreMsgTime)
 	if err != nil {
-		zap.L().Error("cs.rClient.ZRangeMessageList err:", zap.Error(err))
+		zap.L().Error("cs.rCache.ZRangeMessageList err:", zap.Error(err))
 		return cs.respRepo.MessageListResponse(errcode.ErrRedis, err.Error(), &chat.MessageListResponse{}), nil
 	}
-	if messageList == nil {
+	fmt.Println("req.PreMsgTime:", req.PreMsgTime)
+	for _, v := range messageList {
+		fmt.Printf("message:%#v\n", v)
+	}
+	exist, err := cs.rCache.KeyExist(ctx, historyKey)
+	if err != nil {
+		zap.L().Error("cs.rCache.KeyExist err:", zap.Error(err))
+		return cs.respRepo.MessageListResponse(errcode.ErrRedis, err.Error(), &chat.MessageListResponse{}), nil
+	}
+	if !exist {
+		fmt.Println("缓存没有，！！！！！！！！取 数据库！！！！！！！！！！！！！！！！！！！！！")
 		// 未命中缓存，取数据库取消息
-		messageList, err = cs.ChatRepo.GetMessageList(ctx, req.UserId, req.ToUserId)
+		messageList, err = cs.ChatRepo.GetMessageList(ctx, req.UserId, req.ToUserId, req.PreMsgTime)
 		if err != nil {
-			zap.L().Error("cs.rClient.GetMessageList err:", zap.Error(err))
+			zap.L().Error("cs.rCache.GetMessageList err:", zap.Error(err))
 			return cs.respRepo.MessageListResponse(errcode.ErrDB, err.Error(), &chat.MessageListResponse{}), nil
 		}
+		if messageList == nil {
+			return cs.respRepo.MessageListResponse(errcode.StatusOK, model.MsgNil, &chat.MessageListResponse{}), nil
+		}
 		// 添加缓存
-		if err = cs.rClient.PushManyHistoryMessage(ctx, historyKey, messageList); err != nil {
-			zap.L().Error("cs.rClient.PushManyHistoryMessage err:", zap.Error(err))
+		if err = cs.rCache.PushManyHistoryMessage(ctx, historyKey, messageList); err != nil {
+			zap.L().Error("cs.rCache.PushManyHistoryMessage err:", zap.Error(err))
 			return cs.respRepo.MessageListResponse(errcode.ErrRedis, err.Error(), &chat.MessageListResponse{}), nil
 		}
 	}
@@ -105,12 +118,14 @@ func (cs *ChatServiceImpl) MessageList(ctx context.Context, req *chat.MessageLis
 	resp.MessageList = make([]*chat.Message, len(messageList))
 	for i, message := range messageList {
 		createdTime := message.CreatedAt.Unix()
+		fmt.Println("createdTime:", createdTime)
+		fmt.Println("createdTime/100:", createdTime/100)
 		resp.MessageList[i] = &chat.Message{
 			Id:         int64(i),
 			ToUserId:   int64(message.ToUserId),
 			FromUserId: int64(message.UserId),
 			Content:    message.Content,
-			CreateTime: createdTime,
+			CreateTime: createdTime, // 将ms级转为 s级
 		}
 	}
 

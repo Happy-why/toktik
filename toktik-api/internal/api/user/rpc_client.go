@@ -23,7 +23,7 @@ func InitRpcUserClient() {
 		client.WithResolver(r),
 	)
 	if err != nil {
-		zap.L().Error("apiServer InitRpcUserClient err:", zap.Error(err))
+		zap.L().Error("apiServer InitRpc User Client err:", zap.Error(err))
 		panic(err)
 	}
 	api.UserClient = c

@@ -82,9 +82,7 @@ func MustUser() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		_, err := api.UserClient.TokenVerify(c,
-			&user.TokenVerifyRequest{UserId: content.ID, TokenType: string(content.Type)},
-		)
+		_, err := api.UserClient.TokenVerify(c, &user.TokenVerifyRequest{UserId: content.ID, TokenType: string(content.Type)})
 		if err != nil {
 			zap.L().Error("api.UserClient.TokenVerify err:", zap.Error(err))
 			res.Reply(errcode.ErrAuth.WithDetails(err.Error()))

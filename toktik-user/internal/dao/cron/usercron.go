@@ -4,8 +4,8 @@ import (
 	"context"
 	"go.uber.org/zap"
 	"toktik-common/timing_job"
+	"toktik-user/internal/cache"
 	"toktik-user/internal/dao/mysql"
-	"toktik-user/internal/dao/redis"
 	"toktik-user/internal/model/auto"
 )
 
@@ -16,7 +16,7 @@ func TimingJob() {
 
 func UserInfoMoveToDB() {
 	ctx := context.Background()
-	rdb := redis.GetRdbCache()
+	rdb := cache.GetRdbCache()
 	dbConn := mysql.NewGormConn()
 	// 从数据库取 user_ids
 	userIds := make([]int64, 0)
