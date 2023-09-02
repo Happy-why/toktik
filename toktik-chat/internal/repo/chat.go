@@ -6,5 +6,5 @@ import (
 )
 
 type ChatRepo interface {
-	GetMessageList(c context.Context, userId, targetId int64) ([]*auto.Message, error)
+	GetMessageList(c context.Context, userId, targetId int64, preMsgTime int64) ([]*auto.Message, error)
 }
