@@ -1,7 +1,9 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
+	"fmt"
+	"github.com/cloudwego/hertz/pkg/app"
 	"go.uber.org/zap"
 	"toktik-api/internal/api"
 	"toktik-api/internal/global"
@@ -17,7 +19,7 @@ const (
 )
 
 type AuthToken struct {
-	Token string `json:"token" form:"token"`
+	Token string `json:"token" form:"token" query:"token"`
 }
 
 // ParseToken 获取并解析header中token
@@ -34,23 +36,24 @@ func ParseToken(accessToken string) (*token.Payload, string, errcode.Err) {
 }
 
 // Auth 鉴权中间件,用于解析并写入token
-func Auth() func(c *gin.Context) {
-	return func(c *gin.Context) {
+func Auth() func(ctx context.Context, c *app.RequestContext) {
+	return func(ctx context.Context, c *app.RequestContext) {
 		res := response.NewResponse(c)
 		t := &AuthToken{}
-		if err := c.ShouldBind(&t); err != nil {
+		if err := c.Bind(&t); err != nil {
 			zap.L().Error("c.ShouldBind(&t) err:", zap.Error(err))
 			res.Reply(errcode.ErrAuth.WithDetails(err.Error()))
 			c.Abort()
 			return
 		}
+		fmt.Println("token:", t)
 		if t.Token == TokenNil {
-			c.Next()
+			c.Next(ctx)
 			return
 		}
 		payload, _, err := ParseToken(t.Token)
 		if err != nil {
-			c.Next()
+			c.Next(ctx)
 			return
 		}
 		content := &token.Content{}
@@ -61,14 +64,15 @@ func Auth() func(c *gin.Context) {
 			return
 		}
 		zap.S().Info(content)
+		fmt.Println("content:", content)
 		c.Set(AuthKey, content)
-		c.Next()
+		c.Next(ctx)
 	}
 }
 
 // MustUser 必须是用户
-func MustUser() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func MustUser() app.HandlerFunc {
+	return func(ctx context.Context, c *app.RequestContext) {
 		res := response.NewResponse(c)
 		val, ok := c.Get(AuthKey)
 		if !ok {
@@ -82,13 +86,15 @@ func MustUser() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		_, err := api.UserClient.TokenVerify(c, &user.TokenVerifyRequest{UserId: content.ID, TokenType: string(content.Type)})
+		fmt.Println("准备 TokenVerify content:", content)
+		_, err := api.UserClient.TokenVerify(ctx, &user.TokenVerifyRequest{UserId: content.ID, TokenType: string(content.Type)})
 		if err != nil {
 			zap.L().Error("api.UserClient.TokenVerify err:", zap.Error(err))
 			res.Reply(errcode.ErrAuth.WithDetails(err.Error()))
 			c.Abort()
 			return
 		}
-		c.Next()
+		fmt.Println("TokenVerify 成功！")
+		c.Next(ctx)
 	}
 }

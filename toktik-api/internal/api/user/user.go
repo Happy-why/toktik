@@ -1,8 +1,8 @@
 package user
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
+	"context"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/jinzhu/copier"
 	"toktik-api/internal/api"
 	"toktik-api/internal/model/request"
@@ -21,11 +21,11 @@ func NewHandlerUser() *HandlerUser {
 	return &HandlerUser{}
 }
 
-func (h *HandlerUser) Register(c *gin.Context) {
+func (h *HandlerUser) Register(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.RegisterRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
@@ -37,7 +37,7 @@ func (h *HandlerUser) Register(c *gin.Context) {
 	// 3.调用user rpc服务 获取响应
 	params := &user.RegisterRequest{}
 	_ = copier.Copy(params, req)
-	result, err := api.UserClient.Register(c, params)
+	result, err := api.UserClient.Register(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return
@@ -46,14 +46,13 @@ func (h *HandlerUser) Register(c *gin.Context) {
 	resp := &response.RegisterResponse{}
 	_ = copier.Copy(resp, result)
 	res.Reply(nil, resp)
-	return
 }
 
-func (h *HandlerUser) Login(c *gin.Context) {
+func (h *HandlerUser) Login(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.LoginRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
@@ -65,25 +64,22 @@ func (h *HandlerUser) Login(c *gin.Context) {
 	// 3.调用user rpc服务 获取响应
 	params := &user.LoginRequest{}
 	_ = copier.Copy(params, req)
-	result, err := api.UserClient.Login(c, params)
+	result, err := api.UserClient.Login(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return
 	}
-	fmt.Println("result:", result)
 	// 4.返回结果
 	resp := &response.LoginResponse{}
 	_ = copier.Copy(resp, result)
-	fmt.Println("resp:", resp)
 	res.Reply(nil, resp)
-	return
 }
 
-func (h *HandlerUser) UserIndex(c *gin.Context) {
+func (h *HandlerUser) UserIndex(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.UserIndexRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
@@ -97,7 +93,7 @@ func (h *HandlerUser) UserIndex(c *gin.Context) {
 	params := &user.UserIndexRequest{}
 	_ = copier.Copy(params, req)
 
-	result, err := api.UserClient.UserIndex(c, params)
+	result, err := api.UserClient.UserIndex(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return
@@ -106,5 +102,4 @@ func (h *HandlerUser) UserIndex(c *gin.Context) {
 	resp := &response.UserIndexResponse{}
 	_ = copier.Copy(resp, result)
 	res.Reply(nil, resp)
-	return
 }

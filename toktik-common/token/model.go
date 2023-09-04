@@ -2,7 +2,7 @@ package token
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 type (
@@ -44,7 +44,7 @@ type Token struct {
 }
 
 // GetTokenContent 从当前上下文中获取保存的content内容
-func GetTokenContent(c *gin.Context) (*Content, bool) {
+func GetTokenContent(c *app.RequestContext) (*Content, bool) {
 	val, ok := c.Get(AuthKey)
 	if !ok {
 		return nil, false

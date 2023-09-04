@@ -1,9 +1,8 @@
 package interaction
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app/server"
 	"log"
-	"toktik-api/pkg/middleware"
 	"toktik-api/pkg/router"
 )
 
@@ -16,11 +15,11 @@ func init() {
 	router.Register(ri)
 }
 
-func (*RouterInteraction) Route(r *gin.Engine) {
+func (*RouterInteraction) Route(r *server.Hertz) {
 	InitRpcInteractionClient()
 	//初始化grpc的客户端连接
 	h := NewHandlerInteraction()
-	g := r.Group("/douyin/relation", middleware.MustUser())
+	g := r.Group("/douyin/relation" /*middleware.MustUser()*/)
 	{
 		g.POST("/action/", h.FollowSB)
 		g.GET("/follow/list/", h.FollowList)
