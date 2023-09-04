@@ -6,6 +6,7 @@ option go_package = "favor";
 
 message FavoriteListRequest {
   int64 user_id = 1; // 用户id
+  int64 my_user_id = 2; // 当前登录用户
 }
 
 message FavoriteListResponse {

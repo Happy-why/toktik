@@ -9,6 +9,7 @@ type Config struct {
 	Rpc    Rpc
 	Token  Token
 	Etcd   Etcd
+	Jaeger Jaeger
 }
 
 type Nacos struct {
@@ -31,6 +32,12 @@ type Rpc struct {
 	Name        string
 	Addr        string
 	ServerAddrs map[string]string
+}
+
+type Jaeger struct {
+	HTTPEndpoint      string
+	RPCExportEndpoint string
+	ServerName        map[string]string
 }
 
 type Logger struct {

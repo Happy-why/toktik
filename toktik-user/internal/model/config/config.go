@@ -12,6 +12,7 @@ type Config struct {
 	Redis  Redis
 	Etcd   Etcd
 	Nacos  Nacos
+	Jaeger Jaeger
 }
 
 type Nacos struct {
@@ -39,6 +40,11 @@ type Rules struct {
 type Rpc struct {
 	Name string
 	Addr string
+}
+
+type Jaeger struct {
+	RPCExportEndpoint string
+	ServerName        map[string]string
 }
 
 type Etcd struct {

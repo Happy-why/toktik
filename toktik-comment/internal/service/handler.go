@@ -77,7 +77,6 @@ func (vs *VideoServiceImpl) CommentAction(ctx context.Context, req *comment.Comm
 		// ④ 获取用户信息
 		userIndexResp, _ := client.UserClient.UserIndex(ctx, &user.UserIndexRequest{
 			UserId:   req.UserId,
-			Token:    "",
 			MyUserId: req.UserId,
 		})
 		if userIndexResp == nil {

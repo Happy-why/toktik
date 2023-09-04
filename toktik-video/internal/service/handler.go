@@ -211,7 +211,7 @@ func (vs *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishL
 	// 1.处理业务逻辑
 	// 2.处理业务
 	// ① 根据 user_id 查询当前用户的所有信息
-	userIndexResp, _ := client.UserClient.UserIndex(ctx, &user.UserIndexRequest{UserId: req.UserId, Token: "", MyUserId: req.UserId})
+	userIndexResp, _ := client.UserClient.UserIndex(ctx, &user.UserIndexRequest{UserId: req.UserId, MyUserId: req.UserId})
 	if userIndexResp == nil {
 		zap.L().Error("client.UserClient.UserIndex 返回空指针")
 		return vs.respRepo.PublishListResponse(errcode.ErrServer, model.MsgNil, &video.PublishListResponse{}), nil
@@ -221,7 +221,7 @@ func (vs *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishL
 		return vs.respRepo.PublishListResponse(errcode.CreateErr(userIndexResp.StatusCode, model.MsgNil), userIndexResp.StatusMsg, &video.PublishListResponse{}), nil
 	}
 
-	// ② 根据 user_id 在 video表中查询 当前用户发表的视频信息，和视频id
+	// ② 根据 user_id 在 video表中查询 该用户发表的视频信息，和视频id
 	// 去缓存查询 user 的 video_ids
 	userVideoKey := auto.CreateUserVideoKey(uint(req.UserId))
 	videoIds, err := vs.rCache.SGetUserVideoIds(ctx, userVideoKey)
@@ -245,9 +245,9 @@ func (vs *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishL
 			return vs.respRepo.PublishListResponse(errcode.ErrRedis, err.Error(), &video.PublishListResponse{}), nil
 		}
 	}
-	// ③ 判断 用户对每个视频是否点赞
+	// ③ 判断 当前登录用户对每个视频是否点赞
 	IsFavoriteResp, _ := client.FavorClient.IsFavoriteVideos(ctx, &favor.IsFavoriteVideosRequest{
-		UserId:   req.UserId,
+		UserId:   req.MyUserId,
 		VideoIds: videoIds,
 	})
 	if IsFavoriteResp == nil {
@@ -308,7 +308,6 @@ func (vs *VideoServiceImpl) GetVideoInfo(ctx context.Context, req *video.GetVide
 	// 通过 user_id 去查 user_info
 	userIndexResp, _ := client.UserClient.UserIndex(ctx, &user.UserIndexRequest{
 		UserId:   int64(videoInfo.UserId),
-		Token:    "",
 		MyUserId: req.UserId,
 	})
 	if userIndexResp == nil {

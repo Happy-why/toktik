@@ -127,16 +127,18 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginRequest) (re
 	defer cancel()
 	// 通过 username 查询 UserInfo
 	userInfo, err := s.UserRepo.GetUserInfoByUsername(c, req.Username)
+	if err == gorm.ErrRecordNotFound {
+		zap.L().Info("用户名不存在！")
+		return s.respRepo.LoginResponse(myerr.UserNotFound, model.MsgNil, &user.LoginResponse{}), nil
+	}
 	if err != nil {
 		zap.L().Error("s.UserRepo.GetUserByUsername err:", zap.Error(err))
 		return s.respRepo.LoginResponse(errcode.ErrDB, err.Error(), &user.LoginResponse{}), nil
 	}
-
 	// 判断 password
 	if err = utils.CheckPassword(req.Password, userInfo.Password); err != nil {
 		return s.respRepo.LoginResponse(myerr.PasswordErr, err.Error(), &user.LoginResponse{}), nil
 	}
-
 	// 生成token
 	token, content, err := CreateToken(int64(userInfo.ID))
 	if err != nil {
@@ -354,11 +356,11 @@ func (s *UserServiceImpl) GetUserList(ctx context.Context, req *user.GetUserList
 	})
 	if isFollowResp == nil {
 		zap.L().Error("client.InteractionClient.IsFollowManyTargets 返回空指针")
-		return s.respRepo.GetUserListResponse(errcode.ErrServer, model.MsgNil, &user.GetUserListResponse{}), nil
+		return s.respRepo.GetUserListResponse(errcode.ErrServer, myerr.IsFollowManyTargetsErr.Error(), &user.GetUserListResponse{}), nil
 	}
 	if isFollowResp.StatusCode != model.RpcSuccess {
 		zap.L().Error("client.InteractionClient.IsFollowManyTargets err:", zap.Error(err))
-		return s.respRepo.GetUserListResponse(errcode.CreateErr(isFollowResp.StatusCode, model.MsgNil), isFollowResp.StatusMsg, &user.GetUserListResponse{}), nil
+		return s.respRepo.GetUserListResponse(errcode.CreateErr(isFollowResp.StatusCode, myerr.IsFollowManyTargetsErr.Error()), isFollowResp.StatusMsg, &user.GetUserListResponse{}), nil
 	}
 	// 2.处理业务
 	// 先查缓存

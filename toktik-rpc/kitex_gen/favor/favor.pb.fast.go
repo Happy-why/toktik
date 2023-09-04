@@ -20,6 +20,11 @@ func (x *FavoriteListRequest) FastRead(buf []byte, _type int8, number int32) (of
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -35,6 +40,11 @@ ReadFieldError:
 
 func (x *FavoriteListRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *FavoriteListRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.MyUserId, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -271,6 +281,7 @@ func (x *FavoriteListRequest) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -279,6 +290,14 @@ func (x *FavoriteListRequest) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *FavoriteListRequest) fastWriteField2(buf []byte) (offset int) {
+	if x.MyUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 2, x.GetMyUserId())
 	return offset
 }
 
@@ -451,6 +470,7 @@ func (x *FavoriteListRequest) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
@@ -459,6 +479,14 @@ func (x *FavoriteListRequest) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeInt64(1, x.GetUserId())
+	return n
+}
+
+func (x *FavoriteListRequest) sizeField2() (n int) {
+	if x.MyUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(2, x.GetMyUserId())
 	return n
 }
 
@@ -628,6 +656,7 @@ func (x *IsFavoriteVideosResponse) sizeField3() (n int) {
 
 var fieldIDToName_FavoriteListRequest = map[int32]string{
 	1: "UserId",
+	2: "MyUserId",
 }
 
 var fieldIDToName_FavoriteListResponse = map[int32]string{

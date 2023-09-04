@@ -20,9 +20,10 @@ func (*RouterFavor) Route(r *gin.Engine) {
 	InitRpcFavorClient()
 	//初始化grpc的客户端连接
 	h := NewHandlerVideo()
+	r.GET("/douyin/favorite/list/", h.FavoriteList)
 	g := r.Group("/douyin", middleware.MustUser())
 	{
 		g.POST("/favorite/action/", h.FavoriteAction)
-		g.GET("/favorite/list/", h.FavoriteList)
+
 	}
 }

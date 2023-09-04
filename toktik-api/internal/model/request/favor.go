@@ -8,6 +8,7 @@ type FavoriteActionRequest struct {
 }
 
 type FavoriteListRequest struct {
-	UserId int64  `json:"user_id" form:"user_id"`
-	Token  string `json:"token" form:"token"`
+	UserId   int64  `json:"user_id" form:"user_id"`
+	MyUserId int64  `json:"my_user_id" form:"my_user_id"`
+	Token    string `json:"token" form:"token"`
 }

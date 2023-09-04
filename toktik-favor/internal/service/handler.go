@@ -143,6 +143,7 @@ func (fs *FavorServiceImpl) FavoriteList(ctx context.Context, req *favor.Favorit
 		return fs.respRepo.FavoriteListResponse(errcode.ErrRedis, err.Error(), &favor.FavoriteListResponse{}), nil
 	}
 	if videoIds == nil {
+		//
 		return fs.respRepo.FavoriteListResponse(errcode.StatusOK, model.MsgNil, resp), nil
 	}
 	// ③ 根据 video_ids 查询到 每个 video_info
@@ -160,7 +161,6 @@ func (fs *FavorServiceImpl) FavoriteList(ctx context.Context, req *favor.Favorit
 	}
 	resp.VideoList = make([]*video.Video, len(videoIds))
 	for i, videoInfo := range getManyVideoInfosResp.VideoInfos {
-
 		resp.VideoList[i] = videoInfo
 	}
 	// 4.返回数据

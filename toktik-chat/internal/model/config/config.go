@@ -11,6 +11,7 @@ type Config struct {
 	Redis  Redis
 	Etcd   Etcd
 	Nacos  Nacos
+	Jaeger Jaeger
 }
 type Nacos struct {
 	Namespace   string `json:"namespace"`
@@ -32,6 +33,11 @@ type Rules struct {
 	DefaultUserAvatar          string
 	DefaultUserSignature       string
 	DefaultUserBackGroundImage string
+}
+
+type Jaeger struct {
+	RPCExportEndpoint string
+	ServerName        map[string]string
 }
 
 type Rpc struct {

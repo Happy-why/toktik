@@ -134,7 +134,7 @@ func (x *FollowListRequest) fastReadField1(buf []byte, _type int8) (offset int, 
 }
 
 func (x *FollowListRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+	x.MyUserId, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -219,7 +219,7 @@ func (x *FansListRequest) fastReadField1(buf []byte, _type int8) (offset int, er
 }
 
 func (x *FansListRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+	x.MyUserId, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -304,7 +304,7 @@ func (x *FriendListRequest) fastReadField1(buf []byte, _type int8) (offset int, 
 }
 
 func (x *FriendListRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.Token, offset, err = fastpb.ReadString(buf, _type)
+	x.MyUserId, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -702,10 +702,10 @@ func (x *FollowListRequest) fastWriteField1(buf []byte) (offset int) {
 }
 
 func (x *FollowListRequest) fastWriteField2(buf []byte) (offset int) {
-	if x.Token == "" {
+	if x.MyUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 2, x.GetToken())
+	offset += fastpb.WriteInt64(buf[offset:], 2, x.GetMyUserId())
 	return offset
 }
 
@@ -763,10 +763,10 @@ func (x *FansListRequest) fastWriteField1(buf []byte) (offset int) {
 }
 
 func (x *FansListRequest) fastWriteField2(buf []byte) (offset int) {
-	if x.Token == "" {
+	if x.MyUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 2, x.GetToken())
+	offset += fastpb.WriteInt64(buf[offset:], 2, x.GetMyUserId())
 	return offset
 }
 
@@ -824,10 +824,10 @@ func (x *FriendListRequest) fastWriteField1(buf []byte) (offset int) {
 }
 
 func (x *FriendListRequest) fastWriteField2(buf []byte) (offset int) {
-	if x.Token == "" {
+	if x.MyUserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 2, x.GetToken())
+	offset += fastpb.WriteInt64(buf[offset:], 2, x.GetMyUserId())
 	return offset
 }
 
@@ -1140,10 +1140,10 @@ func (x *FollowListRequest) sizeField1() (n int) {
 }
 
 func (x *FollowListRequest) sizeField2() (n int) {
-	if x.Token == "" {
+	if x.MyUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(2, x.GetToken())
+	n += fastpb.SizeInt64(2, x.GetMyUserId())
 	return n
 }
 
@@ -1201,10 +1201,10 @@ func (x *FansListRequest) sizeField1() (n int) {
 }
 
 func (x *FansListRequest) sizeField2() (n int) {
-	if x.Token == "" {
+	if x.MyUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(2, x.GetToken())
+	n += fastpb.SizeInt64(2, x.GetMyUserId())
 	return n
 }
 
@@ -1262,10 +1262,10 @@ func (x *FriendListRequest) sizeField1() (n int) {
 }
 
 func (x *FriendListRequest) sizeField2() (n int) {
-	if x.Token == "" {
+	if x.MyUserId == 0 {
 		return n
 	}
-	n += fastpb.SizeString(2, x.GetToken())
+	n += fastpb.SizeInt64(2, x.GetMyUserId())
 	return n
 }
 
@@ -1506,7 +1506,7 @@ var fieldIDToName_FollowActionResponse = map[int32]string{
 
 var fieldIDToName_FollowListRequest = map[int32]string{
 	1: "UserId",
-	2: "Token",
+	2: "MyUserId",
 }
 
 var fieldIDToName_FollowListResponse = map[int32]string{
@@ -1517,7 +1517,7 @@ var fieldIDToName_FollowListResponse = map[int32]string{
 
 var fieldIDToName_FansListRequest = map[int32]string{
 	1: "UserId",
-	2: "Token",
+	2: "MyUserId",
 }
 
 var fieldIDToName_FansListResponse = map[int32]string{
@@ -1528,7 +1528,7 @@ var fieldIDToName_FansListResponse = map[int32]string{
 
 var fieldIDToName_FriendListRequest = map[int32]string{
 	1: "UserId",
-	2: "Token",
+	2: "MyUserId",
 }
 
 var fieldIDToName_FriendListResponse = map[int32]string{

@@ -97,7 +97,7 @@ func (v *HandlerVideo) PublishList(c *gin.Context) {
 		res.Reply(errcode.ErrServer)
 		return
 	}
-	req.UserId = content.ID
+	req.MyUserId = content.ID
 	// 3.调用rpc服务获取响应
 	params := &video.PublishListRequest{}
 	_ = copier.Copy(params, req)
