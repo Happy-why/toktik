@@ -308,6 +308,11 @@ func (x *PublishListRequest) FastRead(buf []byte, _type int8, number int32) (off
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -323,6 +328,11 @@ ReadFieldError:
 
 func (x *PublishListRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
 	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *PublishListRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.MyUserId, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -1017,6 +1027,7 @@ func (x *PublishListRequest) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
@@ -1025,6 +1036,14 @@ func (x *PublishListRequest) fastWriteField1(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *PublishListRequest) fastWriteField2(buf []byte) (offset int) {
+	if x.MyUserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 2, x.GetMyUserId())
 	return offset
 }
 
@@ -1575,6 +1594,7 @@ func (x *PublishListRequest) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
@@ -1583,6 +1603,14 @@ func (x *PublishListRequest) sizeField1() (n int) {
 		return n
 	}
 	n += fastpb.SizeInt64(1, x.GetUserId())
+	return n
+}
+
+func (x *PublishListRequest) sizeField2() (n int) {
+	if x.MyUserId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(2, x.GetMyUserId())
 	return n
 }
 
@@ -1948,6 +1976,7 @@ var fieldIDToName_VideoPublishResponse = map[int32]string{
 
 var fieldIDToName_PublishListRequest = map[int32]string{
 	1: "UserId",
+	2: "MyUserId",
 }
 
 var fieldIDToName_PublishListResponse = map[int32]string{

@@ -14,6 +14,7 @@ func main() {
 	// 初始化
 	setting.InitAllSetting()
 	fmt.Printf("config:%#v\n", global.Settings)
+
 	// 初始化 gin
 	route := gin.Default()
 

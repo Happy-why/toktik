@@ -1,7 +1,10 @@
 package rpc
 
 import (
+	"github.com/kitex-contrib/obs-opentelemetry/provider"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	"toktik-interaction/internal/global"
+	"toktik-interaction/internal/model"
 	"toktik-interaction/internal/service"
 	"toktik-rpc/kitex_gen/interaction/interactionservice"
 
@@ -23,10 +26,16 @@ func RegisterRPC() server.Server {
 		zap.L().Error("net.ResolveTCPAddr err:", zap.Error(err))
 		return nil
 	}
+	provider.NewOpenTelemetryProvider(
+		provider.WithServiceName(global.Settings.Jaeger.ServerName[model.TokTikInteraction]),
+		provider.WithExportEndpoint(global.Settings.Jaeger.RPCExportEndpoint),
+		provider.WithInsecure(),
+	)
 	svr := interactionservice.NewServer(
 		service.NewInteractionService(),
 		server.WithServiceAddr(addr),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: global.Settings.Rpc.Name}),
+		server.WithSuite(tracing.NewServerSuite()),
 		//server.WithMiddleware(rpcmiddleware.CommonMiddleware), // middleware
 		//server.WithMiddleware(rpcmiddleware.ServerMiddleware),
 		server.WithRegistry(r),

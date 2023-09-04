@@ -39,7 +39,7 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 	if req.MyUserId == req.ToUserId {
 		return is.respRepo.FollowSBResponse(myerr.NotCanFollowSelf, model.MsgNil, &inter.FollowActionResponse{}), nil
 	}
-	// 逻辑校验，在 relation 表中查询是否存在 关注关系
+	// ① 逻辑校验，在 relation 表中查询是否存在 关注关系
 	relationID, exist, err := is.interactionRepo.IsRelationExist(ctx, req.MyUserId, req.ToUserId)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		zap.L().Error("is.interactionRepo.IsRelationExist err:", zap.Error(err))
@@ -51,9 +51,7 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 		TargetId:  uint(req.ToUserId),
 	}
 	// 进行业务
-	followKey := auto.CreateFollowKey(req.MyUserId)
-	fanKey := auto.CreateFanKey(req.MyUserId)
-	friendKey := auto.CreateFriendKey(req.MyUserId)
+
 	switch req.ActionType {
 	case model.Follow:
 		if exist {
@@ -91,20 +89,21 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 		//if respErr.Err.ECode() != 0{
 		//	return is.respRepo.FollowSBResponse(respErr.Err, respErr.ErrStr, &inter.FollowActionResponse{}), nil
 		//}
-		// 先删除缓存
-		// 先处理 follow
+		// ② 先删除缓存 ，删除自己的关注缓存
+		followKey := auto.CreateFollowKey(req.MyUserId)
 		err = is.rCache.DelFollow(ctx, followKey)
 		if err != nil {
 			zap.L().Error("is.rCache.SDelFollow err:", zap.Error(err))
 			return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
 		}
-		// 处理 fan
+		// 删除 对方的粉丝缓存
+		fanKey := auto.CreateFanKey(req.ToUserId)
 		err = is.rCache.DelFan(ctx, fanKey)
 		if err != nil {
 			zap.L().Error("is.rCache.SDelFan err:", zap.Error(err))
 			return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
 		}
-		// 进行事务，关注后，将当前用户的follow_count 和 对方用户的follower_count 增1
+		// ③ 进行事务，关注后，将当前用户的follow_count 和 对方用户的follower_count 增1
 		if err = is.transaction.Action(func(conn mysql.DbConn) error {
 			if err = is.interactionRepo.FollowUserAction(ctx, conn, relationInfo); err != nil {
 				zap.L().Error("is.interactionRepo.FollowUserAction err:", zap.Error(err))
@@ -114,8 +113,8 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 		}); err != nil {
 			return is.respRepo.FollowSBResponse(errcode.ErrDB, err.Error(), &inter.FollowActionResponse{}), nil
 		}
-		// 延迟删除缓存，立即删除缓存，请求2 先读取数据库中的旧值，会向缓存中写入旧值，所以需要等待一次redis写入时间再删除
-		time.Sleep(80 * time.Millisecond)
+		// ④ 延迟删除缓存，立即删除缓存的话,请求2 先读取数据库中的旧值，会向缓存中写入旧值，所以需要等待一次redis写入时间再删除
+		time.Sleep(50 * time.Millisecond)
 		err = is.rCache.DelFollow(ctx, followKey)
 		if err != nil {
 			zap.L().Error("is.rCache.SDelFollow err:", zap.Error(err))
@@ -126,7 +125,25 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 			zap.L().Error("is.rCache.SDelFan err:", zap.Error(err))
 			return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
 		}
-
+		// ⑤ 判断对方是否关注自己，是则删除好友缓存
+		isFollowMe, err := is.IsFollowTarget2(ctx, req.ToUserId, req.MyUserId)
+		if err != nil {
+			zap.L().Error("is.IsFollowTarget2 err:", zap.Error(err))
+			return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+		}
+		if isFollowMe {
+			friendKey1 := auto.CreateFriendKey(req.MyUserId)
+			if err = is.rCache.DelFriend(ctx, friendKey1); err != nil {
+				zap.L().Error("is.rCache.DelFriend err:", zap.Error(err))
+				return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+			}
+			friendKey2 := auto.CreateFriendKey(req.ToUserId)
+			if err = is.rCache.DelFriend(ctx, friendKey2); err != nil {
+				zap.L().Error("is.rCache.DelFriend err:", zap.Error(err))
+				return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+			}
+		}
+		// ⑥ 计数
 		addFollowResp, _ := client.UserCache.AddFollowCount(ctx, &user.AddFollowCountRequest{UserId: req.MyUserId, TargetId: req.ToUserId})
 		if addFollowResp == nil {
 			fmt.Printf("addFpllowResp:%#v\n", addFollowResp)
@@ -143,15 +160,40 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 			return is.respRepo.FollowSBResponse(myerr.UserNotFollowed, model.MsgNil, &inter.FollowActionResponse{}), nil
 		}
 		relationInfo.ID = relationID
+		// 删除自己的关注缓存
+		followKey := auto.CreateFollowKey(req.MyUserId)
 		err = is.rCache.DelFollow(ctx, followKey)
 		if err != nil {
 			zap.L().Error("is.rCache.SDelFollow err:", zap.Error(err))
 			return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
 		}
+		// 删除对方的粉丝缓存
+		fanKey := auto.CreateFanKey(req.ToUserId)
 		err = is.rCache.DelFan(ctx, fanKey)
 		if err != nil {
 			zap.L().Error("is.rCache.SDelFan err:", zap.Error(err))
 			return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+		}
+		// 如果是好友，则删除双方好友缓存
+		isFollowMe, err := is.IsFollowTarget2(ctx, req.ToUserId, req.MyUserId)
+		if err != nil {
+			zap.L().Error("is.IsFollowTarget2 err:", zap.Error(err))
+			return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+		}
+		if isFollowMe {
+			// 删除好友缓存,双向删除
+			friendKey1 := auto.CreateFriendKey(req.MyUserId)
+			err = is.rCache.DelFriend(ctx, friendKey1)
+			if err != nil {
+				zap.L().Error("is.rCache.DelFriend err:", zap.Error(err))
+				return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+			}
+			friendKey2 := auto.CreateFriendKey(req.ToUserId)
+			err = is.rCache.DelFriend(ctx, friendKey2)
+			if err != nil {
+				zap.L().Error("is.rCache.DelFriend err:", zap.Error(err))
+				return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+			}
 		}
 		// 进行事务，关注后，将当前用户的follow_count 和 对方用户的follower_count -1
 		if err = is.transaction.Action(func(conn mysql.DbConn) error {
@@ -163,7 +205,7 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 		}); err != nil {
 			return is.respRepo.FollowSBResponse(errcode.ErrDB, err.Error(), &inter.FollowActionResponse{}), nil
 		}
-		time.Sleep(80 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 		err = is.rCache.DelFollow(ctx, followKey)
 		if err != nil {
 			zap.L().Error("is.rCache.SDelFollow err:", zap.Error(err))
@@ -174,13 +216,22 @@ func (is *InteractionServiceImpl) FollowSB(ctx context.Context, req *inter.Follo
 			zap.L().Error("is.rCache.SDelFan err:", zap.Error(err))
 			return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
 		}
-		// 删除好友缓存
-		err = is.rCache.DelFriend(ctx, friendKey)
-		if err != nil {
-			zap.L().Error("is.rCache.SetFriend err:", zap.Error(err))
-			return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+		// 如果是好友，则删除双方好友缓存
+		if isFollowMe {
+			// 删除好友缓存,双向删除
+			friendKey1 := auto.CreateFriendKey(req.MyUserId)
+			err = is.rCache.DelFriend(ctx, friendKey1)
+			if err != nil {
+				zap.L().Error("is.rCache.DelFriend err:", zap.Error(err))
+				return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+			}
+			friendKey2 := auto.CreateFriendKey(req.ToUserId)
+			err = is.rCache.DelFriend(ctx, friendKey2)
+			if err != nil {
+				zap.L().Error("is.rCache.DelFriend err:", zap.Error(err))
+				return is.respRepo.FollowSBResponse(errcode.ErrRedis, err.Error(), &inter.FollowActionResponse{}), nil
+			}
 		}
-
 		subFollowResp, _ := client.UserCache.SubFollowCount(ctx, &user.SubFollowCountRequest{UserId: req.MyUserId, TargetId: req.ToUserId})
 		if subFollowResp == nil {
 			zap.L().Error("client.InteractionClient.IsFollowTarget 返回空指针")
@@ -226,7 +277,7 @@ func (is *InteractionServiceImpl) FollowList(ctx context.Context, req *inter.Fol
 		}
 	}
 
-	userListResp, err := client.UserCache.GetUserList(ctx, &user.GetUserListRequest{UserId: req.UserId, TargetId: followIds})
+	userListResp, err := client.UserCache.GetUserList(ctx, &user.GetUserListRequest{UserId: req.MyUserId, TargetId: followIds})
 	if userListResp == nil {
 		zap.L().Error("client.UserCache.GetUserList 返回空指针")
 		return is.respRepo.FollowListResponse(errcode.ErrServer, model.MsgNil, &inter.FollowListResponse{}), nil
@@ -269,7 +320,7 @@ func (is *InteractionServiceImpl) FansList(ctx context.Context, req *inter.FansL
 			return is.respRepo.FansListResponse(errcode.ErrRedis, err.Error(), &inter.FansListResponse{}), nil
 		}
 	}
-	userListResp, err := client.UserCache.GetUserList(ctx, &user.GetUserListRequest{UserId: req.UserId, TargetId: fanIds})
+	userListResp, err := client.UserCache.GetUserList(ctx, &user.GetUserListRequest{UserId: req.MyUserId, TargetId: fanIds})
 	if userListResp == nil {
 		zap.L().Error("client.UserCache.GetUserList 返回空指针")
 		return is.respRepo.FansListResponse(errcode.ErrServer, model.MsgNil, &inter.FansListResponse{}), nil
@@ -280,13 +331,9 @@ func (is *InteractionServiceImpl) FansList(ctx context.Context, req *inter.FansL
 	}
 	// 模型转换，返回
 	resp = new(inter.FansListResponse)
-	//resp.UserList = make([]*user.User, len(userListResp.UserList))
-	//for i, v := range userListResp.UserList {
-	//	resp.UserList[i] = v
-	//}
-	resp.UserList = make([]*user.User, 0)
-	for _, v := range userListResp.UserList {
-		resp.UserList = append(resp.UserList, v)
+	resp.UserList = make([]*user.User, len(fanIds))
+	for i, v := range userListResp.UserList {
+		resp.UserList[i] = v
 	}
 	return is.respRepo.FansListResponse(errcode.StatusOK, model.MsgNil, resp), nil
 }
@@ -307,7 +354,7 @@ func (is *InteractionServiceImpl) FriendList(ctx context.Context, req *inter.Fri
 			zap.L().Error("is.interactionRepo.GetFriendIDs err:", zap.Error(err))
 			return is.respRepo.FriendListResponse(errcode.ErrDB, err.Error(), &inter.FriendListResponse{}), nil
 		}
-		// 没有粉丝，直接返回
+		// 没有好友，直接返回
 		if len(friendIds) == 0 {
 			return is.respRepo.FriendListResponse(errcode.StatusOK, model.MsgNil, &inter.FriendListResponse{}), nil
 		}
@@ -318,7 +365,7 @@ func (is *InteractionServiceImpl) FriendList(ctx context.Context, req *inter.Fri
 		}
 	}
 
-	userListResp, err := client.UserCache.GetUserList(ctx, &user.GetUserListRequest{UserId: req.UserId, TargetId: friendIds})
+	userListResp, err := client.UserCache.GetUserList(ctx, &user.GetUserListRequest{UserId: req.MyUserId, TargetId: friendIds})
 	if userListResp == nil {
 		zap.L().Error("client.UserCache.GetUserList 返回空指针")
 		return is.respRepo.FriendListResponse(errcode.ErrServer, model.MsgNil, &inter.FriendListResponse{}), nil
@@ -442,4 +489,40 @@ func (is *InteractionServiceImpl) IsFriend(ctx context.Context, req *inter.IsFri
 		return is.respRepo.IsFriendResponse(errcode.ErrRedis, err.Error(), &inter.IsFriendResponse{}), nil
 	}
 	return is.respRepo.IsFriendResponse(errcode.StatusOK, model.MsgNil, resp), nil
+}
+
+func (is *InteractionServiceImpl) IsFollowTarget2(ctx context.Context, userId, targetId int64) (bool, error) {
+	// 处理业务
+	// 先查缓存，查不到 查数据库
+	followKey := auto.CreateFollowKey(userId)
+	exist, err := is.rCache.IsFollow(ctx, followKey, targetId)
+	if err != nil {
+		zap.L().Error("is.rCache.IsFollow err:", zap.Error(err))
+		return false, err
+	}
+	if exist {
+		return exist, nil
+	}
+	keyExist, err := is.rCache.KeyExist(ctx, followKey)
+	if err != nil {
+		zap.L().Error("is.rCache.KeyExist err:", zap.Error(err))
+		return false, err
+	}
+	if keyExist { // 缓存未过期
+		return exist, nil
+	}
+	// 因为缓存过期，到relation表中 查询 userId 是否关注 targetId
+	exist, err = is.interactionRepo.IsFollowUser(ctx, userId, targetId)
+	if err != nil {
+		zap.L().Error("is.interactionRepo.IsFollowUser err:", zap.Error(err))
+		return false, err
+	}
+	// 如果查到有关注，则添加缓存
+	if exist {
+		if err = is.rCache.SAddFollow(ctx, followKey, targetId); err != nil {
+			zap.L().Error("is.rCache.SAddFollow err:", zap.Error(err))
+			return false, err
+		}
+	}
+	return exist, nil
 }

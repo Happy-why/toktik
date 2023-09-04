@@ -42,6 +42,7 @@ message VideoPublishResponse {
 
 message PublishListRequest {
    int64 user_id = 1; // 用户id
+   int64 my_user_id = 2; // 当前登录用户的id
 }
 
 message PublishListResponse {

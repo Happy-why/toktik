@@ -17,7 +17,7 @@ message FollowActionResponse{
 
 message FollowListRequest{
    int64 user_id = 1; // 用户id
-   string token = 2; // 用户鉴权token
+   int64 my_user_id = 2; //当前登录用户
 }
 
 message FollowListResponse{
@@ -28,7 +28,7 @@ message FollowListResponse{
 
 message FansListRequest{
    int64 user_id = 1; // 用户id
-   string token = 2; // 用户鉴权token
+  int64 my_user_id = 2; //当前登录用户
 }
 
 message FansListResponse{
@@ -39,13 +39,18 @@ message FansListResponse{
 
 message FriendListRequest{
    int64 user_id = 1; // 用户id
-   string token = 2; // 用户鉴权token
+   int64 my_user_id = 2; //当前登录用户
 }
 
 message FriendListResponse{
    int64 status_code = 1; // 状态码，0-成功，其他值-失败
    string status_msg = 2; // 返回状态描述
   repeated user.User user_list = 3; // 用户列表
+}
+
+message FriendUser {
+    optional string chat_message = 1; // 和该好友的最新聊天消息
+     int64 msgType = 2; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
 
 message IsFollowTargetRequest{

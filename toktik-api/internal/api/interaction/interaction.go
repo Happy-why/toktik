@@ -57,6 +57,12 @@ func (p *HandlerInteraction) FollowList(c *gin.Context) {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
+	content, ok := token.GetTokenContent(c)
+	if !ok {
+		res.Reply(errcode.ErrServer)
+		return
+	}
+	req.MyUserId = content.ID
 	// 2.调用 rpc服务 获取响应
 	params := &inter.FollowListRequest{}
 	_ = copier.Copy(params, req)
@@ -80,6 +86,12 @@ func (p *HandlerInteraction) FansList(c *gin.Context) {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
+	content, ok := token.GetTokenContent(c)
+	if !ok {
+		res.Reply(errcode.ErrServer)
+		return
+	}
+	req.MyUserId = content.ID
 	// 2.调用 rpc服务 获取响应
 	params := &inter.FansListRequest{}
 	_ = copier.Copy(params, req)
@@ -103,6 +115,12 @@ func (p *HandlerInteraction) FriendList(c *gin.Context) {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
+	content, ok := token.GetTokenContent(c)
+	if !ok {
+		res.Reply(errcode.ErrServer)
+		return
+	}
+	req.MyUserId = content.ID
 	// 2.调用 rpc服务 获取响应
 	params := &inter.FriendListRequest{}
 	_ = copier.Copy(params, req)

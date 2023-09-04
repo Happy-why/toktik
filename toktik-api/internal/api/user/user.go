@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"toktik-api/internal/api"
@@ -64,12 +65,16 @@ func (h *HandlerUser) Login(c *gin.Context) {
 	// 3.调用user rpc服务 获取响应
 	params := &user.LoginRequest{}
 	_ = copier.Copy(params, req)
-	resp, err := api.UserClient.Login(c, params)
+	result, err := api.UserClient.Login(c, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return
 	}
+	fmt.Println("result:", result)
 	// 4.返回结果
+	resp := &response.LoginResponse{}
+	_ = copier.Copy(resp, result)
+	fmt.Println("resp:", resp)
 	res.Reply(nil, resp)
 	return
 }

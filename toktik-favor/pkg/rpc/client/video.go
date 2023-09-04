@@ -2,6 +2,8 @@ package client
 
 import (
 	"github.com/cloudwego/kitex/client"
+	"github.com/kitex-contrib/obs-opentelemetry/provider"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	etcd "github.com/kitex-contrib/registry-etcd"
 	"go.uber.org/zap"
 	"toktik-favor/internal/global"
@@ -16,8 +18,14 @@ func InitRpcVideoClient() {
 	if err != nil {
 		panic(err)
 	}
+	provider.NewOpenTelemetryProvider(
+		provider.WithServiceName(global.Settings.Jaeger.ServerName[model.TokTikVideo]),
+		provider.WithExportEndpoint(global.Settings.Jaeger.RPCExportEndpoint),
+		provider.WithInsecure(),
+	)
 	c, err := videoservice.NewClient(
 		model.RpcVideo,
+		client.WithSuite(tracing.NewClientSuite()),
 		//client.WithHostPorts(global.Settings.Rpc.ServerAddrs[model.RpcUser]),
 		//client.WithMiddleware(rpcmiddleware.CommonMiddleware),
 		//client.WithInstanceMW(rpcmiddleware.ClientMiddleware),

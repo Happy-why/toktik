@@ -15,6 +15,7 @@ import (
 	_ "toktik-api/internal/api/user"
 	_ "toktik-api/internal/api/video"
 	"toktik-api/internal/global"
+	"toktik-api/internal/model"
 	"toktik-api/pkg/middleware"
 	"toktik-api/pkg/router"
 	"toktik-api/pkg/setting"
@@ -36,7 +37,7 @@ func main() {
 
 	// 初始化 gin
 	route := gin.Default()
-	route.Use(middleware.Auth(), middleware.Cors(), otelgin.Middleware("toktik-api"))
+	route.Use(middleware.Auth(), middleware.Cors(), otelgin.Middleware(global.Settings.Jaeger.ServerName[model.TokTikApi]))
 	pprof.Register(route)
 	// 路由注册
 	router.InitRouter(route)

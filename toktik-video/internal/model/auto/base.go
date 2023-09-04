@@ -13,10 +13,6 @@ type BaseModel struct {
 	DeletedAt gorm.DeletedAt `json:"deleted_at,string"`
 }
 
-func CreateUserKey(userId uint) string {
-	return "user_info::" + strconv.FormatInt(int64(userId), 10)
-}
-
 func CreatePublishKey() string {
 	return "video_publish"
 }

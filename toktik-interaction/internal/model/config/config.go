@@ -11,6 +11,7 @@ type Config struct {
 	Redis  Redis
 	Etcd   Etcd
 	Nacos  Nacos
+	Jaeger Jaeger
 }
 
 type Nacos struct {
@@ -27,6 +28,11 @@ type Server struct {
 	RunMode               string
 	Addr                  string
 	DefaultContextTimeout time.Duration
+}
+
+type Jaeger struct {
+	RPCExportEndpoint string
+	ServerName        map[string]string
 }
 
 type Rules struct {

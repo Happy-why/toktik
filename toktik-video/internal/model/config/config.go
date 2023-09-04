@@ -12,6 +12,7 @@ type Config struct {
 	Etcd      Etcd
 	AliyunOSS AliyunOSS
 	Nacos     Nacos
+	Jaeger    Jaeger
 }
 
 type Nacos struct {
@@ -35,6 +36,11 @@ type Rules struct {
 	DefaultUserSignature    string
 	VideoInfoCacheExpire    time.Duration
 	FavoriteInfoCacheExpire time.Duration
+}
+
+type Jaeger struct {
+	RPCExportEndpoint string
+	ServerName        map[string]string
 }
 
 type Rpc struct {

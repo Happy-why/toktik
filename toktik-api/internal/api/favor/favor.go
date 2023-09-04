@@ -56,6 +56,12 @@ func (v *HandlerFavor) FavoriteList(c *gin.Context) {
 		return
 	}
 	// 2.校验参数
+	content, ok := token.GetTokenContent(c)
+	if !ok {
+		res.Reply(errcode.ErrServer)
+		return
+	}
+	req.MyUserId = content.ID
 	// 3.调用rpc服务获取响应
 	params := &favor.FavoriteListRequest{}
 	_ = copier.Copy(params, req)

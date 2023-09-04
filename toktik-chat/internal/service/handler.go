@@ -118,8 +118,6 @@ func (cs *ChatServiceImpl) MessageList(ctx context.Context, req *chat.MessageLis
 	resp.MessageList = make([]*chat.Message, len(messageList))
 	for i, message := range messageList {
 		createdTime := message.CreatedAt.Unix()
-		fmt.Println("createdTime:", createdTime)
-		fmt.Println("createdTime/100:", createdTime/100)
 		resp.MessageList[i] = &chat.Message{
 			Id:         int64(i),
 			ToUserId:   int64(message.ToUserId),
