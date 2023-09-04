@@ -41,12 +41,12 @@ func RegisterRPC() server.Server {
 		//server.WithMiddleware(rpcmiddleware.ServerMiddleware),
 		server.WithRegistry(r),
 	)
-	go func() {
-		err := svr.Run()
-		if err != nil {
-			zap.L().Error("RPC svr.Run() err:", zap.Error(err))
-			panic(err)
-		}
-	}()
+
+	err = svr.Run()
+	if err != nil {
+		zap.L().Error("RPC svr.Run() err:", zap.Error(err))
+		panic(err)
+	}
+
 	return svr
 }

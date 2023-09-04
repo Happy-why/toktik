@@ -1,13 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/gin-contrib/pprof"
-	"github.com/gin-gonic/gin"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/propagation"
-	"log"
+	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/hertz-contrib/gzip"
+	"github.com/hertz-contrib/obs-opentelemetry/provider"
+	"github.com/hertz-contrib/obs-opentelemetry/tracing"
 	_ "toktik-api/internal/api/chat"
 	_ "toktik-api/internal/api/comment"
 	_ "toktik-api/internal/api/favor"
@@ -19,33 +18,35 @@ import (
 	"toktik-api/pkg/middleware"
 	"toktik-api/pkg/router"
 	"toktik-api/pkg/setting"
-	"toktik-api/pkg/tracing"
-	srv "toktik-common/serveHTTP"
 )
 
 func main() {
 	// 初始化
 	setting.InitAllSetting()
 	fmt.Printf("config:%#v\n", global.Settings)
-	// 加载 jaeger
-	tp, tpErr := tracing.JaegerTraceProvider()
-	if tpErr != nil {
-		log.Fatal(tpErr)
-	}
-	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
-	// 初始化 gin
-	route := gin.Default()
-	route.Use(middleware.Auth(), middleware.Cors(), otelgin.Middleware(global.Settings.Jaeger.ServerName[model.TokTikApi]))
-	pprof.Register(route)
+	// 注册链路追踪
+	p := provider.NewOpenTelemetryProvider(
+		provider.WithServiceName(global.Settings.Jaeger.ServerName[model.TokTikApi]),
+		provider.WithExportEndpoint(global.Settings.Jaeger.RPCExportEndpoint),
+		provider.WithInsecure(),
+	)
+	defer p.Shutdown(context.Background())
+
+	tracer, cfg := tracing.NewServerTracer()
+	// 初始化 hz
+	hz := server.Default(
+		server.WithHostPorts(global.Settings.Server.Addr),
+		//server.WithMaxRequestBodySize(),
+		tracer,
+	)
+	// 注册 中间件
+	hz.Use(gzip.Gzip(gzip.DefaultCompression))
+	hz.Use(middleware.Auth())
+	hz.Use(tracing.ServerMiddleware(cfg))
 	// 路由注册
-	router.InitRouter(route)
+	router.InitRouter(hz)
 
-	// RPC 注册
-	//kr := router.RegisterRPC()
-	//服务端配置
-	//stop := func() { kr.Stop() }
-	fmt.Println("------------------------------------------------")
-	srv.Run(route, global.Settings.Server.Name, global.Settings.Server.Addr, nil)
+	fmt.Println("-----API Server Start ! ! !-----")
+	hz.Spin()
 }

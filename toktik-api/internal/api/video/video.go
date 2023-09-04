@@ -1,7 +1,9 @@
 package video
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
+	"fmt"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/jinzhu/copier"
 	"toktik-api/internal/api"
 	"toktik-api/internal/model/request"
@@ -19,14 +21,15 @@ func NewHandlerVideo() *HandlerVideo {
 	return &HandlerVideo{}
 }
 
-func (v *HandlerVideo) VideoFeed(c *gin.Context) {
+func (v *HandlerVideo) VideoFeed(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.VideoFeedRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
+	fmt.Println("req:", req)
 	// 若登录，获取用户id
 	content, ok := token.GetTokenContent(c)
 	if ok {
@@ -37,7 +40,7 @@ func (v *HandlerVideo) VideoFeed(c *gin.Context) {
 	// 3.调用rpc服务获取响应
 	params := &video.VideoFeedRequest{}
 	_ = copier.Copy(params, req)
-	result, err := api.VideoClient.VideoFeed(c, params)
+	result, err := api.VideoClient.VideoFeed(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return
@@ -48,14 +51,16 @@ func (v *HandlerVideo) VideoFeed(c *gin.Context) {
 	res.Reply(nil, resp)
 }
 
-func (v *HandlerVideo) VideoPublish(c *gin.Context) {
+func (v *HandlerVideo) VideoPublish(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.VideoPublishRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
+	fmt.Println("req:", req)
+
 	// 2.校验参数
 	content, ok := token.GetTokenContent(c)
 	if !ok {
@@ -72,7 +77,7 @@ func (v *HandlerVideo) VideoPublish(c *gin.Context) {
 	params := &video.VideoPublishRequest{}
 	_ = copier.Copy(params, req)
 	params.Data = dataBuf.Bytes()
-	result, err := api.VideoClient.VideoPublish(c, params)
+	result, err := api.VideoClient.VideoPublish(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return
@@ -83,14 +88,16 @@ func (v *HandlerVideo) VideoPublish(c *gin.Context) {
 	res.Reply(nil, resp)
 }
 
-func (v *HandlerVideo) PublishList(c *gin.Context) {
+func (v *HandlerVideo) PublishList(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.PublishListRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
+	fmt.Println("req:", req)
+
 	// 2.校验参数
 	content, ok := token.GetTokenContent(c)
 	if !ok {
@@ -101,7 +108,7 @@ func (v *HandlerVideo) PublishList(c *gin.Context) {
 	// 3.调用rpc服务获取响应
 	params := &video.PublishListRequest{}
 	_ = copier.Copy(params, req)
-	result, err := api.VideoClient.PublishList(c, params)
+	result, err := api.VideoClient.PublishList(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return

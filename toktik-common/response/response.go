@@ -1,13 +1,13 @@
 package response
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app"
 	"net/http"
 	"toktik-common/errcode"
 )
 
 type Response struct {
-	c *gin.Context
+	c *app.RequestContext
 }
 
 // State 状态码
@@ -22,7 +22,7 @@ type List struct {
 	Total int64       `json:"total"`
 }
 
-func NewResponse(ctx *gin.Context) *Response {
+func NewResponse(ctx *app.RequestContext) *Response {
 	return &Response{c: ctx}
 }
 

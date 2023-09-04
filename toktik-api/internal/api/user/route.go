@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app/server"
 	"log"
 	"toktik-api/pkg/middleware"
 	"toktik-api/pkg/router"
@@ -16,7 +16,7 @@ func init() {
 	router.Register(ru)
 }
 
-func (*RouterUser) Route(r *gin.Engine) {
+func (*RouterUser) Route(r *server.Hertz) {
 	InitRpcUserClient()
 	//初始化grpc的客户端连接
 	h := NewHandlerUser()

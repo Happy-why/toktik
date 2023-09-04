@@ -1,7 +1,8 @@
 package video
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/jinzhu/copier"
 	"toktik-api/internal/api"
 	"toktik-api/internal/model/request"
@@ -19,11 +20,11 @@ func NewHandlerVideo() *HandlerComment {
 	return &HandlerComment{}
 }
 
-func (v *HandlerComment) CommentAction(c *gin.Context) {
+func (v *HandlerComment) CommentAction(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.CommentActionRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
@@ -37,7 +38,7 @@ func (v *HandlerComment) CommentAction(c *gin.Context) {
 	// 3.调用rpc服务获取响应
 	params := &comment.CommentActionRequest{}
 	_ = copier.Copy(params, req)
-	result, err := api.Comment.CommentAction(c, params)
+	result, err := api.Comment.CommentAction(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return
@@ -48,11 +49,11 @@ func (v *HandlerComment) CommentAction(c *gin.Context) {
 	res.Reply(nil, resp)
 }
 
-func (v *HandlerComment) CommentList(c *gin.Context) {
+func (v *HandlerComment) CommentList(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.CommentListRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
@@ -60,7 +61,7 @@ func (v *HandlerComment) CommentList(c *gin.Context) {
 	// 3.调用rpc服务获取响应
 	params := &comment.CommentListRequest{}
 	_ = copier.Copy(params, req)
-	result, err := api.Comment.CommentList(c, params)
+	result, err := api.Comment.CommentList(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return

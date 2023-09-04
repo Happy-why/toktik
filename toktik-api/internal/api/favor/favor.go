@@ -1,7 +1,8 @@
 package video
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/jinzhu/copier"
 	"toktik-api/internal/api"
 	"toktik-api/internal/model/request"
@@ -19,11 +20,11 @@ func NewHandlerVideo() *HandlerFavor {
 	return &HandlerFavor{}
 }
 
-func (v *HandlerFavor) FavoriteAction(c *gin.Context) {
+func (v *HandlerFavor) FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.FavoriteActionRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
@@ -37,7 +38,7 @@ func (v *HandlerFavor) FavoriteAction(c *gin.Context) {
 	// 3.调用rpc服务获取响应
 	params := &favor.FavoriteActionRequest{}
 	_ = copier.Copy(params, req)
-	result, err := api.FavorClient.FavoriteAction(c, params)
+	result, err := api.FavorClient.FavoriteAction(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return
@@ -47,11 +48,11 @@ func (v *HandlerFavor) FavoriteAction(c *gin.Context) {
 	_ = copier.Copy(resp, result)
 	res.Reply(nil, resp)
 }
-func (v *HandlerFavor) FavoriteList(c *gin.Context) {
+func (v *HandlerFavor) FavoriteList(ctx context.Context, c *app.RequestContext) {
 	res := res2.NewResponse(c)
 	// 1.接收参数 参数模型
 	req := &request.FavoriteListRequest{}
-	if err := c.ShouldBind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
@@ -65,7 +66,7 @@ func (v *HandlerFavor) FavoriteList(c *gin.Context) {
 	// 3.调用rpc服务获取响应
 	params := &favor.FavoriteListRequest{}
 	_ = copier.Copy(params, req)
-	result, err := api.FavorClient.FavoriteList(c, params)
+	result, err := api.FavorClient.FavoriteList(ctx, params)
 	if err != nil {
 		res.Reply(errcode.ErrServer.WithDetails(err.Error()))
 		return
