@@ -1,0 +1,50 @@
+Server:
+  Name: "toktik-comment"
+  RunMode: "DEBUG"
+  Addr: "0.0.0.0:8086"
+  DefaultContextTimeout: 10s
+
+Rules:
+
+Jaeger:
+  RPCExportEndpoint: "xxx:4317"
+  ServerName:
+    toktik-api: "toktik-api"
+    toktik-user: "toktik-user"
+    toktik-video: "toktik-video"
+    toktik-interaction: "toktik-interaction"
+    toktik-chat: "toktik-chat"
+    toktik-favor: "toktik-favor"
+    toktik-comment: "toktik-comment"
+
+RPC:
+  Name: "rpc-comment"
+  Addr: "0.0.0.0:8886"
+
+Logger:
+  Level: "debug"
+  LogSavePath: "storage/applogs/"
+  LogFileExt:    ".log"
+  MaxSize: 10
+  MaxBackups: 7
+  MaxAge: 30
+  Compress: false
+  LowLevelFile: "info"
+  HighLevelFile: "error"
+
+Mysql:
+  Username: "root"
+  Password: "xxx"
+  Host: "xxx.135"
+  Port: "3309"
+  DB: "toktik_comment"
+
+Redis:
+  Host: "xxx"
+  Port: "6379"
+  Password: ""
+  DB: 6
+
+Etcd:
+  Addr:
+    - "xxx:2379"

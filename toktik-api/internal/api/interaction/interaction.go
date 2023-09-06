@@ -29,8 +29,6 @@ func (p *HandlerInteraction) FollowSB(ctx context.Context, c *app.RequestContext
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	fmt.Println("req:", req)
-
 	content, ok := token.GetTokenContent(c)
 	if !ok {
 		res.Reply(errcode.ErrServer)
@@ -61,8 +59,6 @@ func (p *HandlerInteraction) FollowList(ctx context.Context, c *app.RequestConte
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	fmt.Println("req:", req)
-
 	content, ok := token.GetTokenContent(c)
 	if !ok {
 		res.Reply(errcode.ErrServer)
@@ -92,8 +88,6 @@ func (p *HandlerInteraction) FansList(ctx context.Context, c *app.RequestContext
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	fmt.Println("req:", req)
-
 	content, ok := token.GetTokenContent(c)
 	if !ok {
 		res.Reply(errcode.ErrServer)
@@ -123,8 +117,6 @@ func (p *HandlerInteraction) FriendList(ctx context.Context, c *app.RequestConte
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	fmt.Println("req:", req)
-
 	content, ok := token.GetTokenContent(c)
 	if !ok {
 		res.Reply(errcode.ErrServer)
@@ -142,6 +134,7 @@ func (p *HandlerInteraction) FriendList(ctx context.Context, c *app.RequestConte
 	// 3.返回结果
 	resp := &response.FriendListResponse{}
 	_ = copier.Copy(resp, result)
+	fmt.Printf("friend resp:%#v\n", resp)
 	res.Reply(nil, resp)
 	return
 }

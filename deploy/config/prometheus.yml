@@ -1,0 +1,36 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+scrape_configs:
+  - job_name: "prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.30.135:9090']
+  - job_name: "toktik-api"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.30.135:8080']
+  - job_name: "toktik-user"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ '192.168.30.135:8081' ]
+  - job_name: "toktik-interaction"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ '192.168.30.135:8082' ]
+  - job_name: "toktik-video"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ '192.168.30.135:8083' ]
+  - job_name: "toktik-chat"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ '192.168.30.135:8084' ]
+  - job_name: "toktik-favor"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ '192.168.30.135:8085' ]
+  - job_name: "toktik-comment"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ '192.168.30.135:8086' ]

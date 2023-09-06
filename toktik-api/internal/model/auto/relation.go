@@ -1,7 +1,5 @@
 package auto
 
-import "strconv"
-
 type Relation struct {
 	BaseModel
 	UserId   uint `json:"user_id,string" gorm:"index:idx_relation,not null"`   // 用户ID
@@ -11,16 +9,4 @@ type Relation struct {
 
 func (*Relation) TableName() string {
 	return "relation"
-}
-
-func CreateFollowKey(userId int64) string {
-	return "follow::" + strconv.FormatInt(userId, 10)
-}
-
-func CreateFanKey(userId int64) string {
-	return "fan::" + strconv.FormatInt(userId, 10)
-}
-
-func CreateFriendKey(userId int64) string {
-	return "friend::" + strconv.FormatInt(userId, 10)
 }

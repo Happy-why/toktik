@@ -14,8 +14,6 @@ require (
 	go.uber.org/zap v1.25.0
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.2
-	toktik-common v0.0.0-00010101000000-000000000000
-	toktik-rpc v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -145,9 +143,3 @@ require (
 )
 
 replace github.com/apache/thrift => github.com/apache/thrift v0.13.0
-
-replace (
-	toktik-api => ../toktik-api
-	toktik-common => ../toktik-common
-	toktik-rpc => ../toktik-rpc
-)

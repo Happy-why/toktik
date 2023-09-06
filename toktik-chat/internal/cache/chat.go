@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -31,7 +32,6 @@ func (cr *ChatrCache) PushHistoryMessage(c context.Context, key string, createTi
 	if err != nil {
 		return err
 	}
-	_, err = cr.rCache.Expire(c, key, 48*time.Hour)
 	return err
 }
 
@@ -81,4 +81,29 @@ func (cr *ChatrCache) ZRangeMessageList(c context.Context, key string, preMsgTim
 		}
 	}
 	return messageInfos, nil
+}
+
+func (cr *ChatrCache) ZGetFriendLatestMessage(c context.Context, key string, myUserId int64) (string, int32, error) {
+	messageList, err := cr.rCache.ZRevRangeWithScores(c, key, 0, 0)
+	if err != nil {
+		return "", 0, err
+	}
+	if len(messageList) == 0 {
+		return "", 0, nil
+	}
+	message := messageList[0]
+	fmt.Println("message redis:", message)
+	//createdTime := time.Unix(int64(message.Score), 0)
+	str := strings.SplitN(message.Member.(string), "+", 3)
+	userId, _ := strconv.ParseInt(str[0], 10, 64)
+	targetId, _ := strconv.ParseInt(str[1], 10, 64)
+	var msgType int32
+	if myUserId == userId {
+		msgType = 1
+	} else if myUserId == targetId {
+		msgType = 0
+	}
+	content := str[2]
+	fmt.Println("content和msgType:", content, msgType)
+	return content, msgType, nil
 }

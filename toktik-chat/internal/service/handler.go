@@ -25,7 +25,7 @@ type ChatServiceImpl struct {
 	transaction mysql.Transaction
 }
 
-func NewUserService() *ChatServiceImpl {
+func NewChatService() *ChatServiceImpl {
 	return &ChatServiceImpl{
 		respRepo:    repo.NewHandlerResps(),
 		ChatRepo:    mysql.NewChatDao(),
@@ -128,4 +128,25 @@ func (cs *ChatServiceImpl) MessageList(ctx context.Context, req *chat.MessageLis
 	}
 
 	return cs.respRepo.MessageListResponse(errcode.StatusOK, model.MsgNil, resp), nil
+}
+
+func (cs *ChatServiceImpl) GetFriendLatestMessage(ctx context.Context, req *chat.GetFriendLatestMessageRequest) (resp *chat.GetFriendLatestMessageResponse, err error) {
+	fmt.Printf("GetFriendLatestMessage req:%#v\n", req)
+	resp = new(chat.GetFriendLatestMessageResponse)
+	resp.MessageList = make([]string, len(req.FriendIds))
+	resp.MsgTypeList = make([]int32, len(req.FriendIds))
+	// 先去缓存查 message
+	for i, friendId := range req.FriendIds {
+		key := auto.CreateChatHistoryKey(req.UserId, friendId)
+		message, msgType, err := cs.rCache.ZGetFriendLatestMessage(ctx, key, req.UserId)
+		if err != nil {
+			zap.L().Error("cs.rCache.ZGetFriendLatestMessage err:", zap.Error(err))
+			return cs.respRepo.GetFriendLatestMessageResponse(errcode.ErrRedis, err.Error(), &chat.GetFriendLatestMessageResponse{}), nil
+		}
+		fmt.Println("循环", i, "中,message:", message)
+		fmt.Println("循环", i, "中,msgType:", msgType)
+		resp.MessageList[i] = message
+		resp.MsgTypeList[i] = msgType
+	}
+	return cs.respRepo.GetFriendLatestMessageResponse(errcode.StatusOK, model.MsgNil, resp), nil
 }

@@ -1,0 +1,7 @@
+Nacos:
+  Namespace: "xxx"          # 命名空间id
+  Group: "api"              # group名称
+  Addr: "xxx.xxx.xxx.xxx"   # 地址
+  Port: 8848
+  Scheme: "http"
+  ContextPath: "/nacos"

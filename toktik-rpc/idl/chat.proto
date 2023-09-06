@@ -35,7 +35,20 @@ message ChatActionResponse {
    string status_msg = 2; // 返回状态描述
 }
 
+message GetFriendLatestMessageRequest{
+  int64 user_id = 1;
+  repeated int64 friend_ids = 2;
+}
+
+message GetFriendLatestMessageResponse{
+  int64 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
+  repeated string message_list = 3;
+  repeated int32 msg_type_list = 4;
+}
+
 service ChatService{
   rpc MessageList(MessageListRequest)returns(MessageListResponse);
   rpc ChatAction(ChatActionRequest)returns(ChatActionResponse);
+  rpc GetFriendLatestMessage(GetFriendLatestMessageRequest)returns(GetFriendLatestMessageResponse);
 }

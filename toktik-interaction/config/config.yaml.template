@@ -1,0 +1,52 @@
+Server:
+  Name: "toktik-interaction"
+  RunMode: "DEBUG"
+  Addr: "0.0.0.0:8082"
+  DefaultContextTimeout: 10s
+
+Rules:
+  DefaultUserAvatar: "https://q1.qlogo.cn/g?b=qq&nk=1780006511&s=640"
+  DefaultUserSignature: "这里什么有没有捏"
+
+Jaeger:
+  RPCExportEndpoint: "xxx:4317"
+  ServerName:
+    toktik-api: "toktik-api"
+    toktik-user: "toktik-user"
+    toktik-video: "toktik-video"
+    toktik-interaction: "toktik-interaction"
+    toktik-chat: "toktik-chat"
+    toktik-favor: "toktik-favor"
+    toktik-comment: "toktik-comment"
+
+RPC:
+  Name: "rpc-interaction"
+  Addr: "0.0.0.0:8882"
+
+Logger:
+  Level: "debug"
+  LogSavePath: "storage/applogs/"
+  LogFileExt:    ".log"
+  MaxSize: 10
+  MaxBackups: 7
+  MaxAge: 30
+  Compress: false
+  LowLevelFile: "info"
+  HighLevelFile: "error"
+
+Mysql:
+  Username: "root"
+  Password: "xxx"
+  Host: "xxx"
+  Port: "3309"
+  DB: "toktik_interaction"
+
+Redis:
+  Host: "xxx"
+  Port: "6379"
+  Password: ""
+  DB: 2
+
+Etcd:
+  Addr:
+    - "xxx:2379"

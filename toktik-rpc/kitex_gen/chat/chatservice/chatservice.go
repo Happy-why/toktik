@@ -22,8 +22,9 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "ChatService"
 	handlerType := (*chat.ChatService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"MessageList": kitex.NewMethodInfo(messageListHandler, newMessageListArgs, newMessageListResult, false),
-		"ChatAction":  kitex.NewMethodInfo(chatActionHandler, newChatActionArgs, newChatActionResult, false),
+		"MessageList":            kitex.NewMethodInfo(messageListHandler, newMessageListArgs, newMessageListResult, false),
+		"ChatAction":             kitex.NewMethodInfo(chatActionHandler, newChatActionArgs, newChatActionResult, false),
+		"GetFriendLatestMessage": kitex.NewMethodInfo(getFriendLatestMessageHandler, newGetFriendLatestMessageArgs, newGetFriendLatestMessageResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "chat",
@@ -345,6 +346,159 @@ func (p *ChatActionResult) GetResult() interface{} {
 	return p.Success
 }
 
+func getFriendLatestMessageHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(chat.GetFriendLatestMessageRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(chat.ChatService).GetFriendLatestMessage(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *GetFriendLatestMessageArgs:
+		success, err := handler.(chat.ChatService).GetFriendLatestMessage(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*GetFriendLatestMessageResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newGetFriendLatestMessageArgs() interface{} {
+	return &GetFriendLatestMessageArgs{}
+}
+
+func newGetFriendLatestMessageResult() interface{} {
+	return &GetFriendLatestMessageResult{}
+}
+
+type GetFriendLatestMessageArgs struct {
+	Req *chat.GetFriendLatestMessageRequest
+}
+
+func (p *GetFriendLatestMessageArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(chat.GetFriendLatestMessageRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *GetFriendLatestMessageArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *GetFriendLatestMessageArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *GetFriendLatestMessageArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in GetFriendLatestMessageArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *GetFriendLatestMessageArgs) Unmarshal(in []byte) error {
+	msg := new(chat.GetFriendLatestMessageRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var GetFriendLatestMessageArgs_Req_DEFAULT *chat.GetFriendLatestMessageRequest
+
+func (p *GetFriendLatestMessageArgs) GetReq() *chat.GetFriendLatestMessageRequest {
+	if !p.IsSetReq() {
+		return GetFriendLatestMessageArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *GetFriendLatestMessageArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *GetFriendLatestMessageArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type GetFriendLatestMessageResult struct {
+	Success *chat.GetFriendLatestMessageResponse
+}
+
+var GetFriendLatestMessageResult_Success_DEFAULT *chat.GetFriendLatestMessageResponse
+
+func (p *GetFriendLatestMessageResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(chat.GetFriendLatestMessageResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *GetFriendLatestMessageResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *GetFriendLatestMessageResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *GetFriendLatestMessageResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in GetFriendLatestMessageResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *GetFriendLatestMessageResult) Unmarshal(in []byte) error {
+	msg := new(chat.GetFriendLatestMessageResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *GetFriendLatestMessageResult) GetSuccess() *chat.GetFriendLatestMessageResponse {
+	if !p.IsSetSuccess() {
+		return GetFriendLatestMessageResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *GetFriendLatestMessageResult) SetSuccess(x interface{}) {
+	p.Success = x.(*chat.GetFriendLatestMessageResponse)
+}
+
+func (p *GetFriendLatestMessageResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *GetFriendLatestMessageResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -370,6 +524,16 @@ func (p *kClient) ChatAction(ctx context.Context, Req *chat.ChatActionRequest) (
 	_args.Req = Req
 	var _result ChatActionResult
 	if err = p.c.Call(ctx, "ChatAction", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetFriendLatestMessage(ctx context.Context, Req *chat.GetFriendLatestMessageRequest) (r *chat.GetFriendLatestMessageResponse, err error) {
+	var _args GetFriendLatestMessageArgs
+	_args.Req = Req
+	var _result GetFriendLatestMessageResult
+	if err = p.c.Call(ctx, "GetFriendLatestMessage", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

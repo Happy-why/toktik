@@ -1,0 +1,7 @@
+http.host: "0.0.0.0"
+#ES地址
+xpack.monitoring.elasticsearch.hosts: ["http://es:9200"]
+xpack.monitoring.enabled: true
+#ES中的内置账户和密码，在ES中配置
+#xpack.monitoring.elasticsearch.username: logstash_system
+#xpack.monitoring.elasticsearch.password: *****************
