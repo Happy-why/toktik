@@ -111,6 +111,10 @@ func (rc *RdbCache) ZGetRangeWithScores(c context.Context, key string, start, st
 	return rc.rdb.ZRangeWithScores(c, key, start, stop).Result()
 }
 
+func (rc *RdbCache) ZRevRangeWithScores(c context.Context, key string, start, stop int64) ([]redis.Z, error) {
+	return rc.rdb.ZRevRangeWithScores(c, key, start, stop).Result()
+}
+
 func (rc *RdbCache) ZGetRangeByScoreWithScores(c context.Context, key string, min, max string, offset, count int64) ([]redis.Z, error) {
 	return rc.rdb.ZRangeByScoreWithScores(c, key, &redis.ZRangeBy{Min: min, Max: max, Offset: offset, Count: count}).Result()
 }

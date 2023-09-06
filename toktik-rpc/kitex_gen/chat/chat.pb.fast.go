@@ -262,6 +262,119 @@ func (x *ChatActionResponse) fastReadField2(buf []byte, _type int8) (offset int,
 	return offset, err
 }
 
+func (x *GetFriendLatestMessageRequest) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetFriendLatestMessageRequest[number], err)
+}
+
+func (x *GetFriendLatestMessageRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *GetFriendLatestMessageRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	offset, err = fastpb.ReadList(buf, _type,
+		func(buf []byte, _type int8) (n int, err error) {
+			var v int64
+			v, offset, err = fastpb.ReadInt64(buf, _type)
+			if err != nil {
+				return offset, err
+			}
+			x.FriendIds = append(x.FriendIds, v)
+			return offset, err
+		})
+	return offset, err
+}
+
+func (x *GetFriendLatestMessageResponse) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
+	switch number {
+	case 1:
+		offset, err = x.fastReadField1(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
+	default:
+		offset, err = fastpb.Skip(buf, _type, number)
+		if err != nil {
+			goto SkipFieldError
+		}
+	}
+	return offset, nil
+SkipFieldError:
+	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
+ReadFieldError:
+	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_GetFriendLatestMessageResponse[number], err)
+}
+
+func (x *GetFriendLatestMessageResponse) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.StatusCode, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *GetFriendLatestMessageResponse) fastReadField2(buf []byte, _type int8) (offset int, err error) {
+	x.StatusMsg, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *GetFriendLatestMessageResponse) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	var v string
+	v, offset, err = fastpb.ReadString(buf, _type)
+	if err != nil {
+		return offset, err
+	}
+	x.MessageList = append(x.MessageList, v)
+	return offset, err
+}
+
+func (x *GetFriendLatestMessageResponse) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	offset, err = fastpb.ReadList(buf, _type,
+		func(buf []byte, _type int8) (n int, err error) {
+			var v int32
+			v, offset, err = fastpb.ReadInt32(buf, _type)
+			if err != nil {
+				return offset, err
+			}
+			x.MsgTypeList = append(x.MsgTypeList, v)
+			return offset, err
+		})
+	return offset, err
+}
+
 func (x *MessageListRequest) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -449,6 +562,86 @@ func (x *ChatActionResponse) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 2, x.GetStatusMsg())
+	return offset
+}
+
+func (x *GetFriendLatestMessageRequest) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	return offset
+}
+
+func (x *GetFriendLatestMessageRequest) fastWriteField1(buf []byte) (offset int) {
+	if x.UserId == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetUserId())
+	return offset
+}
+
+func (x *GetFriendLatestMessageRequest) fastWriteField2(buf []byte) (offset int) {
+	if len(x.FriendIds) == 0 {
+		return offset
+	}
+	offset += fastpb.WriteListPacked(buf[offset:], 2, len(x.GetFriendIds()),
+		func(buf []byte, numTagOrKey, numIdxOrVal int32) int {
+			offset := 0
+			offset += fastpb.WriteInt64(buf[offset:], numTagOrKey, x.GetFriendIds()[numIdxOrVal])
+			return offset
+		})
+	return offset
+}
+
+func (x *GetFriendLatestMessageResponse) FastWrite(buf []byte) (offset int) {
+	if x == nil {
+		return offset
+	}
+	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
+	return offset
+}
+
+func (x *GetFriendLatestMessageResponse) fastWriteField1(buf []byte) (offset int) {
+	if x.StatusCode == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.GetStatusCode())
+	return offset
+}
+
+func (x *GetFriendLatestMessageResponse) fastWriteField2(buf []byte) (offset int) {
+	if x.StatusMsg == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetStatusMsg())
+	return offset
+}
+
+func (x *GetFriendLatestMessageResponse) fastWriteField3(buf []byte) (offset int) {
+	if len(x.MessageList) == 0 {
+		return offset
+	}
+	for i := range x.GetMessageList() {
+		offset += fastpb.WriteString(buf[offset:], 3, x.GetMessageList()[i])
+	}
+	return offset
+}
+
+func (x *GetFriendLatestMessageResponse) fastWriteField4(buf []byte) (offset int) {
+	if len(x.MsgTypeList) == 0 {
+		return offset
+	}
+	offset += fastpb.WriteListPacked(buf[offset:], 4, len(x.GetMsgTypeList()),
+		func(buf []byte, numTagOrKey, numIdxOrVal int32) int {
+			offset := 0
+			offset += fastpb.WriteInt32(buf[offset:], numTagOrKey, x.GetMsgTypeList()[numIdxOrVal])
+			return offset
+		})
 	return offset
 }
 
@@ -642,6 +835,86 @@ func (x *ChatActionResponse) sizeField2() (n int) {
 	return n
 }
 
+func (x *GetFriendLatestMessageRequest) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	return n
+}
+
+func (x *GetFriendLatestMessageRequest) sizeField1() (n int) {
+	if x.UserId == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetUserId())
+	return n
+}
+
+func (x *GetFriendLatestMessageRequest) sizeField2() (n int) {
+	if len(x.FriendIds) == 0 {
+		return n
+	}
+	n += fastpb.SizeListPacked(2, len(x.GetFriendIds()),
+		func(numTagOrKey, numIdxOrVal int32) int {
+			n := 0
+			n += fastpb.SizeInt64(numTagOrKey, x.GetFriendIds()[numIdxOrVal])
+			return n
+		})
+	return n
+}
+
+func (x *GetFriendLatestMessageResponse) Size() (n int) {
+	if x == nil {
+		return n
+	}
+	n += x.sizeField1()
+	n += x.sizeField2()
+	n += x.sizeField3()
+	n += x.sizeField4()
+	return n
+}
+
+func (x *GetFriendLatestMessageResponse) sizeField1() (n int) {
+	if x.StatusCode == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(1, x.GetStatusCode())
+	return n
+}
+
+func (x *GetFriendLatestMessageResponse) sizeField2() (n int) {
+	if x.StatusMsg == "" {
+		return n
+	}
+	n += fastpb.SizeString(2, x.GetStatusMsg())
+	return n
+}
+
+func (x *GetFriendLatestMessageResponse) sizeField3() (n int) {
+	if len(x.MessageList) == 0 {
+		return n
+	}
+	for i := range x.GetMessageList() {
+		n += fastpb.SizeString(3, x.GetMessageList()[i])
+	}
+	return n
+}
+
+func (x *GetFriendLatestMessageResponse) sizeField4() (n int) {
+	if len(x.MsgTypeList) == 0 {
+		return n
+	}
+	n += fastpb.SizeListPacked(4, len(x.GetMsgTypeList()),
+		func(numTagOrKey, numIdxOrVal int32) int {
+			n := 0
+			n += fastpb.SizeInt32(numTagOrKey, x.GetMsgTypeList()[numIdxOrVal])
+			return n
+		})
+	return n
+}
+
 var fieldIDToName_MessageListRequest = map[int32]string{
 	1: "UserId",
 	2: "ToUserId",
@@ -672,4 +945,16 @@ var fieldIDToName_ChatActionRequest = map[int32]string{
 var fieldIDToName_ChatActionResponse = map[int32]string{
 	1: "StatusCode",
 	2: "StatusMsg",
+}
+
+var fieldIDToName_GetFriendLatestMessageRequest = map[int32]string{
+	1: "UserId",
+	2: "FriendIds",
+}
+
+var fieldIDToName_GetFriendLatestMessageResponse = map[int32]string{
+	1: "StatusCode",
+	2: "StatusMsg",
+	3: "MessageList",
+	4: "MsgTypeList",
 }

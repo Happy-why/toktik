@@ -1,0 +1,51 @@
+Server:
+  Name: "toktik-favor"
+  RunMode: "DEBUG"
+  Addr: "0.0.0.0:8085"
+  DefaultContextTimeout: 10s
+
+Rules:
+  FavoriteInfoCacheExpire: 168h
+
+Jaeger:
+  RPCExportEndpoint: "xxx:4317"
+  ServerName:
+    toktik-api: "toktik-api"
+    toktik-user: "toktik-user"
+    toktik-video: "toktik-video"
+    toktik-interaction: "toktik-interaction"
+    toktik-chat: "toktik-chat"
+    toktik-favor: "toktik-favor"
+    toktik-comment: "toktik-comment"
+
+RPC:
+  Name: "rpc-favor"
+  Addr: "0.0.0.0:8885"
+
+Logger:
+  Level: "debug"
+  LogSavePath: "storage/applogs/"
+  LogFileExt:    ".log"
+  MaxSize: 10
+  MaxBackups: 7
+  MaxAge: 30
+  Compress: false
+  LowLevelFile: "info"
+  HighLevelFile: "error"
+
+Mysql:
+  Username: "root"
+  Password: "xxx"
+  Host: "xxx"
+  Port: "3309"
+  DB: "toktik_favor"
+
+Redis:
+  Host: "xxx"
+  Port: "6379"
+  Password: ""
+  DB: 5
+
+Etcd:
+  Addr:
+    - "xxx:2379"

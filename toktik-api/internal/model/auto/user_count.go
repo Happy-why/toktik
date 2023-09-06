@@ -14,11 +14,3 @@ type UserCount struct {
 func (*UserCount) TableName() string {
 	return "user_count"
 }
-
-const (
-	FollowCount    = "follow_count"
-	FollowerCount  = "follower_count"
-	TotalFavorited = "total_favorited"
-	WorkCount      = "work_count"
-	FavoriteCount  = "favorite_count"
-)

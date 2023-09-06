@@ -20,7 +20,7 @@ func RegisterRPC() server.Server {
 		zap.L().Error("etcd.NewEtcdRegistry err:", zap.Error(err))
 		return nil
 	}
-	addr, err := net.ResolveTCPAddr("tcp", global.Settings.Rpc.Addr) //:8881
+	addr, err := net.ResolveTCPAddr("tcp", global.Settings.Rpc.Addr) //:8884
 	if err != nil {
 		zap.L().Error("net.ResolveTCPAddr err:", zap.Error(err))
 		return nil
@@ -31,7 +31,7 @@ func RegisterRPC() server.Server {
 		provider.WithInsecure(),
 	)
 	svr := chatservice.NewServer(
-		service.NewUserService(),
+		service.NewChatService(),
 		server.WithServiceAddr(addr),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: global.Settings.Rpc.Name}),
 		server.WithSuite(tracing.NewServerSuite()),

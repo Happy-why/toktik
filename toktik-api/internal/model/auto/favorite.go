@@ -1,7 +1,5 @@
 package auto
 
-import "strconv"
-
 // Favorite 点赞表 /*
 type Favorite struct {
 	ID      uint `json:"id,string" gorm:"primarykey"`
@@ -11,9 +9,4 @@ type Favorite struct {
 
 func (*Favorite) TableName() string {
 	return "favorite"
-}
-
-func CreateFavKey(userId uint) string {
-	favStr := strconv.Itoa(int(userId))
-	return "user_favorite::" + favStr
 }

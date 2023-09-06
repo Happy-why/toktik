@@ -22,3 +22,12 @@ func (MessageListHandler) MessageListResponse(err errcode.Err, msg string, resp 
 	resp.StatusMsg = err.Error() + ":" + msg
 	return resp
 }
+
+type GetFriendLatestMessageHandler struct {
+}
+
+func (MessageListHandler) GetFriendLatestMessageResponse(err errcode.Err, msg string, resp *chat.GetFriendLatestMessageResponse) *chat.GetFriendLatestMessageResponse {
+	resp.StatusCode = err.ECode()
+	resp.StatusMsg = err.Error() + ":" + msg
+	return resp
+}

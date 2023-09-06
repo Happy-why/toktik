@@ -1,0 +1,420 @@
+version: '3'
+
+networks:
+  toktik-net:
+    driver: bridge
+
+services:
+
+  Nacos:
+    container_name: nacos-standalone
+    image: nacos/nacos-server:v2.2.0
+    restart: always
+    environment:
+      - MODE=standalone
+      - JVM_XMS=512m
+      - JVM_MAX=512m
+      - JVM_XMN=256m
+    privileged: true
+    volumes:
+        - ./deploy/data/nacos/data:/home/nacos/data
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    networks:
+      - toktik-net
+
+  Etcd:
+    container_name: etcd3
+    image: bitnami/etcd:3.5.6
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_NAME=node1
+    privileged: true
+    volumes:
+      - ./deploy/data/etcd/data:/bitnami/etcd/data
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    networks:
+      - toktik-net
+
+  # Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib-dev:latest
+    command: [ "--config=/etc/otel-collector-config.yaml", "${OTELCOL_ARGS}" ]
+    volumes:
+      - ./deploy/config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "1888:1888"   # pprof extension
+      - "8888"        # Prometheus' metrics exposed by the collector
+      - "8889:8889"   # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+      - "55679"       # zpages extension
+    depends_on:
+      - jaeger-all-in-one
+    networks:
+      - toktik-net
+
+  # Jaeger
+  jaeger-all-in-one:
+    image: jaegertracing/all-in-one:1.41
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"
+      - "14268"
+      - "14250:14250"
+      - "6831:6831"
+    networks:
+      - toktik-net
+
+  # Victoriametrics
+  victoriametrics:
+    container_name: victoriametrics
+    image: victoriametrics/victoria-metrics
+    ports:
+      - "8428:8428"
+      - "8089:8089"
+      - "8089:8089/udp"
+      - "2003:2003"
+      - "2003:2003/udp"
+      - "4242:4242"
+    command:
+      - '--storageDataPath=/storage'
+      - '--graphiteListenAddr=:2003'
+      - '--opentsdbListenAddr=:4242'
+      - '--httpListenAddr=:8428'
+      - '--influxListenAddr=:8089'
+    restart: always
+    networks:
+      - toktik-net
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    hostname: prometheus
+    restart: always
+    volumes:
+      - ./deploy/config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - toktik-net
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3000:3000"
+    networks:
+      - toktik-net
+
+  kafdrop:
+    container_name: kafdrop
+    image: obsidiandynamics/kafdrop
+    restart: "no"
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:29092"
+      JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+    depends_on:
+      - "kafka"
+    networks:
+      - toktik-net
+
+  kafka:
+    container_name: kafka
+    image: obsidiandynamics/kafka
+    restart: "no"
+    ports:
+      - "2181:2181"
+      - "9092:9092"
+    environment:
+      KAFKA_LISTENERS: "INTERNAL://:29092,EXTERNAL://:9092"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://192.168.30.134:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
+      KAFKA_RESTART_ATTEMPTS: "10"
+      KAFKA_RESTART_DELAY: "5"
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: "0"
+    networks:
+      - toktik-net
+
+  es:
+    container_name: es
+    image: elasticsearch:8.6.0
+    volumes:
+      - ./deploy/data/es/data:/usr/share/elasticsearch/data
+      - ./deploy/data/es/logs:/usr/share/elasticsearch/logs
+      - ./deploy/data/es/plugins:/usr/share/elasticsearch/plugins #装 ik分词器
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - node.name=es
+      - cluster.name=elasticsearch
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - TAKE_FILE_OWNERSHIP=true
+    privileged: true
+    networks:
+      - toktik-net
+
+  kibana:
+    image: kibana:8.6.0
+    container_name: kibana
+    depends_on:
+      - es
+    environment:
+      SERVER_NAME: kibana
+      SERVER_HOST: "0.0.0.0"
+      ELASTICSEARCH_HOSTS: http://es:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - toktik-net
+
+  logstash:
+    image: logstash:8.6.0
+    container_name: logstash
+    volumes:
+      - ./deploy/config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./deploy/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./deploy/data/logstash/log/:/home/public/
+    ports:
+      - '5044:5044'
+      - '50000:50000/tcp'
+      - '50000:50000/udp'
+      - '9600:9600'
+    environment:
+      LS_JAVA_OPTS: -Xms1024m -Xmx1024m
+      TZ: Asia/Shanghai
+      MONITORING_ENABLED: false
+    depends_on:
+      - es
+    networks:
+      - toktik-net
+
+  mysql:
+    container_name: mysql8
+    image: mysql:8.0.20
+    restart: always
+    ports:
+      - "3309:3306"
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - ./deploy/data/mysql/data:/var/lib/mysql
+      - ./deploy/data/mysql/conf:/etc/mysql/conf.d/
+      - ./deploy/data/mysql/logs:/logs
+      - ./deploy/config/db_init:/docker-entrypoint-initdb.d
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+    networks:
+      - toktik-net
+
+  Redis:
+    container_name: redis6
+    image: redis:6.2.7
+    restart: always
+    volumes:
+      - ./deploy/data/redis/data:/data
+      - ./deploy/data/redis/redis.conf:/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - toktik-net
+
+
+  toktik-api:
+    container_name:   toktik-api
+    image:  toktik-api:0.1
+    ports:
+      - "8080:8080"
+    networks:
+      - toktik-net
+    depends_on:
+      -  Nacos
+      -  Etcd
+      -  otel-collector
+      -  jaeger-all-in-one
+      -  victoriametrics
+      -  prometheus
+      -  grafana
+      -  kafdrop
+      -  kafka
+      -  es
+      -  kibana
+      -  logstash
+      -  mysql
+      -  Redis
+
+  toktik-user:
+    container_name:   toktik-user
+    image:  toktik-user:0.1
+    ports:
+      - "8081:8081"
+      - "8881:8881"
+    networks:
+      - toktik-net
+    depends_on:
+      -  Nacos
+      -  Etcd
+      -  otel-collector
+      -  jaeger-all-in-one
+      -  victoriametrics
+      -  prometheus
+      -  grafana
+      -  kafdrop
+      -  kafka
+      -  es
+      -  kibana
+      -  logstash
+      -  mysql
+      -  Redis
+
+  toktik-interaction:
+    container_name:   toktik-interaction
+    image:  toktik-interaction:0.1
+    ports:
+      - "8082:8082"
+      - "8882:8882"
+    networks:
+      - toktik-net
+    depends_on:
+      -  Nacos
+      -  Etcd
+      -  otel-collector
+      -  jaeger-all-in-one
+      -  victoriametrics
+      -  prometheus
+      -  grafana
+      -  kafdrop
+      -  kafka
+      -  es
+      -  kibana
+      -  logstash
+      -  mysql
+      -  Redis
+
+  toktik-video:
+    container_name:   toktik-video
+    image:  toktik-video:0.1
+    ports:
+      - "8083:8083"
+      - "8883:8883"
+    networks:
+      - toktik-net
+    depends_on:
+      -  Nacos
+      -  Etcd
+      -  otel-collector
+      -  jaeger-all-in-one
+      -  victoriametrics
+      -  prometheus
+      -  grafana
+      -  kafdrop
+      -  kafka
+      -  es
+      -  kibana
+      -  logstash
+      -  mysql
+      -  Redis
+
+  toktik-chat:
+    container_name:   toktik-chat
+    image:  toktik-chat:0.1
+    ports:
+      - "8084:8084"
+      - "8884:8884"
+    networks:
+      - toktik-net
+    depends_on:
+      -  Nacos
+      -  Etcd
+      -  otel-collector
+      -  jaeger-all-in-one
+      -  victoriametrics
+      -  prometheus
+      -  grafana
+      -  kafdrop
+      -  kafka
+      -  es
+      -  kibana
+      -  logstash
+      -  mysql
+      -  Redis
+
+  toktik-favor:
+    container_name:   toktik-favor
+    image:  toktik-favor:0.1
+    ports:
+      - "8085:8085"
+      - "8885:8885"
+    networks:
+      - toktik-net
+    depends_on:
+      -  Nacos
+      -  Etcd
+      -  otel-collector
+      -  jaeger-all-in-one
+      -  victoriametrics
+      -  prometheus
+      -  grafana
+      -  kafdrop
+      -  kafka
+      -  es
+      -  kibana
+      -  logstash
+      -  mysql
+      -  Redis
+
+  toktik-comment:
+    container_name:   toktik-comment
+    image:  toktik-comment:0.1
+    ports:
+      - "8086:8086"
+      - "8886:8886"
+    networks:
+      - toktik-net
+    depends_on:
+      -  Nacos
+      -  Etcd
+      -  otel-collector
+      -  jaeger-all-in-one
+      -  victoriametrics
+      -  prometheus
+      -  grafana
+      -  kafdrop
+      -  kafka
+      -  es
+      -  kibana
+      -  logstash
+      -  mysql
+      -  Redis
+

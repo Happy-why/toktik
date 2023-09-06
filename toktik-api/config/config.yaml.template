@@ -1,0 +1,46 @@
+Server:
+  Name: "toktik-api"
+  Addr: "0.0.0.0:8080"
+
+RPC:
+  Name: "rpc-api"
+  Addr: "0.0.0.0:8880"
+  ServerAddrs:
+    rpc-user: xxx:8881
+    rpc-video: xxx:8882
+    rpc-interaction: xxx:8883
+    rpc-chat: xxx:8884
+    rpc-favor: xxx:8885
+    rpc-comment: xxx:8886
+
+Jaeger:
+  HTTPEndpoint: "http://xxx:14268/api/traces"
+  RPCExportEndpoint: "xxx:4317"
+  ServerName:
+    toktik-api: "toktik-api"
+    toktik-user: "toktik-user"
+    toktik-video: "toktik-video"
+    toktik-interaction: "toktik-interaction"
+    toktik-chat: "toktik-chat"
+    toktik-favor: "toktik-favor"
+    toktik-comment: "toktik-comment"
+
+Logger:
+  Level: "debug"
+  LogSavePath: "storage/applogs/"
+  LogFileExt:    ".log"
+  MaxSize: 10
+  MaxBackups: 7
+  MaxAge: 30
+  Compress: false
+  LowLevelFile: "info"
+  HighLevelFile: "error"
+
+Etcd:
+  Addr:
+    - "xxx:2379"
+
+Token:
+  Key: "xxx"
+  UserTokenExp: 168h # 小时
+  AuthorizationKey: xxx

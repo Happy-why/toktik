@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"go.uber.org/zap"
 	"toktik-api/internal/api"
@@ -46,7 +45,6 @@ func Auth() func(ctx context.Context, c *app.RequestContext) {
 			c.Abort()
 			return
 		}
-		fmt.Println("token:", t)
 		if t.Token == TokenNil {
 			c.Next(ctx)
 			return
@@ -63,8 +61,6 @@ func Auth() func(ctx context.Context, c *app.RequestContext) {
 			c.Abort()
 			return
 		}
-		zap.S().Info(content)
-		fmt.Println("content:", content)
 		c.Set(AuthKey, content)
 		c.Next(ctx)
 	}
@@ -86,7 +82,6 @@ func MustUser() app.HandlerFunc {
 			c.Abort()
 			return
 		}
-		fmt.Println("准备 TokenVerify content:", content)
 		_, err := api.UserClient.TokenVerify(ctx, &user.TokenVerifyRequest{UserId: content.ID, TokenType: string(content.Type)})
 		if err != nil {
 			zap.L().Error("api.UserClient.TokenVerify err:", zap.Error(err))
@@ -94,7 +89,6 @@ func MustUser() app.HandlerFunc {
 			c.Abort()
 			return
 		}
-		fmt.Println("TokenVerify 成功！")
 		c.Next(ctx)
 	}
 }

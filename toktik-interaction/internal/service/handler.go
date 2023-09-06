@@ -14,6 +14,7 @@ import (
 	"toktik-interaction/internal/repo"
 	"toktik-interaction/pkg/myerr"
 	"toktik-interaction/pkg/rpc/client"
+	"toktik-rpc/kitex_gen/chat"
 	inter "toktik-rpc/kitex_gen/interaction"
 	"toktik-rpc/kitex_gen/user"
 )
@@ -364,7 +365,7 @@ func (is *InteractionServiceImpl) FriendList(ctx context.Context, req *inter.Fri
 			return is.respRepo.FriendListResponse(errcode.ErrRedis, err.Error(), &inter.FriendListResponse{}), nil
 		}
 	}
-
+	// 通过 friendIds 查询 好友之间的最新一条消息
 	userListResp, err := client.UserCache.GetUserList(ctx, &user.GetUserListRequest{UserId: req.MyUserId, TargetId: friendIds})
 	if userListResp == nil {
 		zap.L().Error("client.UserCache.GetUserList 返回空指针")
@@ -374,11 +375,37 @@ func (is *InteractionServiceImpl) FriendList(ctx context.Context, req *inter.Fri
 		zap.L().Error("client.UserCache.GetUserList err:", zap.Error(err))
 		return is.respRepo.FriendListResponse(errcode.CreateErr(userListResp.StatusCode, model.MsgNil), userListResp.StatusMsg, &inter.FriendListResponse{}), nil
 	}
+	getFriendLatestMsgResp, _ := client.ChatCache.GetFriendLatestMessage(ctx, &chat.GetFriendLatestMessageRequest{
+		UserId:    req.MyUserId,
+		FriendIds: friendIds,
+	})
+	if getFriendLatestMsgResp == nil {
+		zap.L().Error("client.ChatCache.GetFriendLatestMessage 返回空指针")
+		return is.respRepo.FriendListResponse(errcode.ErrServer, model.MsgNil, &inter.FriendListResponse{}), nil
+	}
+	if getFriendLatestMsgResp.StatusCode != model.RpcSuccess {
+		zap.L().Error("client.ChatCache.GetFriendLatestMessage err:", zap.Error(err))
+		return is.respRepo.FriendListResponse(errcode.CreateErr(userListResp.StatusCode, model.MsgNil), getFriendLatestMsgResp.StatusMsg, &inter.FriendListResponse{}), nil
+	}
 	// 模型转换，返回
 	resp = new(inter.FriendListResponse)
-	resp.UserList = make([]*user.User, len(userListResp.UserList))
+	resp.UserList = make([]*inter.FriendUser, len(friendIds))
 	for i, v := range userListResp.UserList {
-		resp.UserList[i] = v
+		resp.UserList[i] = &inter.FriendUser{
+			Id:              v.Id,
+			Name:            v.Name,
+			FollowCount:     v.FollowCount,
+			FollowerCount:   v.FollowerCount,
+			IsFollow:        v.IsFollow,
+			Avatar:          v.Avatar,
+			BackgroundImage: v.BackgroundImage,
+			Signature:       v.Signature,
+			TotalFavorited:  v.TotalFavorited,
+			WorkCount:       v.WorkCount,
+			FavoriteCount:   v.FavoriteCount,
+			ChatMessage:     &getFriendLatestMsgResp.MessageList[i],
+			MsgType:         getFriendLatestMsgResp.MsgTypeList[i],
+		}
 	}
 	return is.respRepo.FriendListResponse(errcode.StatusOK, model.MsgNil, resp), nil
 }
