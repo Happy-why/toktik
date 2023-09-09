@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/common/utils"
 )
 
 var routers []Router
@@ -19,7 +19,7 @@ func Register(root ...Router) {
 
 func InitRouter(r *server.Hertz) {
 	r.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
-		c.JSON(200, gin.H{"msg": "pong"})
+		c.JSON(200, utils.H{"msg": "pong"})
 	})
 	for _, root := range routers {
 		root.Route(r)

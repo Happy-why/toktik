@@ -29,7 +29,6 @@ func (v *HandlerVideo) VideoFeed(ctx context.Context, c *app.RequestContext) {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	fmt.Println("req:", req)
 	// 若登录，获取用户id
 	content, ok := token.GetTokenContent(c)
 	if ok {

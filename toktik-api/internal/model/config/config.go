@@ -10,6 +10,7 @@ type Config struct {
 	Token  Token
 	Etcd   Etcd
 	Jaeger Jaeger
+	Limit  Limit
 }
 
 type Nacos struct {
@@ -60,4 +61,26 @@ type Token struct {
 	Key              string
 	UserTokenExp     time.Duration
 	AuthorizationKey string
+}
+type Limit struct {
+	IPLimit  IPLimit  `yaml:"IPLimit"`
+	APILimit APILimit `yaml:"APILimit"`
+}
+
+type IPLimit struct {
+	Cap     int64 `yaml:"Cap"`
+	GenNum  int64 `yaml:"GenNum"`
+	GenTime int64 `yaml:"GenTime"`
+	Cost    int64 `yaml:"Cost"`
+}
+
+type APILimit struct {
+	Upload []Bucket `yaml:"Upload"`
+	Email  []Bucket `yaml:"Email"`
+}
+
+type Bucket struct {
+	Count    int           `yaml:"Count"`
+	Duration time.Duration `yaml:"Duration"`
+	Burst    int           `yaml:"Burst"`
 }

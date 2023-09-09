@@ -251,170 +251,170 @@ services:
       - toktik-net
 
 
-  toktik-api:
-    container_name:   toktik-api
-    image:  toktik-api:0.1
-    ports:
-      - "8080:8080"
-    networks:
-      - toktik-net
-    depends_on:
-      -  Nacos
-      -  Etcd
-      -  otel-collector
-      -  jaeger-all-in-one
-      -  victoriametrics
-      -  prometheus
-      -  grafana
-      -  kafdrop
-      -  kafka
-      -  es
-      -  kibana
-      -  logstash
-      -  mysql
-      -  Redis
-
-  toktik-user:
-    container_name:   toktik-user
-    image:  toktik-user:0.1
-    ports:
-      - "8081:8081"
-      - "8881:8881"
-    networks:
-      - toktik-net
-    depends_on:
-      -  Nacos
-      -  Etcd
-      -  otel-collector
-      -  jaeger-all-in-one
-      -  victoriametrics
-      -  prometheus
-      -  grafana
-      -  kafdrop
-      -  kafka
-      -  es
-      -  kibana
-      -  logstash
-      -  mysql
-      -  Redis
-
-  toktik-interaction:
-    container_name:   toktik-interaction
-    image:  toktik-interaction:0.1
-    ports:
-      - "8082:8082"
-      - "8882:8882"
-    networks:
-      - toktik-net
-    depends_on:
-      -  Nacos
-      -  Etcd
-      -  otel-collector
-      -  jaeger-all-in-one
-      -  victoriametrics
-      -  prometheus
-      -  grafana
-      -  kafdrop
-      -  kafka
-      -  es
-      -  kibana
-      -  logstash
-      -  mysql
-      -  Redis
-
-  toktik-video:
-    container_name:   toktik-video
-    image:  toktik-video:0.1
-    ports:
-      - "8083:8083"
-      - "8883:8883"
-    networks:
-      - toktik-net
-    depends_on:
-      -  Nacos
-      -  Etcd
-      -  otel-collector
-      -  jaeger-all-in-one
-      -  victoriametrics
-      -  prometheus
-      -  grafana
-      -  kafdrop
-      -  kafka
-      -  es
-      -  kibana
-      -  logstash
-      -  mysql
-      -  Redis
-
-  toktik-chat:
-    container_name:   toktik-chat
-    image:  toktik-chat:0.1
-    ports:
-      - "8084:8084"
-      - "8884:8884"
-    networks:
-      - toktik-net
-    depends_on:
-      -  Nacos
-      -  Etcd
-      -  otel-collector
-      -  jaeger-all-in-one
-      -  victoriametrics
-      -  prometheus
-      -  grafana
-      -  kafdrop
-      -  kafka
-      -  es
-      -  kibana
-      -  logstash
-      -  mysql
-      -  Redis
-
-  toktik-favor:
-    container_name:   toktik-favor
-    image:  toktik-favor:0.1
-    ports:
-      - "8085:8085"
-      - "8885:8885"
-    networks:
-      - toktik-net
-    depends_on:
-      -  Nacos
-      -  Etcd
-      -  otel-collector
-      -  jaeger-all-in-one
-      -  victoriametrics
-      -  prometheus
-      -  grafana
-      -  kafdrop
-      -  kafka
-      -  es
-      -  kibana
-      -  logstash
-      -  mysql
-      -  Redis
-
-  toktik-comment:
-    container_name:   toktik-comment
-    image:  toktik-comment:0.1
-    ports:
-      - "8086:8086"
-      - "8886:8886"
-    networks:
-      - toktik-net
-    depends_on:
-      -  Nacos
-      -  Etcd
-      -  otel-collector
-      -  jaeger-all-in-one
-      -  victoriametrics
-      -  prometheus
-      -  grafana
-      -  kafdrop
-      -  kafka
-      -  es
-      -  kibana
-      -  logstash
-      -  mysql
-      -  Redis
+#  toktik-api:
+#    container_name:   toktik-api
+#    image:  toktik-api:0.1
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - toktik-net
+#    depends_on:
+#      -  Nacos
+#      -  Etcd
+#      -  otel-collector
+#      -  jaeger-all-in-one
+#      -  victoriametrics
+#      -  prometheus
+#      -  grafana
+#      -  kafdrop
+#      -  kafka
+#      -  es
+#      -  kibana
+#      -  logstash
+#      -  mysql
+#      -  Redis
+#
+#  toktik-user:
+#    container_name:   toktik-user
+#    image:  toktik-user:0.1
+#    ports:
+#      - "8081:8081"
+#      - "8881:8881"
+#    networks:
+#      - toktik-net
+#    depends_on:
+#      -  Nacos
+#      -  Etcd
+#      -  otel-collector
+#      -  jaeger-all-in-one
+#      -  victoriametrics
+#      -  prometheus
+#      -  grafana
+#      -  kafdrop
+#      -  kafka
+#      -  es
+#      -  kibana
+#      -  logstash
+#      -  mysql
+#      -  Redis
+#
+#  toktik-interaction:
+#    container_name:   toktik-interaction
+#    image:  toktik-interaction:0.1
+#    ports:
+#      - "8082:8082"
+#      - "8882:8882"
+#    networks:
+#      - toktik-net
+#    depends_on:
+#      -  Nacos
+#      -  Etcd
+#      -  otel-collector
+#      -  jaeger-all-in-one
+#      -  victoriametrics
+#      -  prometheus
+#      -  grafana
+#      -  kafdrop
+#      -  kafka
+#      -  es
+#      -  kibana
+#      -  logstash
+#      -  mysql
+#      -  Redis
+#
+#  toktik-video:
+#    container_name:   toktik-video
+#    image:  toktik-video:0.1
+#    ports:
+#      - "8083:8083"
+#      - "8883:8883"
+#    networks:
+#      - toktik-net
+#    depends_on:
+#      -  Nacos
+#      -  Etcd
+#      -  otel-collector
+#      -  jaeger-all-in-one
+#      -  victoriametrics
+#      -  prometheus
+#      -  grafana
+#      -  kafdrop
+#      -  kafka
+#      -  es
+#      -  kibana
+#      -  logstash
+#      -  mysql
+#      -  Redis
+#
+#  toktik-chat:
+#    container_name:   toktik-chat
+#    image:  toktik-chat:0.1
+#    ports:
+#      - "8084:8084"
+#      - "8884:8884"
+#    networks:
+#      - toktik-net
+#    depends_on:
+#      -  Nacos
+#      -  Etcd
+#      -  otel-collector
+#      -  jaeger-all-in-one
+#      -  victoriametrics
+#      -  prometheus
+#      -  grafana
+#      -  kafdrop
+#      -  kafka
+#      -  es
+#      -  kibana
+#      -  logstash
+#      -  mysql
+#      -  Redis
+#
+#  toktik-favor:
+#    container_name:   toktik-favor
+#    image:  toktik-favor:0.1
+#    ports:
+#      - "8085:8085"
+#      - "8885:8885"
+#    networks:
+#      - toktik-net
+#    depends_on:
+#      -  Nacos
+#      -  Etcd
+#      -  otel-collector
+#      -  jaeger-all-in-one
+#      -  victoriametrics
+#      -  prometheus
+#      -  grafana
+#      -  kafdrop
+#      -  kafka
+#      -  es
+#      -  kibana
+#      -  logstash
+#      -  mysql
+#      -  Redis
+#
+#  toktik-comment:
+#    container_name:   toktik-comment
+#    image:  toktik-comment:0.1
+#    ports:
+#      - "8086:8086"
+#      - "8886:8886"
+#    networks:
+#      - toktik-net
+#    depends_on:
+#      -  Nacos
+#      -  Etcd
+#      -  otel-collector
+#      -  jaeger-all-in-one
+#      -  victoriametrics
+#      -  prometheus
+#      -  grafana
+#      -  kafdrop
+#      -  kafka
+#      -  es
+#      -  kibana
+#      -  logstash
+#      -  mysql
+#      -  Redis
 

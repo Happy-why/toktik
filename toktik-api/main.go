@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/hertz-contrib/gzip"
 	"github.com/hertz-contrib/obs-opentelemetry/provider"
 	"github.com/hertz-contrib/obs-opentelemetry/tracing"
+	hertzSentinel "github.com/hertz-contrib/opensergo/sentinel/adapter"
+	log2 "log"
 	_ "toktik-api/internal/api/chat"
 	_ "toktik-api/internal/api/comment"
 	_ "toktik-api/internal/api/favor"
@@ -17,6 +21,7 @@ import (
 	"toktik-api/internal/model"
 	"toktik-api/pkg/middleware"
 	"toktik-api/pkg/router"
+	"toktik-api/pkg/sentinel"
 	"toktik-api/pkg/setting"
 )
 
@@ -24,6 +29,9 @@ func main() {
 	// 初始化
 	setting.InitAllSetting()
 	fmt.Printf("config:%#v\n", global.Settings)
+
+	// 初始化sentinel
+	sentinel.InitSentinel()
 
 	// 注册链路追踪
 	p := provider.NewOpenTelemetryProvider(
@@ -44,9 +52,20 @@ func main() {
 	hz.Use(gzip.Gzip(gzip.DefaultCompression))
 	hz.Use(middleware.Auth())
 	hz.Use(tracing.ServerMiddleware(cfg))
+	hz.Use(hertzSentinel.SentinelServerMiddleware(
+		hertzSentinel.WithServerResourceExtractor(func(c context.Context, ctx *app.RequestContext) string {
+			return "api"
+		}),
+		hertzSentinel.WithServerBlockFallback(func(c context.Context, ctx *app.RequestContext) {
+			ctx.AbortWithStatusJSON(400, utils.H{
+				"err":  "too many request; the quota used up",
+				"code": 10222,
+			})
+		})))
+	hz.Use(middleware.LimitIP())
 	// 路由注册
 	router.InitRouter(hz)
 
-	fmt.Println("-----API Server Start ! ! !-----")
+	log2.Println("-----API Server Start ! ! !-----")
 	hz.Spin()
 }

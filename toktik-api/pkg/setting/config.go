@@ -32,7 +32,7 @@ func InitBootStrap() {
 	// 配置 nacos
 	NacosConfig, err := setting.NewSetting(bootstrap, configType, strings.Split(configPaths, ",")...) // 引入配置文件路径
 	if err != nil {
-		panic("初始化配置文件有误:" + err.Error())
+		log2.Fatalln("初始化配置文件有误:" + err.Error())
 	}
 	if err = NacosConfig.BindAll(&global.Settings); err != nil {
 		panic("初始化配置文件有误:" + err.Error())
