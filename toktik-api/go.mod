@@ -3,13 +3,17 @@ module toktik-api
 go 1.19
 
 require (
+	github.com/alibaba/sentinel-golang v1.0.4
 	github.com/cloudwego/hertz v0.6.8
 	github.com/cloudwego/kitex v0.6.2
+	github.com/h2non/filetype v1.1.3
 	github.com/hertz-contrib/gzip v0.0.1
+	github.com/hertz-contrib/monitor-prometheus v0.0.0-20221109015426-47eab4e08245
 	github.com/hertz-contrib/obs-opentelemetry/provider v0.2.2
 	github.com/hertz-contrib/obs-opentelemetry/tracing v0.2.2
 	github.com/hertz-contrib/opensergo v0.0.1
 	github.com/jinzhu/copier v0.4.0
+	github.com/kitex-contrib/monitor-prometheus v0.1.0
 	github.com/kitex-contrib/obs-opentelemetry v0.2.3
 	github.com/kitex-contrib/registry-etcd v0.1.0
 	github.com/nacos-group/nacos-sdk-go/v2 v2.2.3
@@ -22,7 +26,6 @@ require (
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
-	github.com/alibaba/sentinel-golang v1.0.4 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1704 // indirect
 	github.com/andeya/goutil v1.0.0 // indirect
 	github.com/apache/thrift v0.18.1 // indirect
@@ -66,10 +69,10 @@ require (
 	github.com/nyaruka/phonenumbers v1.1.6 // indirect
 	github.com/oleiade/lane v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.12.2 // indirect
-	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/common v0.32.1 // indirect
-	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/prometheus/client_golang v1.14.0 // indirect
+	github.com/prometheus/client_model v0.3.0 // indirect
+	github.com/prometheus/common v0.37.0 // indirect
+	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.21.6 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect

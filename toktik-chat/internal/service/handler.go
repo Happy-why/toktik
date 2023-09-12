@@ -88,10 +88,6 @@ func (cs *ChatServiceImpl) MessageList(ctx context.Context, req *chat.MessageLis
 		zap.L().Error("cs.rCache.ZRangeMessageList err:", zap.Error(err))
 		return cs.respRepo.MessageListResponse(errcode.ErrRedis, err.Error(), &chat.MessageListResponse{}), nil
 	}
-	fmt.Println("req.PreMsgTime:", req.PreMsgTime)
-	for _, v := range messageList {
-		fmt.Printf("message:%#v\n", v)
-	}
 	exist, err := cs.rCache.KeyExist(ctx, historyKey)
 	if err != nil {
 		zap.L().Error("cs.rCache.KeyExist err:", zap.Error(err))
@@ -143,8 +139,6 @@ func (cs *ChatServiceImpl) GetFriendLatestMessage(ctx context.Context, req *chat
 			zap.L().Error("cs.rCache.ZGetFriendLatestMessage err:", zap.Error(err))
 			return cs.respRepo.GetFriendLatestMessageResponse(errcode.ErrRedis, err.Error(), &chat.GetFriendLatestMessageResponse{}), nil
 		}
-		fmt.Println("循环", i, "中,message:", message)
-		fmt.Println("循环", i, "中,msgType:", msgType)
 		resp.MessageList[i] = message
 		resp.MsgTypeList[i] = msgType
 	}

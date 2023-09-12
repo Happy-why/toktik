@@ -25,6 +25,10 @@ Jaeger:
     toktik-favor: "toktik-favor"
     toktik-comment: "toktik-comment"
 
+Prometheus:
+  Post: ":9190"
+  Path: "/metrics"
+
 Logger:
   Level: "debug"
   LogSavePath: "storage/applogs/"

@@ -18,3 +18,7 @@ const (
 	TokTikFavor       = "toktik-favor"
 	TokTikComment     = "toktik-comment"
 )
+
+const (
+	SentinelApi = "api"
+)

@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -63,7 +62,6 @@ func (vr *CommentCache) ZGetCommentList(c context.Context, key string) ([]int64,
 			BaseModel: auto.BaseModel{ID: uint(commentId), CreatedAt: time.Unix(int64(v.Score), 0)},
 			Content:   str[2],
 		}
-		fmt.Printf("commentInfo: commentId:%#v\n", commentId)
 	}
 	return userIds, commentList, nil
 }

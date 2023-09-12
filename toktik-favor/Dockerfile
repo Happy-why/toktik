@@ -6,5 +6,5 @@ RUN  mkdir config && mv config.yaml config/config.yaml && mv bootstrap.yaml conf
 
 RUN chmod +x ./toktik-favor
 
-EXPOSE 8085 8885
+EXPOSE 8085 8885 9195
 ENTRYPOINT ["./toktik-favor"]

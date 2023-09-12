@@ -6,5 +6,5 @@ RUN  mkdir config && mv config.yaml config/config.yaml && mv bootstrap.yaml conf
 
 RUN chmod +x ./toktik-comment
 
-EXPOSE 8086 8886
+EXPOSE 8086 8886 9196
 ENTRYPOINT ["./toktik-comment"]

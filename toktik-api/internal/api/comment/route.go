@@ -3,6 +3,7 @@ package video
 import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"log"
+	"toktik-api/pkg/middleware"
 	"toktik-api/pkg/router"
 )
 
@@ -20,7 +21,7 @@ func (*RouterComment) Route(r *server.Hertz) {
 	//初始化grpc的客户端连接
 	h := NewHandlerVideo()
 	r.GET("/douyin/comment/list/", h.CommentList)
-	g := r.Group("/douyin" /* middleware.MustUser()*/)
+	g := r.Group("/douyin", middleware.MustUser())
 	{
 		g.POST("/comment/action/", h.CommentAction)
 	}

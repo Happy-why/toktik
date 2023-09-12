@@ -21,6 +21,10 @@ Jaeger:
     toktik-favor: "toktik-favor"
     toktik-comment: "toktik-comment"
 
+Prometheus:
+  Post: ":9193"
+  Path: "/metrics"
+
 RPC:
   Name: "rpc-video"
   Addr: "0.0.0.0:8883"

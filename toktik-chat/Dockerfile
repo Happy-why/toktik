@@ -7,5 +7,5 @@ RUN  mkdir config && mv config.yaml config/config.yaml && mv bootstrap.yaml conf
 
 RUN chmod +x ./toktik-chat
 
-EXPOSE 8084 8884
+EXPOSE 8084 8884 9194
 ENTRYPOINT ["./toktik-chat"]

@@ -9,5 +9,5 @@ RUN  mkdir config && mv config.yaml config/config.yaml && mv bootstrap.yaml conf
 
 RUN chmod +x ./toktik-video
 
-EXPOSE 8083 8883
+EXPOSE 8083 8883 9193
 ENTRYPOINT ["./toktik-video"]

@@ -3,16 +3,17 @@ package config
 import "time"
 
 type Config struct {
-	Logger Logger
-	Server Server
-	Rpc    Rpc
-	Rules  Rules
-	Token  Token
-	Mysql  Mysql
-	Redis  Redis
-	Etcd   Etcd
-	Nacos  Nacos
-	Jaeger Jaeger
+	Logger     Logger
+	Server     Server
+	Rpc        Rpc
+	Rules      Rules
+	Token      Token
+	Mysql      Mysql
+	Redis      Redis
+	Etcd       Etcd
+	Nacos      Nacos
+	Jaeger     Jaeger
+	Prometheus Prometheus
 }
 
 type Nacos struct {
@@ -45,6 +46,11 @@ type Rpc struct {
 type Jaeger struct {
 	RPCExportEndpoint string
 	ServerName        map[string]string
+}
+
+type Prometheus struct {
+	Post string
+	Path string
 }
 
 type Etcd struct {

@@ -6,5 +6,5 @@ RUN  mkdir config && mv config.yaml config/config.yaml && mv bootstrap.yaml conf
 
 RUN chmod +x ./toktik-interaction
 
-EXPOSE 8082 8882
+EXPOSE 8082 8882 9192
 ENTRYPOINT ["./toktik-interaction"]

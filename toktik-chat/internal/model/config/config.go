@@ -3,15 +3,16 @@ package config
 import "time"
 
 type Config struct {
-	Logger Logger
-	Server Server
-	Rpc    Rpc
-	Rules  Rules
-	Mysql  Mysql
-	Redis  Redis
-	Etcd   Etcd
-	Nacos  Nacos
-	Jaeger Jaeger
+	Logger     Logger
+	Server     Server
+	Rpc        Rpc
+	Rules      Rules
+	Mysql      Mysql
+	Redis      Redis
+	Etcd       Etcd
+	Nacos      Nacos
+	Jaeger     Jaeger
+	Prometheus Prometheus
 }
 type Nacos struct {
 	Namespace   string `json:"namespace"`
@@ -38,6 +39,11 @@ type Rules struct {
 type Jaeger struct {
 	RPCExportEndpoint string
 	ServerName        map[string]string
+}
+
+type Prometheus struct {
+	Post string
+	Path string
 }
 
 type Rpc struct {

@@ -2,7 +2,6 @@ package interaction
 
 import (
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/jinzhu/copier"
 	"toktik-api/internal/api"
@@ -134,7 +133,6 @@ func (p *HandlerInteraction) FriendList(ctx context.Context, c *app.RequestConte
 	// 3.返回结果
 	resp := &response.FriendListResponse{}
 	_ = copier.Copy(resp, result)
-	fmt.Printf("friend resp:%#v\n", resp)
 	res.Reply(nil, resp)
 	return
 }

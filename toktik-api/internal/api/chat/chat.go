@@ -2,7 +2,6 @@ package chat
 
 import (
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/jinzhu/copier"
 	"toktik-api/internal/api"
@@ -67,7 +66,6 @@ func (h *HandlerChat) MessageList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req.UserId = content.ID
-	fmt.Printf("MessageListReq:%#v\n", req)
 	// 2.调用 rpc服务 获取响应
 	params := &chat.MessageListRequest{}
 	_ = copier.Copy(params, req)

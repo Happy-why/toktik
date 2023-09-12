@@ -3,14 +3,15 @@ package config
 import "time"
 
 type Config struct {
-	Nacos  Nacos
-	Server Server
-	Logger Logger
-	Rpc    Rpc
-	Token  Token
-	Etcd   Etcd
-	Jaeger Jaeger
-	Limit  Limit
+	Nacos      Nacos
+	Server     Server
+	Logger     Logger
+	Rpc        Rpc
+	Token      Token
+	Etcd       Etcd
+	Jaeger     Jaeger
+	Limit      Limit
+	Prometheus Prometheus
 }
 
 type Nacos struct {
@@ -39,6 +40,11 @@ type Jaeger struct {
 	HTTPEndpoint      string
 	RPCExportEndpoint string
 	ServerName        map[string]string
+}
+
+type Prometheus struct {
+	Post string
+	Path string
 }
 
 type Logger struct {

@@ -3,6 +3,7 @@ package request
 import (
 	"bytes"
 	"fmt"
+	"github.com/h2non/filetype"
 	"io"
 	"mime/multipart"
 	"time"
@@ -28,12 +29,16 @@ type VideoPublishRequest struct {
 }
 
 func (v *VideoPublishRequest) VerifyFeed() (*bytes.Buffer, error) {
+
 	if v.Data == nil {
 		return nil, fmt.Errorf("找不到上传的文件呀~")
 	}
 	src, _ := v.Data.Open()
 	buf := bytes.NewBuffer(nil)
 	_, err := io.Copy(buf, src)
+	if !filetype.IsVideo(buf.Bytes()) {
+		return nil, fmt.Errorf("文件格式不对啊")
+	}
 	return buf, err
 }
 

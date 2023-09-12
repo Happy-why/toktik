@@ -2,7 +2,9 @@ package rpc
 
 import (
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	"github.com/cloudwego/kitex/pkg/transmeta"
 	"github.com/cloudwego/kitex/server"
+	prometheus "github.com/kitex-contrib/monitor-prometheus"
 	"github.com/kitex-contrib/obs-opentelemetry/provider"
 	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	etcd "github.com/kitex-contrib/registry-etcd"
@@ -36,6 +38,8 @@ func RegisterRPC() server.Server {
 		server.WithServiceAddr(addr),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: global.Settings.Rpc.Name}),
 		server.WithSuite(tracing.NewServerSuite()),
+		server.WithTracer(prometheus.NewServerTracer(global.Settings.Prometheus.Post, global.Settings.Prometheus.Path)),
+		server.WithMetaHandler(transmeta.ServerTTHeaderHandler),
 		//server.WithMiddleware(rpcmiddleware.CommonMiddleware), // middleware
 		//server.WithMiddleware(rpcmiddleware.ServerMiddleware),
 		server.WithRegistry(r),

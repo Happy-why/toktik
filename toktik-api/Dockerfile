@@ -6,5 +6,5 @@ RUN  mkdir config && mv config.yaml config/config.yaml && mv bootstrap.yaml conf
 
 RUN chmod +x ./toktik-api
 
-EXPOSE 8080
+EXPOSE 8080 9190
 ENTRYPOINT ["./toktik-api"]

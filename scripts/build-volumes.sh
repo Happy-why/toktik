@@ -15,9 +15,8 @@ create_dir() {
     fi
 }
 
-# 在/home下创建目录
-cd ..
-cd ./deploy
+# 在deploy下创建目录
+cd deploy
 
 # 创建deploy/data/目录
 create_dir "data"
@@ -54,3 +53,5 @@ chmod 777 data/es/plugins
 
 # 创建logstash目录结构
 create_dir "data/logstash/log"
+
+cd ..

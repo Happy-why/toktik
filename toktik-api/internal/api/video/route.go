@@ -3,6 +3,7 @@ package video
 import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"log"
+	"toktik-api/pkg/middleware"
 	"toktik-api/pkg/router"
 )
 
@@ -21,7 +22,7 @@ func (*RouterVideo) Route(r *server.Hertz) {
 	h := NewHandlerVideo()
 	r.GET("/douyin/feed/", h.VideoFeed)
 	r.GET("/douyin//publish/list/", h.PublishList)
-	g := r.Group("/douyin" /*middleware.MustUser()*/)
+	g := r.Group("/douyin", middleware.MustUser())
 	{
 		g.POST("/publish/action/", h.VideoPublish)
 

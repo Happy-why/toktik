@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/hertz-contrib/gzip"
+	"github.com/hertz-contrib/monitor-prometheus"
 	"github.com/hertz-contrib/obs-opentelemetry/provider"
 	"github.com/hertz-contrib/obs-opentelemetry/tracing"
 	hertzSentinel "github.com/hertz-contrib/opensergo/sentinel/adapter"
@@ -28,7 +28,7 @@ import (
 func main() {
 	// 初始化
 	setting.InitAllSetting()
-	fmt.Printf("config:%#v\n", global.Settings)
+	log2.Printf("config:%#v\n", global.Settings)
 
 	// 初始化sentinel
 	sentinel.InitSentinel()
@@ -45,6 +45,7 @@ func main() {
 	// 初始化 hz
 	hz := server.Default(
 		server.WithHostPorts(global.Settings.Server.Addr),
+		server.WithTracer(prometheus.NewServerTracer(global.Settings.Prometheus.Post, global.Settings.Prometheus.Path)),
 		//server.WithMaxRequestBodySize(),
 		tracer,
 	)
@@ -52,9 +53,10 @@ func main() {
 	hz.Use(gzip.Gzip(gzip.DefaultCompression))
 	hz.Use(middleware.Auth())
 	hz.Use(tracing.ServerMiddleware(cfg))
+	// hertzSentinel "github.com/hertz-contrib/opensergo/sentinel/adapter"
 	hz.Use(hertzSentinel.SentinelServerMiddleware(
 		hertzSentinel.WithServerResourceExtractor(func(c context.Context, ctx *app.RequestContext) string {
-			return "api"
+			return model.SentinelApi
 		}),
 		hertzSentinel.WithServerBlockFallback(func(c context.Context, ctx *app.RequestContext) {
 			ctx.AbortWithStatusJSON(400, utils.H{

@@ -9,28 +9,28 @@ scrape_configs:
   - job_name: "toktik-api"
     scrape_interval: 5s
     static_configs:
-      - targets: ['192.168.30.135:8080']
+      - targets: ['192.168.30.135:9190']
   - job_name: "toktik-user"
     scrape_interval: 5s
     static_configs:
-      - targets: [ '192.168.30.135:8081' ]
+      - targets: [ '192.168.30.135:9191' ]
   - job_name: "toktik-interaction"
     scrape_interval: 5s
     static_configs:
-      - targets: [ '192.168.30.135:8082' ]
+      - targets: [ '192.168.30.135:9192' ]
   - job_name: "toktik-video"
     scrape_interval: 5s
     static_configs:
-      - targets: [ '192.168.30.135:8083' ]
+      - targets: [ '192.168.30.135:9193' ]
   - job_name: "toktik-chat"
     scrape_interval: 5s
     static_configs:
-      - targets: [ '192.168.30.135:8084' ]
+      - targets: [ '192.168.30.135:9194' ]
   - job_name: "toktik-favor"
     scrape_interval: 5s
     static_configs:
-      - targets: [ '192.168.30.135:8085' ]
+      - targets: [ '192.168.30.135:9195' ]
   - job_name: "toktik-comment"
     scrape_interval: 5s
     static_configs:
-      - targets: [ '192.168.30.135:8086' ]
+      - targets: [ '192.168.30.135:9196' ]

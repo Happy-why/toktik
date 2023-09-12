@@ -2,7 +2,6 @@ package video
 
 import (
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/jinzhu/copier"
 	"toktik-api/internal/api"
@@ -58,8 +57,6 @@ func (v *HandlerVideo) VideoPublish(ctx context.Context, c *app.RequestContext) 
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	fmt.Println("req:", req)
-
 	// 2.校验参数
 	content, ok := token.GetTokenContent(c)
 	if !ok {
@@ -95,8 +92,6 @@ func (v *HandlerVideo) PublishList(ctx context.Context, c *app.RequestContext) {
 		res.Reply(errcode.ErrParamsNotValid.WithDetails(err.Error()))
 		return
 	}
-	fmt.Println("req:", req)
-
 	// 2.校验参数
 	content, ok := token.GetTokenContent(c)
 	if !ok {

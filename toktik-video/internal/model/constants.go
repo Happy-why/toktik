@@ -21,16 +21,6 @@ const (
 )
 
 const (
-	FAVORITE = iota + 1
-	CANCELFAVORITE
-)
-
-const (
-	COMMENT = iota + 1
-	CANCELCOMMENT
-)
-
-const (
 	RpcUser        = "rpc-user"
 	RpcVideo       = "rpc-video"
 	RpcInteraction = "rpc-interaction"

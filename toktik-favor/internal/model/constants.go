@@ -11,23 +11,8 @@ const (
 )
 
 const (
-	MP4 = ".mp4"
-	JPG = ".jpg"
-)
-
-const (
-	VIDEO = "video"
-	COVER = "cover"
-)
-
-const (
 	FAVORITE = iota + 1
 	CANCELFAVORITE
-)
-
-const (
-	COMMENT = iota + 1
-	CANCELCOMMENT
 )
 
 const (
