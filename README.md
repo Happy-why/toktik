@@ -23,17 +23,3 @@
 ![project.png](docs/project.png)
 
 ***
-### 代码架构：
-tiktok\
-├── api\
-│   ├── http\
-│   │   ├── handler      # HTTP 请求处理器\
-│   │   └── middleware   # HTTP 中间件
-│   └── rpc\
-│       ├── middleware   # RPC 中间件\
-│       └── service      # RPC 服务定义和实现\
-├── config               # 配置文件\
-├── dal                  # 数据访问层 包含对数据库的连接，以及对数据库的操作\
-├── idl                  # 接口定义语言\
-├── main.go              # 项目主入口\
-└── go.mod
