@@ -11,4 +11,3 @@ chmod 777 scripts/build-bin.sh
 # 3. 构建每个服务的Docker镜像
 chmod 777 scripts/build-dockerfile.sh
 ./scripts/build-dockerfile.sh
-

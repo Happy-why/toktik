@@ -32,7 +32,7 @@ func InitBootStrap() {
 	// 配置 nacos
 	NacosConfig, err := setting.NewSetting(bootstrap, configType, strings.Split(configPaths, ",")...) // 引入配置文件路径
 	if err != nil {
-		panic("初始化配置文件有误:" + err.Error())
+		log2.Println("初始化配置文件有误:" + err.Error())
 	}
 	if err = NacosConfig.BindAll(&global.Settings); err != nil {
 		panic("初始化配置文件有误:" + err.Error())
@@ -45,7 +45,7 @@ func InitBootStrap() {
 		Group:  global.Settings.Nacos.Group,
 	})
 	if err != nil {
-		log2.Fatalln(err)
+		log2.Println(err)
 	}
 	// 监听远程配置文件的更改
 	if err = nacosClient.confClient.ListenConfig(vo.ConfigParam{
@@ -62,7 +62,7 @@ func InitBootStrap() {
 				panic("初始化配置文件有误:" + err.Error())
 			}
 			//log2.Printf("load nacos config changed %s \n", data)
-			log2.Printf("配置更改")
+			log2.Println("配置更改")
 		},
 	}); err != nil {
 		log2.Fatalln(err)
@@ -73,16 +73,16 @@ func InitBootStrap() {
 			log2.Fatalln(err)
 		}
 		if err = Setting.BindAll(&global.Settings); err != nil {
-			panic("初始化配置文件有误:" + err.Error())
+			log2.Fatalln("初始化配置文件有误:" + err.Error())
 		}
 	} else {
 		// 在调用其他组件的Init时，这个init会首先执行并且把配置文件绑定到全局的结构体上
 		Setting, err := setting.NewSetting(configName, configType, strings.Split(configPaths, ",")...) // 引入配置文件路径
 		if err != nil {
-			panic("初始化配置文件有误:" + err.Error())
+			log2.Fatalln("初始化配置文件有误:" + err.Error())
 		}
 		if err = Setting.BindAll(&global.Settings); err != nil {
-			panic("初始化配置文件有误:" + err.Error())
+			log2.Fatalln("初始化配置文件有误:" + err.Error())
 		}
 	}
 }
