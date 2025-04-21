@@ -13,7 +13,6 @@ require (
 	github.com/hertz-contrib/obs-opentelemetry/tracing v0.2.2
 	github.com/hertz-contrib/opensergo v0.0.1
 	github.com/jinzhu/copier v0.4.0
-	github.com/kitex-contrib/monitor-prometheus v0.1.0
 	github.com/kitex-contrib/obs-opentelemetry v0.2.3
 	github.com/kitex-contrib/registry-etcd v0.1.0
 	github.com/nacos-group/nacos-sdk-go/v2 v2.2.3
